@@ -1,24 +1,24 @@
 ### Sesión 1 (1 hora y 30 minutos):
 #### 1. Introducción al acceso a datos (30 minutos)
+
 #### 1.1 Concepto de acceso a datos (15 minutos)
 
 **Definición (5 minutos):**
-- Explicar que el "acceso a datos" se refiere a las técnicas y métodos que permiten a una aplicación interactuar con fuentes de datos, sean estas bases de datos, archivos de texto, archivos binarios, entre otros.
-- Especificar que en este módulo, nos concentraremos en el acceso a datos a través de archivos utilizando Java.
+- El "acceso a datos" se refiere a las técnicas y métodos que permiten a una aplicación interactuar con fuentes de datos, sean estas bases de datos, archivos de texto, archivos binarios, entre otros.
+- En este módulo, nos concentraremos en el acceso a datos a través de archivos utilizando Java.
 
-**Componentes (10 minutos):**
+**Componentes fundamentales (10 minutos):**
 - **Archivo**: Un conjunto de datos relacionados almacenados en una computadora.
 - **Stream**: Un flujo de datos o secuencia que puede ser de entrada (para leer datos) o de salida (para escribir datos).
 - **Buffer**: Un área de almacenamiento temporal utilizada para mejorar la eficiencia de las operaciones de lectura y escritura.
 - Introducción a las clases y métodos comúnmente utilizados en Java para el acceso a datos (File, InputStream, OutputStream, Reader, Writer, etc.), estos se tratarán con más detalle en las siguientes secciones.
 
----
 
 #### 1.2 Importancia del manejo de archivos en Java (15 minutos)
 
 **Fundamentación (5 minutos):**
-- Explicar cómo el manejo de archivos es una habilidad fundamental para cualquier programador, ya que permite la persistencia de datos, es decir, que los datos sigan existiendo incluso después de que el programa haya terminado.
-- Mencionar que a través del manejo de archivos, podemos compartir información entre distintos programas y realizar análisis de datos complejos.
+- El manejo de archivos es una habilidad fundamental para cualquier programador, ya que permite la persistencia de datos, es decir, que los datos sigan existiendo incluso después de que el programa haya terminado.
+- A través del manejo de archivos, podemos compartir información entre distintos programas y realizar análisis de datos complejos.
 
 **Aplicaciones Prácticas (5 minutos):**
 - Almacenamiento y recuperación de información: guardar configuraciones, guardar resultados, leer datos de entrada, entre otros.
@@ -26,11 +26,90 @@
 - Logging: registrar eventos o transacciones para el análisis posterior, una herramienta indispensable para el monitoreo y el debugging.
 
 **Ejemplos en Java (5 minutos):**
-- Presentar breves ejemplos de situaciones en las que sería útil el manejo de archivos en aplicaciones Java.
-- Mencionar que Java ofrece un amplio soporte para operaciones de I/O a través de varias clases y APIs, facilitando así el manejo de archivos de diversas formas y tipos.
+- Breves ejemplos de situaciones en las que sería útil el manejo de archivos en aplicaciones Java.
+- Java ofrece un amplio soporte para operaciones de I/O a través de varias clases y APIs, facilitando así el manejo de archivos de diversas formas y tipos.
 
-**Conclusión (2 minutos):**
-- Resumir los puntos clave discutidos en esta sección y establecer una transición hacia el siguiente tema donde se discutirán los tipos de archivos para el acceso a datos en más detalle.
+Dos escenarios ejemplo donde el manejo de archivos en aplicaciones Java sería muy útil:
+
+### 1. Registro y Consulta de Usuarios:
+
+**Situación:** Una aplicación requiere mantener un registro de usuarios con su respectiva información básica como nombre, edad y correo electrónico.
+
+**Ejemplo de Código en Java:**
+
+```java
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class RegistroUsuarios {
+
+    public static void main(String[] args) {
+        String archivo = "usuarios.txt";
+
+        // Escribiendo datos de usuarios en el archivo
+        try (FileWriter writer = new FileWriter(archivo)) {
+            writer.write("Nombre,Edad,Correo\n");
+            writer.write("Juan,30,juan@example.com\n");
+            writer.write("Maria,25,maria@example.com\n");
+        } catch (IOException e) {
+            System.out.println("Error escribiendo en el archivo: " + e.getMessage());
+        }
+
+        // Leyendo datos de usuarios del archivo
+        try (FileReader reader = new FileReader(archivo)) {
+            int caracter;
+            while ((caracter = reader.read()) != -1) {
+                System.out.print((char) caracter);
+            }
+        } catch (IOException e) {
+            System.out.println("Error leyendo el archivo: " + e.getMessage());
+        }
+    }
+}
+```
+
+### 2. Manejo de Configuraciones de una Aplicación:
+
+**Situación:** Un software que necesita guardar y leer configuraciones del usuario, como preferencias de visualización, desde un archivo.
+
+**Ejemplo de Código en Java:**
+
+```java
+import java.util.Properties;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class ConfiguracionApp {
+
+    public static void main(String[] args) {
+        Properties prop = new Properties();
+        String archivo = "config.properties";
+
+        // Guardando configuraciones en un archivo
+        try (FileOutputStream output = new FileOutputStream(archivo)) {
+            prop.setProperty("tema", "oscuro");
+            prop.setProperty("fuente", "Arial");
+            prop.store(output, null);
+        } catch (IOException io) {
+            System.out.println("Error guardando configuraciones: " + io.getMessage());
+        }
+
+        // Leyendo configuraciones desde un archivo
+        try (FileInputStream input = new FileInputStream(archivo)) {
+            prop.load(input);
+            System.out.println("Tema: " + prop.getProperty("tema"));
+            System.out.println("Fuente: " + prop.getProperty("fuente"));
+        } catch (IOException ex) {
+            System.out.println("Error leyendo configuraciones: " + ex.getMessage());
+        }
+    }
+}
+```
+
+En ambos ejemplos, se demuestra cómo realizar operaciones básicas de escritura y lectura de archivos en Java, una habilidad esencial para manipular datos persistentes en aplicaciones reales.
+
 
 
 ### 2. Tipos de archivos para el acceso a datos (30 minutos)
@@ -38,18 +117,53 @@
 #### 2.1 Archivos de texto (Plain Text) (10 minutos)
 
 **Definición y características (3 minutos):**
-- Definir lo que son los archivos de texto: archivos que contienen caracteres legibles y están estructurados en líneas.
-- Enumerar algunas de sus características: sencillos de leer y escribir, pueden ser editados con cualquier editor de texto, no contienen metadatos complejos, etc.
+- Los archivos de texto: archivos que contienen caracteres legibles y están estructurados en líneas.
+- Algunas de sus características: sencillos de leer y escribir, pueden ser editados con cualquier editor de texto, no contienen metadatos complejos, etc.
 
 **Uso en Java (7 minutos):**
 - **Lectura**:
   - Utilización de clases como `FileReader` y `BufferedReader` para leer archivos de texto en Java.
-  - Demostrar con un ejemplo sencillo de cómo leer un archivo de texto línea por línea.
+  - Demostración con un ejemplo sencillo de cómo leer un archivo de texto línea por línea.
+```java
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class LecturaArchivo {
+    public static void main(String[] args) {
+        try (BufferedReader br = new BufferedReader(new FileReader("ejemplo.txt"))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                System.out.println(linea);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo: " + e.getMessage());
+        }
+    }
+}
+```
+
 - **Escritura**:
   - Utilización de clases como `FileWriter` y `BufferedWriter` para escribir en archivos de texto en Java.
   - Demostrar con un ejemplo sencillo de cómo escribir en un archivo de texto.
 
----
+```java
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class EscrituraArchivo {
+    public static void main(String[] args) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("salida.txt"))) {
+            bw.write("Esto es una línea de texto.");
+            bw.newLine();
+            bw.write("Esto es otra línea de texto.");
+        } catch (IOException e) {
+            System.err.println("Error al escribir en el archivo: " + e.getMessage());
+        }
+    }
+}
+```
 
 #### 2.2 Archivos binarios (10 minutos)
 
@@ -65,7 +179,6 @@
   - Introducir clases como `FileOutputStream` y `DataOutputStream` para la escritura de archivos binarios en Java.
   - Demostrar con un ejemplo básico de cómo escribir datos en un archivo binario.
 
----
 
 #### 2.3 Archivos JSON y XML (10 minutos)
 
@@ -108,7 +221,6 @@
 - Crear y ejecutar un simple programa "Hola Mundo" en Java para verificar que el entorno está configurado correctamente.
 - Resolución de posibles problemas comunes que pueden surgir durante la configuración.
 
----
 
 #### 3.2 Creación de un proyecto básico en Java (15 minutos)
 
@@ -125,7 +237,7 @@
 
 Un ejemplo básico usando únicamente `File`, `FileWriter` y `FileReader` para escribir y leer en un archivo de texto:
 
-```
+```java
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -178,9 +290,9 @@ public class AccesoDatos {
 }
 ```
 
-Aquí utilizando buffers para mejorar el rendimiento y simplificar el código.
+Aquí utilizando buffers para mejorar el rendimiento y simplificar el código al escribir y leer líneas completas a cada iteración del bucle while.
 
-```
+```java
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
