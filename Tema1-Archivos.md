@@ -123,6 +123,92 @@ En ambos ejemplos, se demuestra cómo realizar operaciones básicas de escritura
 **Uso en Java (7 minutos):**
 - **Lectura**:
   - Utilización de clases como `FileReader` y `BufferedReader` para leer archivos de texto en Java.
+
+Explicación en detalle sobre la clase `FileReader` en Java:
+
+### FileReader en Java
+
+`FileReader` es una clase en Java que proporciona métodos para leer caracteres de un archivo. Es una subclase de la clase `InputStreamReader`, que es una clase para leer flujos de caracteres. Aquí están algunos puntos clave sobre `FileReader`:
+
+#### 1. **Creación de una Instancia de FileReader**
+
+Para leer un archivo, primero necesitamos crear una instancia de `FileReader`, especificando el archivo que queremos leer, que puede ser un objeto `File` o una ruta de archivo como una cadena:
+
+```java
+FileReader reader = new FileReader("ruta/del/archivo.txt");
+```
+
+#### 2. **Lectura de Caracteres**
+
+La clase `FileReader` provee varios métodos para leer caracteres del archivo:
+
+- `int read()`: Lee un solo carácter y devuelve su valor como un entero (devuelve -1 si se ha alcanzado el final del archivo).
+- `int read(char[] cbuf)`: Lee varios caracteres a la vez en una matriz de caracteres (devuelve el número de caracteres leídos o -1 si se ha alcanzado el final del archivo).
+- `int read(char[] cbuf, int off, int len)`: Lee varios caracteres en una parte de la matriz de caracteres especificada.
+
+#### 3. **Manejo de Excepciones**
+
+Las operaciones de I/O pueden generar excepciones, así que se deben manejar utilizando bloques try-catch o declarando que el método puede lanzar una excepción del tipo IOException:
+
+```java
+try {
+    FileReader reader = new FileReader("ruta/del/archivo.txt");
+    int caracter;
+    while((caracter = reader.read()) != -1) {
+        System.out.print((char) caracter);
+    }
+    reader.close();
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+#### 4. **Cierre del Archivo**
+
+Es fundamental cerrar el `FileReader` después de usarlo para liberar los recursos asociados. Esto se puede hacer utilizando el método `close()`:
+
+```java
+reader.close();
+```
+
+#### 5. **Uso con try-with-resources**
+
+A partir de Java 7, puedes utilizar la declaración try-with-resources, que garantiza que el `FileReader` se cerrará automáticamente al final del bloque try:
+
+```java
+try (FileReader reader = new FileReader("ruta/del/archivo.txt")) {
+    int caracter;
+    while((caracter = reader.read()) != -1) {
+        System.out.print((char) caracter);
+    }
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+#### 6. **Buffering**
+
+Aunque `FileReader` puede leer caracteres directamente de un archivo, generalmente es más eficiente usarlo con `BufferedReader`, que puede reducir el número de operaciones de I/O al leer múltiples caracteres a la vez.
+
+#### 7. **Codificación de Caracteres**
+
+`FileReader` utiliza la codificación de caracteres predeterminada del sistema. Si deseas especificar una codificación de caracteres diferente, considera usar `InputStreamReader` con `FileInputStream`, lo que permite especificar la codificación de caracteres.
+
+#### 8. **Desempeño**
+
+Para archivos grandes, es recomendable usar `FileReader` con `BufferedReader` para aumentar el rendimiento, ya que `BufferedReader` lee grandes bloques de datos a la vez en lugar de leer carácter por carácter, reduciendo así el tiempo de I/O.
+
+```java
+try (BufferedReader br = new BufferedReader(new FileReader("ruta/del/archivo.txt"))) {
+    String linea;
+    while ((linea = br.readLine()) != null) {
+        System.out.println(linea);
+    }
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
   - Demostración con un ejemplo sencillo de cómo leer un archivo de texto línea por línea.
 ```java
 import java.io.BufferedReader;
@@ -145,7 +231,89 @@ public class LecturaArchivo {
 
 - **Escritura**:
   - Utilización de clases como `FileWriter` y `BufferedWriter` para escribir en archivos de texto en Java.
-  - Demostrar con un ejemplo sencillo de cómo escribir en un archivo de texto.
+
+Explicación sobre la clase `FileWriter` en Java:
+
+### FileWriter en Java
+
+La clase `FileWriter` es una clase en Java que se utiliza para escribir caracteres en un archivo. Forma parte del paquete `java.io` y es una subclase de la clase `OutputStreamWriter`, que es una clase de escritura de flujo de caracteres. Aquí están algunos detalles clave sobre `FileWriter`:
+
+#### 1. **Creación y Apertura de Archivos**
+
+Cuando creamos una instancia de `FileWriter`, Java intenta abrir el archivo especificado. Si el archivo no existe, se creará uno nuevo. Aquí está un ejemplo sencillo:
+
+```java
+FileWriter writer = new FileWriter("archivo.txt");
+```
+
+#### 2. **Modos de Escritura**
+
+`FileWriter` permite escribir en un archivo en dos modos: 
+- **Modo Sobrescribir** (default): Sobrescribe el contenido del archivo existente.
+- **Modo Append**: Añade el nuevo contenido al final del archivo existente, conservando el contenido original. Se activa pasando un segundo argumento `true` al constructor:
+
+  ```java
+  FileWriter writer = new FileWriter("archivo.txt", true);
+  ```
+
+#### 3. **Escribir en el Archivo**
+
+El `FileWriter` ofrece varios métodos para escribir en el archivo:
+
+- `write(int c)`: Escribe un solo carácter.
+- `write(char[] cbuf)`: Escribe una matriz de caracteres.
+- `write(String str)`: Escribe una cadena de caracteres.
+- `write(String str, int off, int len)`: Escribe una parte de una cadena de caracteres.
+
+Por ejemplo,
+
+```java
+writer.write("Hola Mundo");
+```
+
+#### 4. **Cierre del Archivo**
+
+Es importante cerrar el `FileWriter` una vez que hemos terminado de escribir en el archivo para liberar los recursos asociados. Se hace utilizando el método `close()`:
+
+```java
+writer.close();
+```
+
+#### 5. **Manejo de Excepciones**
+
+Las operaciones de I/O pueden generar excepciones, por lo que es necesario manejarlas utilizando bloques try-catch o declarando que el método puede lanzar una excepción de tipo IOException:
+
+```java
+try {
+    FileWriter writer = new FileWriter("archivo.txt");
+    writer.write("Hola Mundo");
+    writer.close();
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+#### 6. **Uso con try-with-resources**
+
+Desde Java 7, puedes utilizar la declaración try-with-resources, que garantiza que el `FileWriter` se cerrará automáticamente al final del bloque try:
+
+```java
+try (FileWriter writer = new FileWriter("archivo.txt")) {
+    writer.write("Hola Mundo");
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+#### 7. **Buffering**
+
+Aunque `FileWriter` puede escribir caracteres directamente en un archivo, es recomendable usarlo junto con `BufferedWriter` para una escritura más eficiente, especialmente cuando se escribe una gran cantidad de texto.
+
+#### 8. **Codificación de Caracteres**
+
+`FileWriter` utiliza la codificación de caracteres predeterminada del sistema. Si deseas especificar una codificación de caracteres diferente, deberías considerar usar `OutputStreamWriter`.
+
+  - Demostración con un ejemplo sencillo de cómo escribir en un archivo de texto.
 
 ```java
 import java.io.BufferedWriter;
@@ -168,16 +336,134 @@ public class EscrituraArchivo {
 #### 2.2 Archivos binarios (10 minutos)
 
 **Definición y características (3 minutos):**
-- Explicar que los archivos binarios contienen información en un formato que solo puede ser leído por programas específicos, no son legibles por humanos.
-- Mencionar algunas características: pueden almacenar una amplia variedad de tipos de datos, son más eficientes para la lectura y escritura en comparación con los archivos de texto, etc.
+- Los archivos binarios contienen información en un formato que solo puede ser leído por programas específicos, no son legibles por humanos.
+- Algunas características: pueden almacenar una amplia variedad de tipos de datos, son más eficientes para la lectura y escritura en comparación con los archivos de texto.
 
 **Uso en Java (7 minutos):**
 - **Lectura**:
-  - Introducir clases como `FileInputStream` y `DataInputStream` para la lectura de archivos binarios en Java.
-  - Demostrar con un ejemplo básico de cómo leer datos de un archivo binario.
+  -  Explicación detallada de las clases `FileInputStream` y `DataInputStream` en Java, específicamente para la lectura de archivos binarios:
+
+### FileInputStream
+
+#### 1. **Descripción General**
+La clase `FileInputStream` es parte del paquete java.io y se utiliza para leer bytes de un archivo. Es adecuado para leer datos binarios.
+
+#### 2. **Creación de una Instancia**
+Para crear una instancia de `FileInputStream`, necesitarás especificar la ruta del archivo desde el cual deseas leer, esto puede hacerse usando un objeto `File` o una cadena que representa la ruta del archivo:
+
+```java
+FileInputStream fis = new FileInputStream("ruta/del/archivo.bin");
+```
+
+#### 3. **Métodos de Lectura**
+`FileInputStream` proporciona varios métodos para leer datos:
+
+- `int read()`: lee un byte de datos y devuelve su valor como un entero (retorna -1 si se ha alcanzado el final del archivo).
+- `int read(byte[] b)`: lee varios bytes a la vez en un array de bytes.
+- `int read(byte[] b, int off, int len)`: lee varios bytes en una parte del array de bytes especificada.
+
+#### 4. **Manejo de Excepciones**
+Al igual que con otras clases de IO, las operaciones de IO pueden generar excepciones, y estas deben manejarse correctamente, generalmente con un bloque try-catch:
+
+```java
+try {
+    FileInputStream fis = new FileInputStream("ruta/del/archivo.bin");
+} catch (FileNotFoundException e) {
+    e.printStackTrace();
+}
+```
+
+### DataInputStream
+
+#### 1. **Descripción General**
+La clase `DataInputStream` permite leer tipos de datos primitivos (como int, float, double, etc.) de una manera portable desde un flujo de entrada. Generalmente se usa en combinación con `FileInputStream` para leer datos binarios.
+
+#### 2. **Creación de una Instancia**
+Para crear una instancia de `DataInputStream`, necesitarás envolver un objeto `InputStream` (como un `FileInputStream`) dentro de un `DataInputStream`:
+
+```java
+DataInputStream dis = new DataInputStream(new FileInputStream("ruta/del/archivo.bin"));
+```
+
+#### 3. **Métodos de Lectura**
+`DataInputStream` proporciona varios métodos para leer datos primitivos:
+
+- `int readInt()`: lee un entero de 4 bytes.
+- `float readFloat()`: lee un float de 4 bytes.
+- `double readDouble()`: lee un double de 8 bytes.
+- `String readUTF()`: lee una cadena en formato UTF-8.
+- Entre otros...
+
+#### 4. **Manejo de Excepciones**
+Al igual que con `FileInputStream`, las operaciones de IO pueden generar excepciones que deben manejarse con bloques try-catch:
+
+```java
+try {
+    DataInputStream dis = new DataInputStream(new FileInputStream("ruta/del/archivo.bin"));
+    int i = dis.readInt();
+    float f = dis.readFloat();
+    // y así sucesivamente...
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+#### 5. **Uso en Conjunto**
+`FileInputStream` y `DataInputStream` a menudo se usan juntos para leer datos binarios de un archivo:
+
+```java
+try (DataInputStream dis = new DataInputStream(new FileInputStream("ruta/del/archivo.bin"))) {
+    int i = dis.readInt();
+    float f = dis.readFloat();
+    // ...
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+  - Demostración con un ejemplo básico de cómo leer datos de un archivo binario utilizando `FileInputStream` y `DataInputStream` en Java:
+
+```java
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class LeerDatosBinarios {
+
+    public static void main(String[] args) {
+        
+        String ruta = "ruta/del/archivo.bin";  // Ajusta la ruta según necesitas
+        
+        try (DataInputStream dis = new DataInputStream(new FileInputStream(ruta))) {
+            
+            // Supongamos que el archivo contiene un entero, un flotante y una cadena en este orden
+            int valorEntero = dis.readInt();       // Leer un entero de 4 bytes
+            float valorFlotante = dis.readFloat(); // Leer un float de 4 bytes
+            String valorCadena = dis.readUTF();    // Leer una cadena en formato UTF-8
+            
+            System.out.println("Valor Entero: " + valorEntero);
+            System.out.println("Valor Flotante: " + valorFlotante);
+            System.out.println("Valor Cadena: " + valorCadena);
+            
+        } catch (IOException e) {
+            System.err.println("Ocurrió un error durante la lectura del archivo: " + e.getMessage());
+        }
+    }
+}
+```
+
+En este ejemplo:
+
+1. Importamos las clases necesarias.
+2. Usamos un bloque try-with-resources para manejar el flujo de entrada, lo que garantiza que el flujo se cerrará automáticamente al final del bloque, incluso si ocurre una excepción.
+3. Creamos una nueva instancia de `DataInputStream` envolviendo una nueva instancia de `FileInputStream` apuntando a la ruta del archivo binario.
+4. Usamos los métodos `readInt()`, `readFloat()` y `readUTF()` de `DataInputStream` para leer un entero, un flotante y una cadena del archivo, respectivamente, y luego los imprimimos a la consola.
+5. Capturamos cualquier excepción de `IOException` que pueda ocurrir y la manejamos imprimiendo un mensaje de error en la consola.
+
+
 - **Escritura**:
   - Introducir clases como `FileOutputStream` y `DataOutputStream` para la escritura de archivos binarios en Java.
-  - Demostrar con un ejemplo básico de cómo escribir datos en un archivo binario.
+  - Demostración con un ejemplo básico de cómo escribir datos en un archivo binario.
 
 
 #### 2.3 Archivos JSON y XML (10 minutos)
@@ -476,7 +762,7 @@ public class EjemploPractico {
 2. `DataInputStream`: Permite leer datos de tipos primitivos (como int, float, etc.) de una forma más cómoda y eficiente desde un InputStream (como un FileInputStream).
 
 **Demostración (10 minutos):**
-Crea un archivo binario con algunos datos y luego utiliza `FileInputStream` y `DataInputStream` para leer y mostrar estos datos.
+Creación de un archivo binario con algunos datos y luego utiliza `FileInputStream` y `DataInputStream` para leer y mostrar estos datos.
 
 ```java
 import java.io.DataInputStream;
@@ -541,10 +827,6 @@ public class EscrituraBinaria {
 ```
 
 #### 5.3 Ejemplos prácticos - (15 minutos)
-
-En esta sección, los alumnos pueden crear pequeños proyectos que utilicen las habilidades aprendidas para leer y escribir archivos binarios.
-
-**Ejemplo práctico (15 minutos):**
 Crear un pequeño programa que permita al usuario ingresar datos (como edad, altura y estado de matrícula) a través de la consola, los guarde en un archivo binario y luego los lea y muestre desde ese archivo binario.
 
 ```java
@@ -792,7 +1074,7 @@ public class XmlExample {
 
 En ambos ejemplos, creamos una instancia de `Persona` y luego la escribimos en un archivo usando Jackson (para JSON) o JAXB (para XML). Posteriormente, leemos el archivo creado y mostramos el nombre de la persona leída en la consola.
 
-A continuación dos ejemplos más elaborados para trabajar con múltiples objetos Persona y almacenarlos en archivos JSON y XML. En estos ejemplos, crearemos una lista de objetos `Persona` y le permitiremos al usuario agregar nuevas personas a la lista antes de escribir toda la lista en un archivo. También podrán leer la lista completa de personas desde el archivo.
+A continuación, dos ejemplos más elaborados para trabajar con múltiples objetos Persona y almacenarlos en archivos JSON y XML. En estos ejemplos, crearemos una lista de objetos `Persona` y le permitiremos al usuario agregar nuevas personas a la lista antes de escribir toda la lista en un archivo. También podrán leer la lista completa de personas desde el archivo.
 
 ### Ejemplo con Jackson (JSON)
 
@@ -934,9 +1216,83 @@ En esta sección, se hablará sobre cómo manejar excepciones durante las operac
 
 **Teoría: (10 minutos)**
 
-1. **Importancia del Manejo de Excepciones:** Discusión sobre por qué es crucial manejar las excepciones adecuadamente, especialmente en operaciones de I/O.
-2. **Clases de Excepciones:** Explicación de las clases de excepciones más comunes que se encuentran durante las operaciones de I/O en Java: `IOException`, `FileNotFoundException`, etc.
-3. **Bloque try-catch-finally:** Descripción del uso de bloques try-catch-finally para manejar excepciones.
+####1. Importancia del Manejo de Excepciones: Discusión sobre por qué es crucial manejar las excepciones adecuadamente, especialmente en operaciones de I/O.
+
+El manejo adecuado de excepciones, particularmente en operaciones de entrada/salida (I/O), es un componente vital en el desarrollo de aplicaciones robustas y confiables por varias razones:
+
+1. **Prevención de Fallos Catastróficos**: Las operaciones de I/O están inherentemente predispuestas a errores debido a varias razones (archivos que no se encuentran, problemas de red, permisos insuficientes, etc.). Un manejo de excepciones adecuado permite que la aplicación lide con estos problemas de una manera controlada, evitando fallos inesperados que pueden resultar en la pérdida de datos o en un cierre abrupto de la aplicación.
+
+2. **Mejor Experiencia del Usuario**: Cuando ocurre un error, es posible informar al usuario sobre el problema de una manera más amigable y legible, en lugar de dejar que la aplicación se cierre o se quede en un estado indefinido.
+
+3. **Facilita la Depuración y el Mantenimiento**: Manejar excepciones de forma explícita permite registrar información detallada sobre los problemas que ocurrieron, lo que facilita la identificación y resolución de bugs durante la fase de desarrollo y mantenimiento.
+
+4. **Recursos y Limpiado Ordenado**: El manejo de excepciones proporciona una oportunidad para liberar recursos que fueron adquiridos antes de que ocurriera la excepción, evitando así posibles fugas de memoria y otros problemas relacionados con la gestión de recursos.
+
+5. **Seguridad**: Las operaciones de I/O a menudo implican trabajar con datos externos, que pueden ser una fuente de vulnerabilidades de seguridad. Un manejo adecuado de las excepciones puede ayudar a prevenir ciertos tipos de ataques (por ejemplo, la manipulación de archivos).
+
+6. **Control de Flujo**: Aunque las excepciones deben usarse para condiciones excepcionales (y no como una forma general de control de flujo), pueden ofrecer una manera de separar la lógica de error de la lógica normal, resultando en un código más limpio y mantenible.
+
+### 2. Clases de Excepciones
+
+En Java, las operaciones de I/O suelen lanzar diversas excepciones que heredan de la clase madre `IOException`. Aquí está una explicación detallada de algunas de las clases de excepciones más comunes que podrías encontrar:
+
+#### 2.1 `IOException`
+
+- **Descripción**: Es la clase general de excepciones producidas por operaciones fallidas o interrumpidas de I/O. 
+- **Causas Comunes**: Puede ser lanzada por varias razones, incluyendo fallos de sistema, operaciones de red fallidas, interrupciones de streams de I/O, etc.
+- **Cómo Manejarlo**: Dependiendo de la naturaleza de tu aplicación, podrías manejar `IOException` registrando el error y mostrando un mensaje amigable al usuario.
+
+#### 2.2 `FileNotFoundException`
+
+- **Descripción**: Una subclase de `IOException`, lanzada cuando un intento de abrir el archivo denotado por una ruta especificada falla.
+- **Causas Comunes**: El archivo no existe o no hay permisos suficientes para acceder al archivo.
+- **Cómo Manejarlo**: Este tipo de excepción puede ser manejada proporcionando un mensaje detallado sobre la razón del fallo, y tal vez dando una oportunidad al usuario para especificar una nueva ruta de archivo.
+
+### 3. Bloque try-catch-finally
+
+El bloque `try-catch-finally` es una construcción que permite manejar excepciones de una manera controlada y predecible. A continuación, describo cada uno de estos bloques y cómo utilizarlos:
+
+#### 3.1 Bloque `try`
+
+- **Descripción**: Este bloque contiene el código que puede lanzar una excepción. Es obligatorio que vaya seguido de al menos un bloque `catch` o un bloque `finally`.
+- **Uso**: Envolvemos el código que puede lanzar una excepción dentro de un bloque `try`.
+
+#### 3.2 Bloque `catch`
+
+- **Descripción**: Este bloque contiene el código que se ejecutará si se lanza una excepción dentro del bloque `try` asociado. Puedes tener múltiples bloques `catch` para manejar diferentes tipos de excepciones.
+- **Uso**: Usamos bloques `catch` para definir cómo manejar diferentes tipos de excepciones que pueden ser lanzadas dentro del bloque `try`.
+
+#### 3.3 Bloque `finally`
+
+- **Descripción**: Este bloque contiene código que se ejecutará independientemente de si una excepción fue lanzada o no. Es opcional pero, si está presente, siempre se ejecuta después de los bloques `try`/`catch`.
+- **Uso**: Usamos bloques `finally` para liberar recursos que fueron adquiridos antes de la ejecución del bloque `try`, como cerrar conexiones a bases de datos o streams de archivos.
+
+#### Ejemplo de Código en Java
+
+```java
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) {
+        File file = new File("path/to/file.txt");
+
+        try {
+            FileReader fileReader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String line = bufferedReader.readLine();
+            System.out.println(line);
+        } catch (FileNotFoundException e) {
+            System.err.println("Archivo no encontrado: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error de I/O: " + e.getMessage());
+        } finally {
+            System.out.println("Este bloque 'finally' siempre se ejecuta.");
+        }
+    }
+}
+```
+
+En este ejemplo, el bloque `try` contiene código que puede lanzar excepciones `FileNotFoundException` o `IOException`. Estas excepciones son manejadas por los bloques `catch` correspondientes, y el bloque `finally` se ejecuta al final, independientemente de si se lanzó una excepción o no.
 
 **Práctica: (5 minutos)**
 
@@ -1026,48 +1382,8 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
   - Implementar métodos para leer y escribir datos en un archivo (utilizando las técnicas aprendidas en la clase).
   - Manejar adecuadamente las excepciones que puedan ocurrir durante las operaciones de I/O.
 
-#### 8.2 Recapitulación de lo aprendido (10 minutos)
-
-Después de completar la actividad práctica, habrá una sesión de recapitulación para revisar todos los conceptos clave que se han cubierto durante la clase. Los puntos clave a repasar serían:
-
-- Concepto e importancia del acceso a datos.
-- Tipos de archivos para el acceso a datos y cómo trabajar con ellos en Java.
-- Buenas prácticas y manejo de excepciones durante las operaciones de I/O.
-
-
-#### 8.3 Espacio para preguntas y respuestas (5 minutos)
-
-Finalmente, se abre un espacio donde se podrán hacer preguntas sobre cualquier tema que se ha discutido durante la clase.
-
-### Material complementario y ejercicios:
-
-#### - Libros:
-
-0. **"Acceso a Datos": Libro de clase por Carlos Alberto Cortijo Bon.
-
-1. **"Java: The Complete Reference"** por Herbert Schildt
-   - Un libro completo que abarca todos los aspectos de la programación en Java, incluido el acceso a datos.
    
-2. **"Clean Code: A Handbook of Agile Software Craftsmanship"** por Robert C. Martin
-   - Un libro esencial que enseña las buenas prácticas de codificación, muy útil para escribir código más limpio y mantenible.
-   
-#### - Guía de referencia rápida con los conceptos clave:
-
-1. ** Términos Clave:** Un glosario con las definiciones de términos clave como "Acceso a datos", "Archivos Binarios", "JSON", "XML", etc.
-   
-
-#### - Listado de recursos adicionales para aprendizaje autónomo:
-
-1. **Documentación Oficial de Java:** [Enlace a la documentación oficial de Java](https://docs.oracle.com/javase/8/docs/)
-   - Un recurso valioso para aprender más sobre las clases y métodos disponibles en Java para el acceso a datos.
-   
-2. **Coursera (Programación en Java):** [Cursos en Coursera](https://www.coursera.org/)
-   - Plataforma con varios cursos de Java que cubren desde conceptos básicos hasta avanzados, incluido el acceso a datos.
-
-3. **Stack Overflow:** [Stack Overflow - Java](https://stackoverflow.com/questions/tagged/java)
-   - Un foro de comunidad activa donde se pueden hacer preguntas específicas y obtener respuestas de expertos en la comunidad de Java.
-   
-#### - Ejercicios de práctica para reforzar lo aprendido en clase:
+#### - Ejercicios OPTATIVOS de práctica para reforzar lo aprendido en clase:
 #### 1. Ejercicio práctico - Manipulación de Archivos de Texto:
 
 **Enunciado:** Como parte de un pequeño sistema de gestión bibliotecaria, su tarea es crear un programa en Java que permita al usuario registrar nuevos libros en un archivo de texto. Cada libro debe tener un título, autor y año de publicación. El programa debe ser capaz de realizar las siguientes operaciones:
@@ -1107,3 +1423,32 @@ Finalmente, se abre un espacio donde se podrán hacer preguntas sobre cualquier 
    c. Buscar productos específicos por código o nombre.
 
 **Objetivo:** Aprender a trabajar con bibliotecas externas en Java para crear y leer archivos JSON y XML, familiarizándose con el proceso de serialización y deserialización de objetos.
+
+
+### Material complementario y ejercicios:
+
+#### - Libros:
+
+0. **"Acceso a Datos": Libro de clase por Carlos Alberto Cortijo Bon.
+
+1. **"Java: The Complete Reference"** por Herbert Schildt
+   - Un libro completo que abarca todos los aspectos de la programación en Java, incluido el acceso a datos.
+   
+2. **"Clean Code: A Handbook of Agile Software Craftsmanship"** por Robert C. Martin
+   - Un libro esencial que enseña las buenas prácticas de codificación, muy útil para escribir código más limpio y mantenible.
+   
+#### - Referencia rápida con los conceptos clave:
+
+1. ** Términos Clave:** Un glosario con las definiciones de términos clave como "Acceso a datos", "Archivos de Texto",  "Archivos Binarios", "JSON", "XML", etc.
+   
+
+#### - Listado de recursos adicionales para aprendizaje autónomo:
+
+1. **Documentación Oficial de Java:** [Enlace a la documentación oficial de Java](https://docs.oracle.com/javase/8/docs/)
+   - Un recurso valioso para aprender más sobre las clases y métodos disponibles en Java para el acceso a datos.
+   
+2. **Coursera (Programación en Java):** [Cursos en Coursera](https://www.coursera.org/)
+   - Plataforma con varios cursos de Java que cubren desde conceptos básicos hasta avanzados, incluido el acceso a datos.
+
+3. **Stack Overflow:** [Stack Overflow - Java](https://stackoverflow.com/questions/tagged/java)
+   - Un foro de comunidad activa donde se pueden hacer preguntas específicas y obtener respuestas de expertos en la comunidad de Java.
