@@ -1336,7 +1336,92 @@ En esta sección, se hablará sobre algunas de las buenas prácticas que deben s
 
 1. **Cierre de Recursos:** Discusión sobre la importancia de cerrar los recursos después de su uso para evitar fugas de memoria.
 2. **Utilizar Try-with-Resources:** Explicación de cómo utilizar la declaración try-with-resources en Java para gestionar recursos de forma más eficiente.
-3. **Manipulación de Datos Sensibles:** Charla sobre cómo manejar correctamente los datos sensibles durante las operaciones de acceso a datos.
+3. **Manipulación de Datos Sensibles:** Cómo manejar correctamente los datos sensibles durante las operaciones de acceso a datos.
+
+### 1. Cierre de Recursos
+
+#### 1.1 Importancia del Cierre de Recursos
+
+El cierre de recursos como streams, conexiones a bases de datos, entre otros, es vital en la programación Java para prevenir fugas de memoria y garantizar que los datos no se corrompan. Cuando un recurso es abierto pero no cerrado adecuadamente, puede llevar a una acumulación de conexiones abiertas, resultando en una pérdida gradual de memoria, lo que puede deteriorar el rendimiento del sistema o incluso causar fallos.
+
+#### 1.2 Estrategias para el Cierre de Recursos
+
+Es fundamental implementar estrategias de cierre de recursos en el código. Esto puede hacerse manualmente utilizando el método `close()` en un bloque `finally` o automáticamente utilizando el bloque try-with-resources, introducido en Java 7, que garantiza que cada recurso abierto será cerrado al final de la ejecución del bloque.
+
+### 2. Utilizar Try-with-Resources
+
+#### 2.1 Introducción a Try-with-Resources
+
+El bloque try-with-resources es una construcción en Java que garantiza que cada recurso declarado en la try-será cerrado al final de la declaración. Esto ayuda a prevenir posibles fugas de memoria y a hacer el código más limpio y legible.
+
+#### 2.2 Cómo Utilizar Try-with-Resources
+
+Para utilizar try-with-resources, simplemente declaras el recurso en el paréntesis de la declaración try, y Java se encargará de cerrarlos al final de la ejecución del bloque. Aquí está un ejemplo:
+
+```java
+try (FileReader fr = new FileReader("path/to/file.txt"); 
+     BufferedReader br = new BufferedReader(fr)) {
+    // Tu código aquí
+} catch (IOException e) {
+    // Manejo de excepciones aquí
+}
+```
+
+En este ejemplo, `fr` y `br` serán cerrados automáticamente al final del bloque try, incluso si una excepción es lanzada dentro del bloque.
+
+### 3. Manipulación de Datos Sensibles
+
+#### 3.1 Importancia de la Manipulación Adecuada de Datos Sensibles
+
+En operaciones de acceso a datos, puede haber momentos en los que necesites manejar datos sensibles, como información personal o credenciales. Es crucial manejar estos datos de manera segura para prevenir posibles filtraciones de información o ataques de seguridad.
+
+#### 3.2 Estrategias para la Manipulación Segura de Datos Sensibles
+
+Algunas estrategias para manejar datos sensibles de manera segura incluyen:
+
+- **Encriptación de Datos**: Utiliza algoritmos de encriptación fuertes para proteger los datos sensibles durante la transmisión y el almacenamiento.
+- **Uso de HTTPS**: Si estás transmitiendo datos sensibles sobre la red, asegúrate de utilizar HTTPS, que cifra los datos en tránsito.
+- **Almacenamiento Seguro**: Almacena datos sensibles de manera segura, utilizando medidas como el hash de contraseñas y el almacenamiento encriptado.
+- **Control de Acceso**: Implementa controles de acceso adecuados para prevenir el acceso no autorizado a datos sensibles.
+
+#### 3.3 Código de Ejemplo
+
+Un simple ejemplo de cómo podrías manipular datos sensibles en Java es utilizando clases de Java como `Cipher` para encriptar y desencriptar datos:
+
+```java
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        // Generar una clave secreta
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(128);
+        SecretKey secretKey = keyGenerator.generateKey();
+
+        // Crear un cifrado
+        Cipher cipher = Cipher.getInstance("AES");
+
+        // Inicializar el cifrado para encriptar
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
+        // Encriptar los datos
+        byte[] dataToEncrypt = "Datos Sensibles".getBytes();
+        byte[] encryptedData = cipher.doFinal(dataToEncrypt);
+
+        // Inicializar el cifrado para desencriptar
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+
+        // Desencriptar los datos
+        byte[] decryptedData = cipher.doFinal(encryptedData);
+        
+        System.out.println(new String(decryptedData));
+    }
+}
+```
+
+En este ejemplo, una clave secreta es generada y utilizada para encriptar y desencriptar datos sensibles.
 
 **Práctica: (5 minutos)**
 
@@ -1366,13 +1451,13 @@ public class BestPracticesExample {
 }
 ```
 
-Esta sección proporciona una visión general de las buenas prácticas y del manejo de excepciones en el acceso a datos, proporcionando tanto conocimientos teóricos como prácticos a los estudiantes.
+Esta sección proporciona una visión general de las buenas prácticas y del manejo de excepciones en el acceso a datos, proporcionando tanto conocimientos teóricos como prácticos.
 
 #### 8. Actividad práctica y conclusión (30 minutos)
 
 #### 8.1 Desarrollo de un pequeño proyecto práctico por los estudiantes (15 minutos)
 
-En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo aprendido en la sesión mediante el desarrollo de un pequeño proyecto práctico. Aquí es una sugerencia para el proyecto:
+En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo aprendido en la sesión mediante el desarrollo de un pequeño proyecto práctico. Aquí una sugerencia para el proyecto:
 
 **Proyecto Práctico: Sistema de Gestión de Datos Personales**
 
@@ -1383,7 +1468,7 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
   - Manejar adecuadamente las excepciones que puedan ocurrir durante las operaciones de I/O.
 
    
-#### - Ejercicios OPTATIVOS de práctica para reforzar lo aprendido en clase:
+#### - Ejercicios de práctica para reforzar lo aprendido en clase:
 #### 1. Ejercicio práctico - Manipulación de Archivos de Texto:
 
 **Enunciado:** Como parte de un pequeño sistema de gestión bibliotecaria, su tarea es crear un programa en Java que permita al usuario registrar nuevos libros en un archivo de texto. Cada libro debe tener un título, autor y año de publicación. El programa debe ser capaz de realizar las siguientes operaciones:
@@ -1437,11 +1522,6 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
 2. **"Clean Code: A Handbook of Agile Software Craftsmanship"** por Robert C. Martin
    - Un libro esencial que enseña las buenas prácticas de codificación, muy útil para escribir código más limpio y mantenible.
    
-#### - Referencia rápida con los conceptos clave:
-
-1. ** Términos Clave:** Un glosario con las definiciones de términos clave como "Acceso a datos", "Archivos de Texto",  "Archivos Binarios", "JSON", "XML", etc.
-   
-
 #### - Listado de recursos adicionales para aprendizaje autónomo:
 
 1. **Documentación Oficial de Java:** [Enlace a la documentación oficial de Java](https://docs.oracle.com/javase/8/docs/)
