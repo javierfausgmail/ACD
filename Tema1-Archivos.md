@@ -1,10 +1,10 @@
-### Sesión 1 (1 hora y 30 minutos):
-#### 1. Introducción al acceso a datos (30 minutos)
+# Sesión 1 (1 hora y 30 minutos):
+## 1. Introducción al acceso a datos (30 minutos)
 
-#### 1.1 Concepto de acceso a datos (15 minutos)
+### 1.1 Concepto de acceso a datos (15 minutos)
 
 **Definición (5 minutos):**
-- El "acceso a datos" se refiere a las técnicas y métodos que permiten a una aplicación interactuar con fuentes de datos, sean estas bases de datos, archivos de texto, archivos binarios, entre otros.
+- El "acceso a datos" se refiere a las técnicas y métodos que permiten a una aplicación interáctuar con fuentes de datos, sean estas bases de datos, archivos de texto, archivos binarios, entre otros.
 - En este módulo, nos concentraremos en el acceso a datos a través de archivos utilizando Java.
 
 **Componentes fundamentales (10 minutos):**
@@ -14,7 +14,7 @@
 - Introducción a las clases y métodos comúnmente utilizados en Java para el acceso a datos (File, InputStream, OutputStream, Reader, Writer, etc.), estos se tratarán con más detalle en las siguientes secciones.
 
 
-#### 1.2 Importancia del manejo de archivos en Java (15 minutos)
+### 1.2 Importancia del manejo de archivos en Java (15 minutos)
 
 **Fundamentación (5 minutos):**
 - El manejo de archivos es una habilidad fundamental para cualquier programador, ya que permite la persistencia de datos, es decir, que los datos sigan existiendo incluso después de que el programa haya terminado.
@@ -25,13 +25,300 @@
 - Intercambio de datos: exportar e importar datos en diferentes formatos (texto, JSON, XML, binario, etc.) facilita el intercambio de información entre sistemas diferentes.
 - Logging: registrar eventos o transacciones para el análisis posterior, una herramienta indispensable para el monitoreo y el debugging.
 
-**Ejemplos en Java (5 minutos):**
-- Breves ejemplos de situaciones en las que sería útil el manejo de archivos en aplicaciones Java.
+**API de Java (5 minutos):**
 - Java ofrece un amplio soporte para operaciones de I/O a través de varias clases y APIs, facilitando así el manejo de archivos de diversas formas y tipos.
+
+Clases para archivos de texto:
+
+```mermaid
+classDiagram
+    class Reader {
+    }
+    
+    class Writer {
+    }
+
+
+    class FileReader {
+    }
+
+    class FileWriter {
+    }
+
+    class BufferedReader {
+    }
+
+    class BufferedWriter {
+    }
+
+
+    Reader <|-- FileReader
+    Writer <|-- FileWriter
+
+    Reader <|-- BufferedReader: uses
+    Writer <|-- BufferedWriter: uses
+
+```
+
+Clases para archivos binarios:
+
+```mermaid
+classDiagram
+
+    class InputStream {
+    }
+
+    class OutputStream {
+    }
+
+    class FileInputStream {
+    }
+
+    class FileOutputStream {
+    }
+
+    class DataInputStream {
+    }
+
+    class DataOutputStream {
+    }
+
+
+    InputStream <|-- FileInputStream
+    OutputStream <|-- FileOutputStream
+
+    InputStream <|-- DataInputStream: uses
+    OutputStream <|-- DataOutputStream: uses
+```
+
+
+
+## 2. Tipos de archivos para el acceso a datos (30 minutos)
+
+### 2.1 Archivos de texto (Plain Text) (10 minutos)
+
+**Definición y características (3 minutos):**
+- Los archivos de texto: archivos que contienen caracteres legibles y están estructurados en líneas.
+- Algunas de sus características: sencillos de leer y escribir, pueden ser editados con cualquier editor de texto, no contienen metadatos complejos, etc.
+
+**Uso en Java (7 minutos):**
+- **Para operaciones de Lectura**:
+  - Utilización de clases como `FileReader` y `BufferedReader` para leer archivos de texto en Java.
+
+Explicación en detalle sobre la clase `FileReader` en Java.
+
+#### FileReader en Java
+
+`FileReader` es una clase en Java que proporciona métodos para leer caracteres de un archivo. Es una subclase de la clase `InputStreamReader`, que es una clase para leer flujos de caracteres. Aquí están algunos puntos clave sobre `FileReader`:
+
+##### 1. **Creación de una Instancia de FileReader**
+
+Para leer un archivo, primero necesitamos crear una instancia de `FileReader`, especificando el archivo que queremos leer, que puede ser un objeto `File` o una ruta de archivo como una cadena:
+
+```java
+FileReader reader = new FileReader("ruta/del/archivo.txt");
+```
+
+##### 2. **Lectura de Caracteres**
+
+La clase `FileReader` provee varios métodos para leer caracteres del archivo:
+
+- `int read()`: Lee un solo carácter y devuelve su valor como un entero (devuelve -1 si se ha alcanzado el final del archivo).
+- `int read(char[] cbuf)`: Lee varios caracteres a la vez en una matriz de caracteres (devuelve el número de caracteres leídos o -1 si se ha alcanzado el final del archivo).
+- `int read(char[] cbuf, int off, int len)`: Lee varios caracteres en una parte de la matriz de caracteres especificada.
+
+##### 3. **Manejo de Excepciones**
+
+Las operaciones de I/O pueden generar excepciones, así que se deben manejar utilizando bloques try-catch o declarando que el método puede lanzar una excepción del tipo IOException:
+
+```java
+try {
+    FileReader reader = new FileReader("ruta/del/archivo.txt");
+    int caracter;
+    while((caracter = reader.read()) != -1) {
+        System.out.print((char) caracter);
+    }
+    reader.close();
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+##### 4. **Cierre del Archivo**
+
+Es fundamental cerrar el `FileReader` después de usarlo para liberar los recursos asociados. Esto se puede hacer utilizando el método `close()`:
+
+```java
+reader.close();
+```
+
+##### 5. **Uso con try-with-resources**
+
+A partir de Java 7, puedes utilizar la declaración try-with-resources, que garantiza que el `FileReader` se cerrará automáticamente al final del bloque try:
+
+```java
+try (FileReader reader = new FileReader("ruta/del/archivo.txt")) {
+    int caracter;
+    while((caracter = reader.read()) != -1) {
+        System.out.print((char) caracter);
+    }
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+##### 6. **Buffering**
+
+Aunque `FileReader` puede leer caracteres directamente de un archivo, generalmente es más eficiente usarlo con `BufferedReader`, que puede reducir el número de operaciones de I/O al leer múltiples caracteres a la vez.
+
+##### 7. **Codificación de Caracteres**
+
+`FileReader` utiliza la codificación de caracteres predeterminada del sistema. Si deseas especificar una codificación de caracteres diferente, considera usar `InputStreamReader` con `FileInputStream`, lo que permite especificar la codificación de caracteres.
+
+##### 8. **Desempeño**
+
+Para archivos grandes, es recomendable usar `FileReader` con `BufferedReader` para aumentar el rendimiento, ya que `BufferedReader` lee grandes bloques de datos a la vez en lugar de leer carácter por carácter, reduciendo así el tiempo de I/O.
+
+```java
+try (BufferedReader br = new BufferedReader(new FileReader("ruta/del/archivo.txt"))) {
+    String linea;
+    while ((linea = br.readLine()) != null) {
+        System.out.println(linea);
+    }
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+  - Demostración con un ejemplo sencillo de cómo leer un archivo de texto línea por línea.
+```java
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class LecturaArchivo {
+    public static void main(String[] args) {
+        try (BufferedReader br = new BufferedReader(new FileReader("ejemplo.txt"))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                System.out.println(linea);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo: " + e.getMessage());
+        }
+    }
+}
+```
+
+- **Escritura**:
+  - Utilización de clases como `FileWriter` y `BufferedWriter` para escribir en archivos de texto en Java.
+
+Explicación sobre la clase `FileWriter` en Java:
+
+#### FileWriter en Java
+
+La clase `FileWriter` es una clase en Java que se utiliza para escribir caracteres en un archivo. Forma parte del paquete `java.io` y es una subclase de la clase `OutputStreamWriter`, que es una clase de escritura de flujo de caracteres. Aquí están algunos detalles clave sobre `FileWriter`:
+
+##### 1. **Creación y Apertura de Archivos**
+
+Cuando creamos una instancia de `FileWriter`, Java intenta abrir el archivo especificado. Si el archivo no existe, se creará uno nuevo. Aquí está un ejemplo sencillo:
+
+```java
+FileWriter writer = new FileWriter("archivo.txt");
+```
+
+##### 2. **Modos de Escritura**
+
+`FileWriter` permite escribir en un archivo en dos modos: 
+- **Modo Sobrescribir** (default): Sobrescribe el contenido del archivo existente.
+- **Modo Append**: Añade el nuevo contenido al final del archivo existente, conservando el contenido original. Se activa pasando un segundo argumento `true` al constructor:
+
+  ```java
+  FileWriter writer = new FileWriter("archivo.txt", true);
+  ```
+
+##### 3. **Escribir en el Archivo**
+
+El `FileWriter` ofrece varios métodos para escribir en el archivo:
+
+- `write(int c)`: Escribe un solo carácter.
+- `write(char[] cbuf)`: Escribe una matriz de caracteres.
+- `write(String str)`: Escribe una cadena de caracteres.
+- `write(String str, int off, int len)`: Escribe una parte de una cadena de caracteres.
+
+Por ejemplo,
+
+```java
+writer.write("Hola Mundo");
+```
+
+##### 4. **Cierre del Archivo**
+
+Es importante cerrar el `FileWriter` una vez que hemos terminado de escribir en el archivo para liberar los recursos asociados. Se hace utilizando el método `close()`:
+
+```java
+writer.close();
+```
+
+##### 5. **Manejo de Excepciones**
+
+Las operaciones de I/O pueden generar excepciones, por lo que es necesario manejarlas utilizando bloques try-catch o declarando que el método puede lanzar una excepción de tipo IOException:
+
+```java
+try {
+    FileWriter writer = new FileWriter("archivo.txt");
+    writer.write("Hola Mundo");
+    writer.close();
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+##### 6. **Uso con try-with-resources**
+
+Desde Java 7, puedes utilizar la declaración try-with-resources, que garantiza que el `FileWriter` se cerrará automáticamente al final del bloque try:
+
+```java
+try (FileWriter writer = new FileWriter("archivo.txt")) {
+    writer.write("Hola Mundo");
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+##### 7. **Buffering**
+
+Aunque `FileWriter` puede escribir caracteres directamente en un archivo, es recomendable usarlo junto con `BufferedWriter` para una escritura más eficiente, especialmente cuando se escribe una gran cantidad de texto.
+
+##### 8. **Codificación de Caracteres**
+
+`FileWriter` utiliza la codificación de caracteres predeterminada del sistema. Si deseas especificar una codificación de caracteres diferente, deberías considerar usar `OutputStreamWriter`.
+
+  - Demostración con un ejemplo sencillo de cómo escribir en un archivo de texto.
+
+```java
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class EscrituraArchivo {
+    public static void main(String[] args) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("salida.txt"))) {
+            bw.write("Esto es una línea de texto.");
+            bw.newLine();
+            bw.write("Esto es otra línea de texto.");
+        } catch (IOException e) {
+            System.err.println("Error al escribir en el archivo: " + e.getMessage());
+        }
+    }
+}
+```
+
+
 
 Dos escenarios ejemplo donde el manejo de archivos en aplicaciones Java sería muy útil:
 
-### 1. Registro y Consulta de Usuarios:
+#### Ejemplo 1. Registro y Consulta de Usuarios:
 
 **Situación:** Una aplicación requiere mantener un registro de usuarios con su respectiva información básica como nombre, edad y correo electrónico.
 
@@ -69,7 +356,7 @@ public class RegistroUsuarios {
 }
 ```
 
-### 2. Manejo de Configuraciones de una Aplicación:
+#### Ejemplo 2. Manejo de Configuraciones de una Aplicación:
 
 **Situación:** Un software que necesita guardar y leer configuraciones del usuario, como preferencias de visualización, desde un archivo.
 
@@ -111,229 +398,7 @@ public class ConfiguracionApp {
 En ambos ejemplos, se demuestra cómo realizar operaciones básicas de escritura y lectura de archivos en Java, una habilidad esencial para manipular datos persistentes en aplicaciones reales.
 
 
-
-### 2. Tipos de archivos para el acceso a datos (30 minutos)
-
-#### 2.1 Archivos de texto (Plain Text) (10 minutos)
-
-**Definición y características (3 minutos):**
-- Los archivos de texto: archivos que contienen caracteres legibles y están estructurados en líneas.
-- Algunas de sus características: sencillos de leer y escribir, pueden ser editados con cualquier editor de texto, no contienen metadatos complejos, etc.
-
-**Uso en Java (7 minutos):**
-- **Lectura**:
-  - Utilización de clases como `FileReader` y `BufferedReader` para leer archivos de texto en Java.
-
-Explicación en detalle sobre la clase `FileReader` en Java:
-
-### FileReader en Java
-
-`FileReader` es una clase en Java que proporciona métodos para leer caracteres de un archivo. Es una subclase de la clase `InputStreamReader`, que es una clase para leer flujos de caracteres. Aquí están algunos puntos clave sobre `FileReader`:
-
-#### 1. **Creación de una Instancia de FileReader**
-
-Para leer un archivo, primero necesitamos crear una instancia de `FileReader`, especificando el archivo que queremos leer, que puede ser un objeto `File` o una ruta de archivo como una cadena:
-
-```java
-FileReader reader = new FileReader("ruta/del/archivo.txt");
-```
-
-#### 2. **Lectura de Caracteres**
-
-La clase `FileReader` provee varios métodos para leer caracteres del archivo:
-
-- `int read()`: Lee un solo carácter y devuelve su valor como un entero (devuelve -1 si se ha alcanzado el final del archivo).
-- `int read(char[] cbuf)`: Lee varios caracteres a la vez en una matriz de caracteres (devuelve el número de caracteres leídos o -1 si se ha alcanzado el final del archivo).
-- `int read(char[] cbuf, int off, int len)`: Lee varios caracteres en una parte de la matriz de caracteres especificada.
-
-#### 3. **Manejo de Excepciones**
-
-Las operaciones de I/O pueden generar excepciones, así que se deben manejar utilizando bloques try-catch o declarando que el método puede lanzar una excepción del tipo IOException:
-
-```java
-try {
-    FileReader reader = new FileReader("ruta/del/archivo.txt");
-    int caracter;
-    while((caracter = reader.read()) != -1) {
-        System.out.print((char) caracter);
-    }
-    reader.close();
-} catch (IOException e) {
-    e.printStackTrace();
-}
-```
-
-#### 4. **Cierre del Archivo**
-
-Es fundamental cerrar el `FileReader` después de usarlo para liberar los recursos asociados. Esto se puede hacer utilizando el método `close()`:
-
-```java
-reader.close();
-```
-
-#### 5. **Uso con try-with-resources**
-
-A partir de Java 7, puedes utilizar la declaración try-with-resources, que garantiza que el `FileReader` se cerrará automáticamente al final del bloque try:
-
-```java
-try (FileReader reader = new FileReader("ruta/del/archivo.txt")) {
-    int caracter;
-    while((caracter = reader.read()) != -1) {
-        System.out.print((char) caracter);
-    }
-} catch (IOException e) {
-    e.printStackTrace();
-}
-```
-
-#### 6. **Buffering**
-
-Aunque `FileReader` puede leer caracteres directamente de un archivo, generalmente es más eficiente usarlo con `BufferedReader`, que puede reducir el número de operaciones de I/O al leer múltiples caracteres a la vez.
-
-#### 7. **Codificación de Caracteres**
-
-`FileReader` utiliza la codificación de caracteres predeterminada del sistema. Si deseas especificar una codificación de caracteres diferente, considera usar `InputStreamReader` con `FileInputStream`, lo que permite especificar la codificación de caracteres.
-
-#### 8. **Desempeño**
-
-Para archivos grandes, es recomendable usar `FileReader` con `BufferedReader` para aumentar el rendimiento, ya que `BufferedReader` lee grandes bloques de datos a la vez en lugar de leer carácter por carácter, reduciendo así el tiempo de I/O.
-
-```java
-try (BufferedReader br = new BufferedReader(new FileReader("ruta/del/archivo.txt"))) {
-    String linea;
-    while ((linea = br.readLine()) != null) {
-        System.out.println(linea);
-    }
-} catch (IOException e) {
-    e.printStackTrace();
-}
-```
-
-  - Demostración con un ejemplo sencillo de cómo leer un archivo de texto línea por línea.
-```java
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
-public class LecturaArchivo {
-    public static void main(String[] args) {
-        try (BufferedReader br = new BufferedReader(new FileReader("ejemplo.txt"))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                System.out.println(linea);
-            }
-        } catch (IOException e) {
-            System.err.println("Error al leer el archivo: " + e.getMessage());
-        }
-    }
-}
-```
-
-- **Escritura**:
-  - Utilización de clases como `FileWriter` y `BufferedWriter` para escribir en archivos de texto en Java.
-
-Explicación sobre la clase `FileWriter` en Java:
-
-### FileWriter en Java
-
-La clase `FileWriter` es una clase en Java que se utiliza para escribir caracteres en un archivo. Forma parte del paquete `java.io` y es una subclase de la clase `OutputStreamWriter`, que es una clase de escritura de flujo de caracteres. Aquí están algunos detalles clave sobre `FileWriter`:
-
-#### 1. **Creación y Apertura de Archivos**
-
-Cuando creamos una instancia de `FileWriter`, Java intenta abrir el archivo especificado. Si el archivo no existe, se creará uno nuevo. Aquí está un ejemplo sencillo:
-
-```java
-FileWriter writer = new FileWriter("archivo.txt");
-```
-
-#### 2. **Modos de Escritura**
-
-`FileWriter` permite escribir en un archivo en dos modos: 
-- **Modo Sobrescribir** (default): Sobrescribe el contenido del archivo existente.
-- **Modo Append**: Añade el nuevo contenido al final del archivo existente, conservando el contenido original. Se activa pasando un segundo argumento `true` al constructor:
-
-  ```java
-  FileWriter writer = new FileWriter("archivo.txt", true);
-  ```
-
-#### 3. **Escribir en el Archivo**
-
-El `FileWriter` ofrece varios métodos para escribir en el archivo:
-
-- `write(int c)`: Escribe un solo carácter.
-- `write(char[] cbuf)`: Escribe una matriz de caracteres.
-- `write(String str)`: Escribe una cadena de caracteres.
-- `write(String str, int off, int len)`: Escribe una parte de una cadena de caracteres.
-
-Por ejemplo,
-
-```java
-writer.write("Hola Mundo");
-```
-
-#### 4. **Cierre del Archivo**
-
-Es importante cerrar el `FileWriter` una vez que hemos terminado de escribir en el archivo para liberar los recursos asociados. Se hace utilizando el método `close()`:
-
-```java
-writer.close();
-```
-
-#### 5. **Manejo de Excepciones**
-
-Las operaciones de I/O pueden generar excepciones, por lo que es necesario manejarlas utilizando bloques try-catch o declarando que el método puede lanzar una excepción de tipo IOException:
-
-```java
-try {
-    FileWriter writer = new FileWriter("archivo.txt");
-    writer.write("Hola Mundo");
-    writer.close();
-} catch (IOException e) {
-    e.printStackTrace();
-}
-```
-
-#### 6. **Uso con try-with-resources**
-
-Desde Java 7, puedes utilizar la declaración try-with-resources, que garantiza que el `FileWriter` se cerrará automáticamente al final del bloque try:
-
-```java
-try (FileWriter writer = new FileWriter("archivo.txt")) {
-    writer.write("Hola Mundo");
-} catch (IOException e) {
-    e.printStackTrace();
-}
-```
-
-#### 7. **Buffering**
-
-Aunque `FileWriter` puede escribir caracteres directamente en un archivo, es recomendable usarlo junto con `BufferedWriter` para una escritura más eficiente, especialmente cuando se escribe una gran cantidad de texto.
-
-#### 8. **Codificación de Caracteres**
-
-`FileWriter` utiliza la codificación de caracteres predeterminada del sistema. Si deseas especificar una codificación de caracteres diferente, deberías considerar usar `OutputStreamWriter`.
-
-  - Demostración con un ejemplo sencillo de cómo escribir en un archivo de texto.
-
-```java
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
-public class EscrituraArchivo {
-    public static void main(String[] args) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("salida.txt"))) {
-            bw.write("Esto es una línea de texto.");
-            bw.newLine();
-            bw.write("Esto es otra línea de texto.");
-        } catch (IOException e) {
-            System.err.println("Error al escribir en el archivo: " + e.getMessage());
-        }
-    }
-}
-```
-
-#### 2.2 Archivos binarios (10 minutos)
+### 2.2 Archivos binarios (10 minutos)
 
 **Definición y características (3 minutos):**
 - Los archivos binarios contienen información en un formato que solo puede ser leído por programas específicos, no son legibles por humanos.
@@ -343,26 +408,26 @@ public class EscrituraArchivo {
 - **Lectura**:
   -  Explicación detallada de las clases `FileInputStream` y `DataInputStream` en Java, específicamente para la lectura de archivos binarios:
 
-### FileInputStream
+#### FileInputStream
 
-#### 1. **Descripción General**
+##### 1. **Descripción General**
 La clase `FileInputStream` es parte del paquete java.io y se utiliza para leer bytes de un archivo. Es adecuado para leer datos binarios.
 
-#### 2. **Creación de una Instancia**
+##### 2. **Creación de una Instancia**
 Para crear una instancia de `FileInputStream`, necesitarás especificar la ruta del archivo desde el cual deseas leer, esto puede hacerse usando un objeto `File` o una cadena que representa la ruta del archivo:
 
 ```java
 FileInputStream fis = new FileInputStream("ruta/del/archivo.bin");
 ```
 
-#### 3. **Métodos de Lectura**
+##### 3. **Métodos de Lectura**
 `FileInputStream` proporciona varios métodos para leer datos:
 
 - `int read()`: lee un byte de datos y devuelve su valor como un entero (retorna -1 si se ha alcanzado el final del archivo).
 - `int read(byte[] b)`: lee varios bytes a la vez en un array de bytes.
 - `int read(byte[] b, int off, int len)`: lee varios bytes en una parte del array de bytes especificada.
 
-#### 4. **Manejo de Excepciones**
+##### 4. **Manejo de Excepciones**
 Al igual que con otras clases de IO, las operaciones de IO pueden generar excepciones, y estas deben manejarse correctamente, generalmente con un bloque try-catch:
 
 ```java
@@ -373,19 +438,19 @@ try {
 }
 ```
 
-### DataInputStream
+#### DataInputStream
 
-#### 1. **Descripción General**
+##### 1. **Descripción General**
 La clase `DataInputStream` permite leer tipos de datos primitivos (como int, float, double, etc.) de una manera portable desde un flujo de entrada. Generalmente se usa en combinación con `FileInputStream` para leer datos binarios.
 
-#### 2. **Creación de una Instancia**
+##### 2. **Creación de una Instancia**
 Para crear una instancia de `DataInputStream`, necesitarás envolver un objeto `InputStream` (como un `FileInputStream`) dentro de un `DataInputStream`:
 
 ```java
 DataInputStream dis = new DataInputStream(new FileInputStream("ruta/del/archivo.bin"));
 ```
 
-#### 3. **Métodos de Lectura**
+##### 3. **Métodos de Lectura**
 `DataInputStream` proporciona varios métodos para leer datos primitivos:
 
 - `int readInt()`: lee un entero de 4 bytes.
@@ -394,7 +459,7 @@ DataInputStream dis = new DataInputStream(new FileInputStream("ruta/del/archivo.
 - `String readUTF()`: lee una cadena en formato UTF-8.
 - Entre otros...
 
-#### 4. **Manejo de Excepciones**
+##### 4. **Manejo de Excepciones**
 Al igual que con `FileInputStream`, las operaciones de IO pueden generar excepciones que deben manejarse con bloques try-catch:
 
 ```java
@@ -408,7 +473,7 @@ try {
 }
 ```
 
-#### 5. **Uso en Conjunto**
+##### 5. **Uso en Conjunto**
 `FileInputStream` y `DataInputStream` a menudo se usan juntos para leer datos binarios de un archivo:
 
 ```java
@@ -481,34 +546,7 @@ En este ejemplo:
   - Demostrar con un ejemplo básico cómo parsear y crear archivos XML en Java.
 
 
-### 3. Preparación del entorno de desarrollo (30 minutos)
-
-#### 3.1 Configuración de herramientas necesarias (15 minutos)
-
-**Introducción (3 minutos):**
-- Resaltar la importancia de tener un entorno de desarrollo bien configurado para facilitar la programación eficiente.
-- Mencionar que se utilizarán herramientas específicas para facilitar la gestión y organización del código en Java.
-
-**Herramientas básicas (4 minutos):**
-- **JDK (Java Development Kit):** 
-  - Explicar qué es y por qué es necesario.
-  - Demostración de cómo instalar y configurar el JDK.
-- **IDE (Integrated Development Environment):**
-  - Mencionar algunas IDE populares como Eclipse, IntelliJ IDEA, o NetBeans.
-  - Recomendar una (o varias) para el curso y mostrar cómo instalarla.
-
-**Configuración del entorno (5 minutos):**
-- Guía paso a paso para configurar el entorno de desarrollo:
-  - Configuración de variables de entorno (si es necesario).
-  - Creación de un nuevo workspace o proyecto en la IDE elegida.
-  - Configuración de la estructura del proyecto (p.ej., estructura de paquetes en Java).
-
-**Prueba de la configuración (3 minutos):**
-- Crear y ejecutar un simple programa "Hola Mundo" en Java para verificar que el entorno está configurado correctamente.
-- Resolución de posibles problemas comunes que pueden surgir durante la configuración.
-
-
-#### 3.2 Creación de un proyecto básico en Java (15 minutos)
+## 3.  Creación de un proyecto básico en Java (15 minutos)
 
 **Introducción y planificación (5 minutos):**
 - Explicar que ahora los estudiantes utilizarán el entorno configurado para crear un proyecto básico en Java.
@@ -632,7 +670,7 @@ public class AccesoDatos {
 - Ejecución del proyecto para demostrar que funciona como se esperaba.
 - Introducción a la depuración: mostrar cómo usar el depurador en la IDE para identificar y corregir errores.
 
-### Sesión 2 (1 hora y 30 minutos):
+# Sesión 2 (1 hora y 30 minutos):
 ### 4. Acceso a datos utilizando archivos de texto en Java (45 minutos)
 
 #### 4.1 Lectura de archivos de texto (BufferedReader, FileReader) - (15 minutos)
@@ -1336,92 +1374,7 @@ En esta sección, se hablará sobre algunas de las buenas prácticas que deben s
 
 1. **Cierre de Recursos:** Discusión sobre la importancia de cerrar los recursos después de su uso para evitar fugas de memoria.
 2. **Utilizar Try-with-Resources:** Explicación de cómo utilizar la declaración try-with-resources en Java para gestionar recursos de forma más eficiente.
-3. **Manipulación de Datos Sensibles:** Cómo manejar correctamente los datos sensibles durante las operaciones de acceso a datos.
-
-### 1. Cierre de Recursos
-
-#### 1.1 Importancia del Cierre de Recursos
-
-El cierre de recursos como streams, conexiones a bases de datos, entre otros, es vital en la programación Java para prevenir fugas de memoria y garantizar que los datos no se corrompan. Cuando un recurso es abierto pero no cerrado adecuadamente, puede llevar a una acumulación de conexiones abiertas, resultando en una pérdida gradual de memoria, lo que puede deteriorar el rendimiento del sistema o incluso causar fallos.
-
-#### 1.2 Estrategias para el Cierre de Recursos
-
-Es fundamental implementar estrategias de cierre de recursos en el código. Esto puede hacerse manualmente utilizando el método `close()` en un bloque `finally` o automáticamente utilizando el bloque try-with-resources, introducido en Java 7, que garantiza que cada recurso abierto será cerrado al final de la ejecución del bloque.
-
-### 2. Utilizar Try-with-Resources
-
-#### 2.1 Introducción a Try-with-Resources
-
-El bloque try-with-resources es una construcción en Java que garantiza que cada recurso declarado en la try-será cerrado al final de la declaración. Esto ayuda a prevenir posibles fugas de memoria y a hacer el código más limpio y legible.
-
-#### 2.2 Cómo Utilizar Try-with-Resources
-
-Para utilizar try-with-resources, simplemente declaras el recurso en el paréntesis de la declaración try, y Java se encargará de cerrarlos al final de la ejecución del bloque. Aquí está un ejemplo:
-
-```java
-try (FileReader fr = new FileReader("path/to/file.txt"); 
-     BufferedReader br = new BufferedReader(fr)) {
-    // Tu código aquí
-} catch (IOException e) {
-    // Manejo de excepciones aquí
-}
-```
-
-En este ejemplo, `fr` y `br` serán cerrados automáticamente al final del bloque try, incluso si una excepción es lanzada dentro del bloque.
-
-### 3. Manipulación de Datos Sensibles
-
-#### 3.1 Importancia de la Manipulación Adecuada de Datos Sensibles
-
-En operaciones de acceso a datos, puede haber momentos en los que necesites manejar datos sensibles, como información personal o credenciales. Es crucial manejar estos datos de manera segura para prevenir posibles filtraciones de información o ataques de seguridad.
-
-#### 3.2 Estrategias para la Manipulación Segura de Datos Sensibles
-
-Algunas estrategias para manejar datos sensibles de manera segura incluyen:
-
-- **Encriptación de Datos**: Utiliza algoritmos de encriptación fuertes para proteger los datos sensibles durante la transmisión y el almacenamiento.
-- **Uso de HTTPS**: Si estás transmitiendo datos sensibles sobre la red, asegúrate de utilizar HTTPS, que cifra los datos en tránsito.
-- **Almacenamiento Seguro**: Almacena datos sensibles de manera segura, utilizando medidas como el hash de contraseñas y el almacenamiento encriptado.
-- **Control de Acceso**: Implementa controles de acceso adecuados para prevenir el acceso no autorizado a datos sensibles.
-
-#### 3.3 Código de Ejemplo
-
-Un simple ejemplo de cómo podrías manipular datos sensibles en Java es utilizando clases de Java como `Cipher` para encriptar y desencriptar datos:
-
-```java
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-
-public class Main {
-    public static void main(String[] args) throws Exception {
-        // Generar una clave secreta
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(128);
-        SecretKey secretKey = keyGenerator.generateKey();
-
-        // Crear un cifrado
-        Cipher cipher = Cipher.getInstance("AES");
-
-        // Inicializar el cifrado para encriptar
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-
-        // Encriptar los datos
-        byte[] dataToEncrypt = "Datos Sensibles".getBytes();
-        byte[] encryptedData = cipher.doFinal(dataToEncrypt);
-
-        // Inicializar el cifrado para desencriptar
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
-
-        // Desencriptar los datos
-        byte[] decryptedData = cipher.doFinal(encryptedData);
-        
-        System.out.println(new String(decryptedData));
-    }
-}
-```
-
-En este ejemplo, una clave secreta es generada y utilizada para encriptar y desencriptar datos sensibles.
+3. **Manipulación de Datos Sensibles:** Charla sobre cómo manejar correctamente los datos sensibles durante las operaciones de acceso a datos.
 
 **Práctica: (5 minutos)**
 
@@ -1451,13 +1404,13 @@ public class BestPracticesExample {
 }
 ```
 
-Esta sección proporciona una visión general de las buenas prácticas y del manejo de excepciones en el acceso a datos, proporcionando tanto conocimientos teóricos como prácticos.
+Esta sección proporciona una visión general de las buenas prácticas y del manejo de excepciones en el acceso a datos, proporcionando tanto conocimientos teóricos como prácticos a los estudiantes.
 
 #### 8. Actividad práctica y conclusión (30 minutos)
 
 #### 8.1 Desarrollo de un pequeño proyecto práctico por los estudiantes (15 minutos)
 
-En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo aprendido en la sesión mediante el desarrollo de un pequeño proyecto práctico. Aquí una sugerencia para el proyecto:
+En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo aprendido en la sesión mediante el desarrollo de un pequeño proyecto práctico. Aquí es una sugerencia para el proyecto:
 
 **Proyecto Práctico: Sistema de Gestión de Datos Personales**
 
@@ -1468,7 +1421,7 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
   - Manejar adecuadamente las excepciones que puedan ocurrir durante las operaciones de I/O.
 
    
-#### - Ejercicios de práctica para reforzar lo aprendido en clase:
+#### - Ejercicios OPTATIVOS de práctica para reforzar lo aprendido en clase:
 #### 1. Ejercicio práctico - Manipulación de Archivos de Texto:
 
 **Enunciado:** Como parte de un pequeño sistema de gestión bibliotecaria, su tarea es crear un programa en Java que permita al usuario registrar nuevos libros en un archivo de texto. Cada libro debe tener un título, autor y año de publicación. El programa debe ser capaz de realizar las siguientes operaciones:
@@ -1522,6 +1475,11 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
 2. **"Clean Code: A Handbook of Agile Software Craftsmanship"** por Robert C. Martin
    - Un libro esencial que enseña las buenas prácticas de codificación, muy útil para escribir código más limpio y mantenible.
    
+#### - Referencia rápida con los conceptos clave:
+
+1. ** Términos Clave:** Un glosario con las definiciones de términos clave como "Acceso a datos", "Archivos de Texto",  "Archivos Binarios", "JSON", "XML", etc.
+   
+
 #### - Listado de recursos adicionales para aprendizaje autónomo:
 
 1. **Documentación Oficial de Java:** [Enlace a la documentación oficial de Java](https://docs.oracle.com/javase/8/docs/)
