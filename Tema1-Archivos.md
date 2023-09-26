@@ -1406,9 +1406,9 @@ public class BestPracticesExample {
 
 Esta sección proporciona una visión general de las buenas prácticas y del manejo de excepciones en el acceso a datos, proporcionando tanto conocimientos teóricos como prácticos a los estudiantes.
 
-#### 8. Actividad práctica y conclusión (30 minutos)
+# 8. Actividades prácticas (30 minutos)
 
-#### 8.1 Desarrollo de un pequeño proyecto práctico por los estudiantes (15 minutos)
+## 8.1 Ejercicio práctico - Desarrollo de un pequeño proyecto práctico por los estudiantes (15 minutos)
 
 En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo aprendido en la sesión mediante el desarrollo de un pequeño proyecto práctico. Aquí es una sugerencia para el proyecto:
 
@@ -1421,8 +1421,8 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
   - Manejar adecuadamente las excepciones que puedan ocurrir durante las operaciones de I/O.
 
    
-#### - Ejercicios OPTATIVOS de práctica para reforzar lo aprendido en clase:
-#### 1. Ejercicio práctico - Manipulación de Archivos de Texto:
+
+## 8.2 Ejercicio práctico - Manipulación de Archivos de Texto:
 
 **Enunciado:** Como parte de un pequeño sistema de gestión bibliotecaria, su tarea es crear un programa en Java que permita al usuario registrar nuevos libros en un archivo de texto. Cada libro debe tener un título, autor y año de publicación. El programa debe ser capaz de realizar las siguientes operaciones:
    
@@ -1436,7 +1436,7 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
 
 ---
 
-#### 2. Ejercicio práctico - Trabajando con Archivos Binarios:
+## 8.3 Ejercicio práctico - Trabajando con Archivos Binarios:
 
 **Enunciado:** Como parte de una aplicación de gestión de empleados, debe desarrollar un sistema que permita almacenar y recuperar detalles de empleados (como nombre, edad, y puesto) en un archivo binario. El sistema deberá permitir:
 
@@ -1450,7 +1450,7 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
 
 ---
 
-#### 3. Ejercicio práctico - Creación y Lectura de Archivos JSON/XML:
+## 8.4 Ejercicio práctico - Creación y Lectura de Archivos JSON/XML:
 
 **Enunciado:** Se le asigna la tarea de crear una aplicación de gestión de inventario que pueda almacenar y recuperar detalles de productos (como código de producto, nombre y precio) en archivos JSON y XML. La aplicación deberá tener las siguientes funcionalidades:
 
@@ -1463,7 +1463,7 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
 **Objetivo:** Aprender a trabajar con bibliotecas externas en Java para crear y leer archivos JSON y XML, familiarizándose con el proceso de serialización y deserialización de objetos.
 
 
-### Material complementario y ejercicios:
+# 9. Material complementario:
 
 #### - Libros:
 
@@ -1477,7 +1477,7 @@ En esta sección, los estudiantes tendrán la oportunidad de consolidar todo lo 
    
 #### - Referencia rápida con los conceptos clave:
 
-1. ** Términos Clave:** Un glosario con las definiciones de términos clave como "Acceso a datos", "Archivos de Texto",  "Archivos Binarios", "JSON", "XML", etc.
+1. ** Términos Clave:** "Acceso a datos", "Archivos de Texto",  "Archivos Binarios", "JSON", "XML".
    
 
 #### - Listado de recursos adicionales para aprendizaje autónomo:
