@@ -8,10 +8,10 @@ El contenedor de Spring gestiona la creación, inicialización y destrucción de
 ##### Alcance de los Beans y Gestión de Dependencias
 Los beans pueden tener diferentes alcances (singleton, prototype, request, session). La elección del alcance afecta cómo y cuándo se crea e inyecta un bean.
 
-Claro, exploraremos los diferentes alcances de los beans en Spring y proporcionaré ejemplos concretos de casos de uso, junto con código sencillo para ilustrar cómo se aplican estas anotaciones.
+Exploremos los diferentes alcances de los beans en Spring con ejemplos concretos de casos de uso y código sencillo para ilustrar cómo se aplican estas anotaciones.
 
 ###### 1. Singleton (Alcance por Defecto)
-El alcance `singleton` significa que una única instancia del bean será creada y compartida en todo el contenedor de Spring. Este alcance es el más común y se utiliza para servicios que no mantienen estado.
+El alcance `singleton` significa que una única instancia del bean (recuerda que un bean es simplemente un *objeto con ciertas propiedades* en jerga de Java) será creada y compartida en todo el contenedor de Spring. Este alcance es el más común y se utiliza por ejemplo para servicios que no mantienen estado. Recuerda que el estado es simplemente "datos", por ejemplo, para guardar datos de diferentes beans de tipo Coche no deberíamos utilizar singleton porque necesito muchos objetos cada uno con un estado diferente (marca, potencia, etc diferentes)). 
 
 **Ejemplo:**
 
