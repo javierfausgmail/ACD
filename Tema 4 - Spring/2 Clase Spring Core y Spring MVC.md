@@ -10,7 +10,7 @@ Los beans pueden tener diferentes alcances (singleton, prototype, request, sessi
 
 Exploremos los diferentes alcances de los beans en Spring con ejemplos concretos de casos de uso y código sencillo para ilustrar cómo se aplican estas anotaciones.
 
-###### 1. Singleton (Alcance por Defecto)
+###### 1. Singleton (alcance por defecto)
 El alcance `singleton` significa que una única instancia del bean (recuerda que un bean es simplemente un *objeto con ciertas propiedades* en jerga de Java) será creada y compartida en todo el contenedor de Spring. Este alcance es el más común y se utiliza por ejemplo para servicios que no mantienen estado. Recuerda que el estado es simplemente "datos", por ejemplo, para guardar datos de diferentes beans de tipo Coche no deberíamos utilizar singleton porque necesito muchos objetos cada uno con un estado diferente (marca, potencia, etc diferentes)). 
 
 **Ejemplo:**
