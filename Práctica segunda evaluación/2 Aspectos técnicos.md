@@ -34,4 +34,4 @@ El desarrollo de una aplicación de grado profesional requiere un enfoque integr
 
 14. **Gestión de Cambios y Versiones**: Usa sistemas de control de versiones como Git y prácticas de gestión de cambios eficientes.
 
-Cada uno de estos aspectos contribuirá a la creación de una aplicación robusta, segura y amigable para el usuario, que cumpla con los estándares profesionales de desarrollo de software.
+Cada uno de estos aspectos contribuye a la creación de una aplicación robusta, segura y amigable para el usuario, que cumpla con los estándares profesionales de desarrollo de software.

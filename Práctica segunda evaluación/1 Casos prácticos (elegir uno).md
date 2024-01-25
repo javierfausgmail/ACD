@@ -1,6 +1,6 @@
 Ejemplos de proyectos que incluirán elementos de persistencia, servicios, controladores, relaciones entre entidades, APIs, e interfaces web. 
 
-1. **Sistema de Reservas para un Hotel (ejemplo, no elegir)**: Gestiona reservas de habitaciones, clientes y servicios del hotel. Las habitaciones pueden tener múltiples reservas (OneToMany) y los clientes pueden tener múltiples reservas (OneToMany).
+1. **Sistema de Reservas para un Hotel**: Gestiona reservas de habitaciones, clientes y servicios del hotel. Las habitaciones pueden tener múltiples reservas (OneToMany) y los clientes pueden tener múltiples reservas (OneToMany).
 
 2. **Plataforma de Cursos Online**: Administra cursos, estudiantes y profesores. Los cursos pueden tener varios estudiantes (ManyToMany) y un profesor asignado (ManyToOne).
 
