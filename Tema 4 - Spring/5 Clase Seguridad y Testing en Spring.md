@@ -11,7 +11,7 @@ La autenticación se logra mediante proveedores de autenticación, mientras que 
 
 El **Control de Acceso Basado en Roles (autenticación)** y la **Gestión de Permisos (autorización)**  son aspectos esenciales de la autorización en aplicaciones web, y Spring Boot proporciona herramientas poderosas y flexibles para implementar estas funcionalidades. Aquí se muestra cómo aplicar estos conceptos específicamente en el contexto de Spring Boot y el Spring Security Framework.
 
-### Control de Acceso Basado en Roles (RBAC)
+##### Control de Acceso Basado en Roles (RBAC)
 En RBAC, los **accesos** se otorgan en función de los **roles** asignados a los usuarios. En Spring Boot, esto se gestiona típicamente con Spring Security:
 
 1. **Definición de Roles**: Los roles representan un conjunto de permisos. Por ejemplo, podrías tener roles como `ADMIN`, `USER`, `MANAGER`, etc.
@@ -57,7 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      ```
 Este código configura las rutas para que solo sean accesibles por usuarios con los roles específicos.
 
-### Gestión de Permisos
+##### Gestión de Permisos
 Además de los roles, puedes gestionar permisos específicos para acciones más granulares:
 
 1. **Permisos**: Son autorizaciones más específicas que los roles. Por ejemplo, un rol `USER` podría tener permisos como `READ_PROFILE`, `EDIT_PROFILE`.
@@ -77,27 +77,32 @@ Además de los roles, puedes gestionar permisos específicos para acciones más 
      ```
    - `@PreAuthorize` permite definir la seguridad a nivel de método antes de que se ejecute el método.
 
-### Implementación Práctica en Spring Boot
+##### Implementación Práctica en Spring Boot
 1. **Configurar Spring Security**: Añade Spring Security a tu proyecto de Spring Boot. Puedes hacerlo agregando la dependencia `spring-boot-starter-security` en tu archivo `pom.xml` o `build.gradle`.
 
 2. **Clase de Configuración de Seguridad**: Crea una clase que extienda `WebSecurityConfigurerAdapter` para personalizar tu configuración de seguridad.
 
 3. **Servicio de Detalles de Usuario**: Implementa `UserDetailsService` para cargar datos específicos del usuario (como roles) desde la base de datos.
 
-4. **Personalizar la Autenticación y Autorización**: Utiliza `AuthenticationManagerBuilder` para definir cómo se autenticarán los usuarios (por ejemplo, con base de datos, LDAP, etc.) y configura las reglas de autorización en el método `configure(HttpSecurity http)`.
+4. **Personalizar la Autenticación y Autorización**: Utiliza `AuthenticationManagerBuilder` para definir cómo se autenticarán los usuarios (por ejemplo, con base de datos, LDAP, etc.) y configura las reglas de autorización en el método `configure(HttpSecurity http)`. Puedes utilizar [[JWT]] para este proceso de autenticación y autorización de usuarios.
 
 5. **Pruebas y Validación**: Asegúrate de probar exhaustivamente la seguridad de tu aplicación, incluyendo la autenticación y la autorización, para verificar que los permisos y roles se manejan como se espera.
 
 Implementar RBAC y la gestión de permisos de manera efectiva en Spring Boot con Spring Security te permitirá tener un control detallado y seguro sobre quién puede acceder y realizar operaciones específicas en la aplicación.
 
+##### Vídeo tutorial completo (capítulos 1 y 2)
+https://www.youtube.com/playlist?list=PLr23_YfwEbPRCK4IbemQGwYdgSwfd2aZu
 
-### Ejemplo aplicado Reserva Hotel
+#### Ejemplos documentación oficial
+https://docs.spring.io/spring-security/reference/samples.html
 
+
+##### Ejemplo aplicado Reserva Hotel
 Vamos a detallar cada uno de los puntos mencionados con ejemplos concretos, aplicados al contexto del sistema de reservas de un hotel en Spring Boot:
 
-### 1. Definición y Asignación de Roles
+##### 1. Definición y Asignación de Roles
 
-#### Base de Datos
+###### Base de Datos
 Imagina que tienes una tabla `usuarios` y una tabla `roles`. Los roles pueden ser `ADMIN`, `USER`, `MANAGER`, etc. Además, tendrías una tabla de unión `usuarios_roles` para representar la relación muchos-a-muchos entre usuarios y roles.
 
 ```sql
@@ -121,7 +126,7 @@ CREATE TABLE usuarios_roles (
 );
 ```
 
-#### Entidades en Spring Boot
+###### Entidades en Spring Boot
 Tendrías entidades `Usuario` y `Rol` en tu proyecto de Spring Boot.
 
 ```java
@@ -155,7 +160,7 @@ public class Rol {
 }
 ```
 
-### 2. Clase de Configuración de Seguridad
+##### 2. Clase de Configuración de Seguridad
 
 En Spring Boot, extiendes la clase `WebSecurityConfigurerAdapter` para configurar la seguridad:
 
@@ -191,7 +196,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 }
 ```
 
-### 3. Servicio de Detalles de Usuario
+##### 3. Servicio de Detalles de Usuario
 
 Implementa `UserDetailsService` para cargar los usuarios y sus roles desde la base de datos:
 
@@ -217,8 +222,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 }
 ```
 
-### 4. Pruebas y Validación
-
+##### 4. Pruebas y Validación
 Las pruebas de seguridad implican:
 
 - Verificar que los endpoints están protegidos según los roles.
@@ -240,7 +244,7 @@ public class SecurityTests {
 }
 ```
 
-Estos ejemplos proporcionan un punto de partida para la implementación de RBAC y la seguridad en general en una aplicación con Spring Boot. 
+Estos ejemplos proporcionan un punto de partida para la implementación de RBAC y la seguridad en general en una aplicación con Spring Boot, recuerda que la seguridad informática es un tema crítico en cualquier aplicación y debes de consultar con un experto si no tienes los conocimientos suficientes para hacerte cargo de este aspecto. 
 
 
 #### Sesión 2: Testing en Spring
@@ -273,7 +277,7 @@ public class UsuarioControllerTest {
 }
 ```
 
-#### Sesión 3: Integración y Pruebas de Fin a Fin
+##### Testing avanzado
 
 ##### Pruebas de Integración en Spring
 Las pruebas de integración validan que los distintos módulos de la aplicación funcionen correctamente en conjunto.
