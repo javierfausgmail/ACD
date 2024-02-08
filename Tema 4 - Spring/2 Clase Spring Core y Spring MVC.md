@@ -122,7 +122,7 @@ Este enfoque basado en anotaciones es más declarativo y reduce la necesidad de 
 ##### Arquitectura MVC y su Implementación en Spring
 Spring MVC implementa el patrón Modelo-Vista-Controlador, facilitando el desarrollo de aplicaciones web. El controlador maneja solicitudes, el modelo representa datos, y la vista genera la salida al usuario.
 
-![](Pasted%20image%2020240205110122.png)
+![](Diagrama%20MVC.png)
 
 ##### Creación de un Controlador Básico
 Un controlador en Spring MVC se define con la anotación `@Controller`. Puede manejar solicitudes HTTP mediante anotaciones como `@RequestMapping`.
