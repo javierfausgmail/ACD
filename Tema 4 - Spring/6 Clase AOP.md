@@ -31,7 +31,7 @@ Un consejo (advice) es una acción que hay que ejecutar en determinado/s punto/s
 
 En muchos frameworks de AOP (Spring incluido), el objeto que debe ejecutar esta acción se modela en la mayoría de casos como un **interceptor**: un objeto que recibe una llamada a un método propio antes de que se ejecute ese punto del código. Los interceptores se pueden encadenar, si deseamos realizar varias acciones en el mismo punto, como puede observarse en la siguiente figura.
 
-![](Pasted%20image%2020240108184938.png)
+![](Diagrama%20cadena%20de%20interceptores%20AOP.png)
 
 Cuando algún objeto llama a un método que forma parte del pointcut, el framework de AOP se las "arregla" para que en realidad se llame a un objeto proxy o intermediario, que tiene un método con el mismo nombre y signatura pero cuya ejecución lo que hace en realidad es redirigir la llamada por una cadena de interceptores hasta el método que se quería ejecutar.
 

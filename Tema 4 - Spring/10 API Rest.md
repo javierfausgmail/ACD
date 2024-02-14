@@ -1,7 +1,7 @@
 
 
 
-![[../ACD/2T/Proyecto Ejemplo/Diagrama API Rest y DTO.excalidraw]]
+![[Diagrama API Rest y DTO.excalidraw]]
 
 Ejemplo exponer una API: https://spring.io/guides/gs/accessing-data-rest
 

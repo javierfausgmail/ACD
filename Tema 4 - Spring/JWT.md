@@ -47,7 +47,7 @@ Explicación teórica en vídeo detallada: https://www.youtube.com/watch?v=Lm7WY
 
 1. Curso completo (sin código adjunto): https://www.youtube.com/watch?v=735a83FQR2I
 
-![](Pasted%20image%2020240124123104.png)
+![](Diagrama%20Spring%20Security%20JWT%20Flow.png)
 
 
 2. Curso (con código adjunto) y video tutorial avanzado: https://www.youtube.com/watch?v=Qu3soRF168I

@@ -90,7 +90,7 @@ Además de los roles, puedes gestionar permisos específicos para acciones más 
 
 Implementar RBAC y la gestión de permisos de manera efectiva en Spring Boot con Spring Security te permitirá tener un control detallado y seguro sobre quién puede acceder y realizar operaciones específicas en la aplicación.
 
-##### Vídeo tutorial completo (capítulos 1 y 2)
+##### Vídeo tutorial completo con JWT (capítulos 1 y 2)
 https://www.youtube.com/playlist?list=PLr23_YfwEbPRCK4IbemQGwYdgSwfd2aZu
 
 #### Ejemplos documentación oficial
