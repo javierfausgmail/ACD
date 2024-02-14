@@ -17,10 +17,9 @@ Prerequisitos:
 ### 2. Creación de la estructura completa del proyecto
 
 
-
 Ejemplo promt inicial:
 
-1. Por favor muestrame un diagrama con la **estructura de directorios del proyecto** que me sugieres para organizar todo el código. Ten en cuenta que quiero utilizar una arquitectura por capas siguiendo los principios de la Domain Driven Design. NO quiero una imagen creativa, quiero un diagrama sobre el cual pueda ver como organizar mi código en carpetas del proyecto en mi IDE. Puedes utilizar **ASCII Art** como texto para se presentación mucho mejor, quiero ver el árbol de directorios (paquetes) y archivos (clases) de mi proyecto bien organizado.
+1. Por favor muéstrame un diagrama con la **estructura de directorios del proyecto** que me sugieres para organizar todo el código. Ten en cuenta que quiero utilizar una arquitectura por capas siguiendo los principios de la Domain Driven Design. NO quiero una imagen creativa, quiero un diagrama sobre el cual pueda ver como organizar mi código en carpetas del proyecto en mi IDE. Puedes utilizar **ASCII Art** como texto para se presentación mucho mejor, quiero ver el árbol de directorios (paquetes) y archivos (clases) de mi proyecto bien organizado.
 
 Ejemplos promts iteración/mejora:
 
@@ -107,7 +106,7 @@ TaskMaster2
 - Dentro de **resources/templates**, se incluyen plantillas HTML para las operaciones CRUD de cada dominio, y un `layout.html` como plantilla base para garantizar una interfaz consistente.
 - En la sección de **tests**, se organizan las pruebas por dominio, reflejando la estructura del código principal.
 
-Esta estructura propuesta se alinea con su preferencia por un diseño centrado en el dominio, facilitando la modularidad, la escalabilidad y el mantenimiento del proyecto TaskMaster2.
+Esta estructura propuesta se alinea con nuestra preferencia por un diseño centrado en el dominio, facilitando la modularidad, la escalabilidad y el mantenimiento del proyecto TaskMaster2.
 
 ### 3. Implementación de las clases del modelo de dominio
 
@@ -118,10 +117,10 @@ A partir de una la estructura del proyecto que hemos conseguido en el paso anter
 
 
 Por ejemplo:
+Vamos a crear la entidad Usuario y Tarea utilizando JPA. Utiliza también Lombok para reducir la verbosidad del código.*Para automatizar la gestión de los campos `fechaCreacion`, `fechaModificacion`, y `fechaCompletada` en las entidades JPA, podemos utilizar las anotaciones `@PrePersist` y `@PreUpdate` de JPA. Estas anotaciones se utilizan para especificar los métodos de callback que JPA debe llamar antes de persistir o actualizar una entidad, respectivamente.*
 
-Para automatizar la gestión de los campos `fechaCreacion`, `fechaModificacion`, y `fechaCompletada` en las entidades JPA, podemos utilizar las anotaciones `@PrePersist` y `@PreUpdate` de JPA. Estas anotaciones se utilizan para especificar los métodos de callback que JPA debe llamar antes de persistir o actualizar una entidad, respectivamente.
+// Del anterior texto, *la parte en cursiva* es un ejemplo de como utilizar uno de los textos de una de las [Notas temporales](Notas%20temporales.md) tomadas durante la conversación
 
-A continuación, se muestra cómo implementar estos métodos de callback en las clases del modelo de dominio, utilizando también Lombok para reducir la verbosidad del código:
 
 ### Clase Usuario
 
@@ -243,3 +242,9 @@ public class Tarea {
 - Este enfoque asegura que los campos de auditoría se mantengan automáticamente sin necesidad de gestionarlos manualmente en el código de la lógica de negocio.
 
 Con estas modificaciones, las clases del modelo de dominio de TaskMaster2 manejarán automáticamente la auditoría de las fechas de creación, modificación y, en el caso de las tareas, la fecha de finalización.
+
+
+
+**.... y así seguimos hasta tener todo el código.** 
+
+Por favor, NUNCA toméis el código sin leerlo ni repasarlo entendiendo TODO lo que hace. Se puede/debe indicar al asisitente IA que genere comentarios y explique todo lo que se está haciendo, incluso abrir otra conversación en otra pestaña e indagar sobre el tema que genere dudas hasta que quede claro.

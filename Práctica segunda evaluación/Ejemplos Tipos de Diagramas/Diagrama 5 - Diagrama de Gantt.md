@@ -1,3 +1,5 @@
+Herramienta de planificación de proyectos que puede mostrar la programación de tareas a lo largo del tiempo.
+
 Diagrama de Gantt simplificado para el proyecto "TaskMaster". Este diagrama muestra las fases principales del proyecto y su duración estimada:
 
 - **Diseño**: Desde el 1 de febrero hasta el 28 de febrero de 2024.
@@ -6,6 +8,8 @@ Diagrama de Gantt simplificado para el proyecto "TaskMaster". Este diagrama mues
 - **Lanzamiento**: Del 20 al 30 de junio de 2024.
 
 Cada barra horizontal representa una fase del proyecto, mostrando visualmente cuándo comienza y termina cada fase. Este tipo de diagrama es muy útil para la planificación y seguimiento de proyectos, ya que proporciona una visión clara de la programación y la superposición de actividades.
+
+Este diagrama **MERMAID** (https://mermaid.live) lo muestra visualmente. Para copiar el código haz click en el botón "Edit this block" del siguiente dibujo/bloque:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4a90e2', 'secondaryColor': '#e2e2e2', 'tertiaryColor': '#f0f0f0'}}}%%

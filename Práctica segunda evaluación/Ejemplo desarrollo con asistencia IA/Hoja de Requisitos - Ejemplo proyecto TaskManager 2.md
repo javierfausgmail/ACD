@@ -21,10 +21,12 @@ Es una aplicación web para la gestión de tareas personales.
    - **Prioridad:** RF1 , RF2 y RF5 es esencial, RF3 y RF4 son importantes.
 
 **4. Requisitos No Funcionales**
-   - **Framework de desarrollo:** La aplicación debe de realizarse utilizando SpringBoot con Java en la versión 17 o superior de este lenguaje con Maven como gestor de dependencias. Se utilizará Spring MVC y Thymeleaf para la aplicación web. Utilizaremos la librería Lombok en el proyecto para generar nuestras clases de manera más rápida. Para la persistencia de datos utilizaremos Spring Data JPA y una base de datos MySQL.
+   - **Framework y librerias de desarrollo:** La aplicación debe de realizarse utilizando SpringBoot con un proyecto Maven. Se utilizará Spring MVC y Thymeleaf para la aplicación web. Utilizaremos la librería Lombok en el proyecto para generar nuestras clases de manera más rápida. Para la persistencia de datos utilizaremos Spring Data JPA con Hibernate. 
+   - **Lenguaje de programación**: Java en la versión 17 o superior.
+   - **Base de datos**: MySQL 8.1 o superior
    - **Arquitectura**: Aplicación monolítica implementada por capas siguiendo los principios del Domain Driven Design.
    - **Rendimiento:** La app debe responder en menos de 2 segundos.
-   - **Seguridad:** Cifrado de contraseñas almacenadas, la aplicación debe de gestionar tanto la autenticación como la autorización utilizando las mejores prácticas con Spring Security utilizando JWT para la autenticación. 
+   - **Seguridad:** Cifrado de contraseñas almacenadas, la aplicación debe de gestionar tanto la autenticación como la autorización utilizando las mejores prácticas con Spring Security utilizando JWT para la autenticación.
    - **Usabilidad:** Interfaz sencilla y amigable utilizando BootStrap para el CSS y HTMX para llamadas AJAX al servidor utilizando atributos HTML.
    - **Testing:** Implementar pruebas unitarias y de integración para asegurar la fiabilidad y el correcto funcionamiento de la aplicación en todos sus componentes.
 

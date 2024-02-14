@@ -1,3 +1,5 @@
+Muy útiles para modelar bases de datos, mostrando entidades, sus atributos y las relaciones entre ellas.
+
 Diagrama de Entidad-Relación (ER) para la aplicación "TaskMaster". Este diagrama muestra las entidades principales y sus relaciones:
 
 - **Entidad "USUARIO"**: Representa a los usuarios de la aplicación.    
@@ -17,6 +19,7 @@ Diagrama de Entidad-Relación (ER) para la aplicación "TaskMaster". Este diagra
 - **Relación "crea"**:
     - Un **USUARIO** puede crear varias **TAREAS** (relación uno a muchos).
 
+Este diagrama **MERMAID** (https://mermaid.live) lo muestra visualmente. Para copiar el código haz click en el botón "Edit this block" del siguiente dibujo/bloque:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcc00', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#f0f0f0'}}}%%

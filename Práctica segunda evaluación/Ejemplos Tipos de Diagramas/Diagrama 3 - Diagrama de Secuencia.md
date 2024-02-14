@@ -1,3 +1,5 @@
+Se enfocan en cómo los objetos interactúan en un determinado escenario de un caso de uso, mostrando la secuencia de mensajes entre los objetos.
+
 Diagrama de Secuencia para la acción de "Crear Tarea" en la aplicación "TaskMaster". Este diagrama ilustra la interacción entre el usuario, la interfaz de usuario y el sistema durante el proceso de creación de una tarea:
 
 1. **Usuario** selecciona la opción 'Crear Tarea' en la **Interfaz de Usuario (UI)**.
@@ -9,7 +11,7 @@ Diagrama de Secuencia para la acción de "Crear Tarea" en la aplicación "TaskMa
 7. El **Sistema** envía una confirmación de creación de la tarea a la **UI**.
 8. La **UI** muestra la confirmación al **Usuario**.
 
-Este diagrama muestra la secuencia de mensajes y acciones que ocurren desde que el usuario decide crear una tarea hasta que recibe una confirmación de que la tarea ha sido creada.
+Este diagrama **MERMAID** (https://mermaid.live) muestra la secuencia de mensajes y acciones que ocurren desde que el usuario decide crear una tarea hasta que recibe una confirmación de que la tarea ha sido creada.. Para copiar el código haz click en el botón "Edit this block" del siguiente dibujo/bloque:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4a90e2', 'secondaryColor': '#e2e2e2', 'tertiaryColor': '#f0f0f0'}}}%%

@@ -1,3 +1,5 @@
+Ideales para modelar la estructura de un sistema de software mostrando clases, atributos, operaciones y las relaciones entre las clases.
+
 Diagrama de Clases (UML) para la aplicación "TaskMaster". Este diagrama muestra las clases principales, sus atributos, métodos y relaciones:
 
 - **Clase "Usuario"**: Representa a los usuarios de la aplicación.
@@ -25,6 +27,7 @@ Diagrama de Clases (UML) para la aplicación "TaskMaster". Este diagrama muestra
         
 - **Relación**: Un **Usuario** puede crear varias **Tareas** (relación uno a muchos).
     
+Este diagrama **MERMAID** (https://mermaid.live) lo muestra visualmente. Para copiar el código haz click en el botón "Edit this block" del siguiente dibujo/bloque:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcc00', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#f0f0f0'}}}%%

@@ -1,3 +1,5 @@
+Útiles para representar procesos o flujos de trabajo. Muestran cómo se mueve la información o las tareas a través de varios pasos.
+
 Diagrama de Flujo para el proceso de creación de una tarea en la aplicación "TaskMaster". Este diagrama muestra los pasos secuenciales desde que el usuario decide crear una tarea hasta que la tarea se guarda:
 
 1. **Inicio**: El proceso comienza cuando el usuario ingresa a la aplicación.
@@ -11,7 +13,7 @@ Diagrama de Flujo para el proceso de creación de una tarea en la aplicación "T
 7. **Guardar tarea**: El usuario guarda la tarea.
 8. **Fin**: El proceso de creación de la tarea concluye.
 
-Este diagrama simplifica visualmente el proceso de creación de una tarea en la aplicación, mostrando las decisiones y acciones clave.
+Este diagrama **MERMAID** (https://mermaid.live) lo muestra visualmente. Para copiar el código haz click en el botón "Edit this block" del siguiente dibujo/bloque:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4a90e2', 'secondaryColor': '#e2e2e2', 'tertiaryColor': '#f0f0f0'}}}%%

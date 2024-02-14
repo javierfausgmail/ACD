@@ -1,0 +1,19 @@
+1. Genera una hoja de requisitos mínima como la aportada [Hoja de Requisitos - Ejemplo proyecto TaskManager 2](Hoja%20de%20Requisitos%20-%20Ejemplo%20proyecto%20TaskManager%202.md) (Esta hoja NO tiene porque estar completa y perfecta al 100% desde el minuto cero PERO en muy importante hacer el mejor de nuestros esfuerzos en que así sea. De todas maneras, lo habitual es que con el tiempo sufra modificaciones y debemos SIEMPRE actualizar dicho documento, incluso deberíamos someterlo a un proceso de control de versiones con GIT para rastrear los cambios y quien los ha realizado).
+
+2. Introduce al sistema en la tarea a realizar con una entrada tipo *"Vamos a empezar una aplicación completa en Spring Boot utilizando Java. El proyecto es muy grande así que tendremos que ir paso a paso para abordarlo correctamente. La aplicación debe de abordar todos estos requisitos, te los presento ahora para que vayamos haciendo la especificación detallada conjuntamente y tengas claro desde el principio lo que quiero hacer."* Entonces le copias el contenido de tu hoja de requisitos (así de importante es tener una buena hoja inicial, sino el proyecto empezará mal enfocado y todo será continuamente ir virando objetivos).
+
+3. Una vez el asistente ha entendido bien el proyecto, pasar a generar el archivo pom.xml para el proyecto Maven que incluya todas las dependencias. Genera el proyecto Maven en tu IDE y comprueba que las dependencias están funcionando correctamente, ajusta lo que sea necesario ().
+
+4. Una vez resultas las dependencias, pasar a generar la estructura de directorios y archivos del proyecto. La estructura del proyecto dependerá directamente de la arquitectura y otros detalles del propio proyecto así que antes debes de decidir esto. Deberías de tener un punto de partida muy sólido en este aspecto, esto incluye tanto paquetes, clases, como los archivos de configuración, archivos estáticos tipo iconos, tempaltes HTML, etc. 
+
+5. Una vez estés seguro de tener la estructura del proyecto tal cual te interesa, empieza a generar paso a paso las diferentes clases de tu proyecto y ves integrándolas y probándolas en el proyecto dentro de tu IDE. **No aceptes la primera versión, cada vez que el sistema te ofrezca código léelo al detalle** y reflexiona sobre posibles cambios o mejoras a tener en cuenta, *si las encuentras sugiere a la IA que te explique las mejores alternativas* sobre como implementar tus cambios y elige el que mejor se adapte a tus necesidades.
+
+
+**Consejos complementarios:** 
+
+- Utilizar durante el desarrollo un documento de texto que os ayude a ir apuntando los temas que van surgiendo durante la conversación que tenéis que ir investigando de manera lateral o que se deberán de atender/aplicar posteriormente en el desarrollo de otras partes de código del proyecto. Para llevar un seguimiento sencillo podéis formatear este documento como una lista de tareas a realizar de manera que tengáis un log del trabajo realizado y del que falta por atender (ojo este documento en si mismo únicamente dedicado a la tarea de atender a la conversación con el asistente de IA, no lo confundáis con otras listas de tareas que podéis llevar también en paralelo). Ejemplo: [Notas temporales](Notas%20temporales.md)
+- Crear un documento tipo tutorial con el paso a paso con capturas de pantalla, promts utilizados, etc de como has ido generando el proyecto. Ejemplo: [Tutorial 1](Tutorial%201.md)
+- Aplicar diversas técnicas de prompts que os ayuden a mejorar los resultados obtenidos por el asistente IA: [Técnicas de promting](Técnicas%20de%20promting.md)
+- Por favor, **NUNCA** toméis el código sin leerlo ni repasarlo entendiendo **TODO** lo que hace. Se puede/debe indicar al asistente IA que genere comentarios y explique todo lo que se está haciendo, incluso **abrir otra conversación** en otra pestaña e indagar sobre el tema que genere dudas hasta que quede claro
+
+

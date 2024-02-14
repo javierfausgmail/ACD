@@ -1,3 +1,5 @@
+Para ilustrar la estructura general del software, incluyendo las interacciones y conexiones entre diferentes componentes del sistema.
+
 Diagrama de arquitectura de software para la aplicación "TaskMaster". Este diagrama muestra la estructura general del software, incluyendo las interacciones y conexiones entre diferentes componentes del sistema. 
 
 - **Frontend - Aplicación Móvil:**
@@ -16,7 +18,7 @@ Las flechas indican la dirección de la comunicación entre los componentes:
 - La **Interfaz de Usuario** envía solicitudes de datos al **Servidor**, maneja la autenticación a través de la **API de Autenticación**, y recibe notificaciones de la **API de Notificaciones**.
 - El **Servidor** interactúa con la **Base de Datos** para almacenar y gestionar los datos.
 
-Para visualizar este diagrama puedes usar un editor de Mermaid:
+Este diagrama **MERMAID** (https://mermaid.live) lo muestra visualmente. Para copiar el código haz click en el botón "Edit this block" del siguiente dibujo/bloque:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcc00', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#f0f0f0'}}}%%

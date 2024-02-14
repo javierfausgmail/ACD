@@ -1,4 +1,6 @@
-Este mapa mental se centra en distintas áreas clave del proyecto:
+Excelentes para la lluvia de ideas o para organizar y presentar visualmente ideas y conceptos.
+
+Este mapa mental se centra en distintas áreas clave del proyecto TaskMaster.
 
 - **Núcleo: "TaskMaster"**
     
@@ -21,7 +23,7 @@ Este mapa mental se centra en distintas áreas clave del proyecto:
 
 Este mapa mental es una representación visual y simplificada de los aspectos principales del proyecto.
 
-Para visualizar este diagrama puedes usar un editor de Mermaid:
+Este diagrama **MERMAID** (https://mermaid.live) lo muestra visualmente. Para copiar el código haz click en el botón "Edit this block" del siguiente dibujo/bloque:
 
 
 ```mermaid
