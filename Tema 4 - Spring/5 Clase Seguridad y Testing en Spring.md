@@ -90,15 +90,25 @@ Además de los roles, puedes gestionar permisos específicos para acciones más 
 
 Implementar RBAC y la gestión de permisos de manera efectiva en Spring Boot con Spring Security te permitirá tener un control detallado y seguro sobre quién puede acceder y realizar operaciones específicas en la aplicación.
 
-##### Vídeo tutorial completo con JWT (capítulos 1 y 2)
-https://www.youtube.com/playlist?list=PLr23_YfwEbPRCK4IbemQGwYdgSwfd2aZu
+##### Vídeo tutoriales completos con JWT
 
-#### Ejemplos documentación oficial
-https://docs.spring.io/spring-security/reference/samples.html
+- https://www.youtube.com/watch?v=KBvBY5qyfEM (con código fuente: https://github.com/ali-bouali/spring-boot-3-jwt-security)
+
+- https://www.youtube.com/playlist?list=PLr23_YfwEbPRCK4IbemQGwYdgSwfd2aZu (sin código fuente, capítulos 1 y 2).
+
+##### Ejemplos de la documentación oficial
+* https://docs.spring.io/spring-security/reference/samples.html
 
 
-##### Ejemplo aplicado Reserva Hotel
+##### Ejemplo básico aplicado Reserva Hotel
 Vamos a detallar cada uno de los puntos mencionados con ejemplos concretos, aplicados al contexto del sistema de reservas de un hotel en Spring Boot:
+
+```
+**AVISO:** Con los cambios a partir de Spring 5.7.0-M2 WebSecurityConfigurerAdapter está *deprecated* así que podemos cambiar la configuración siguiendo estos pasos https://www.baeldung.com/spring-deprecated-websecurityconfigureradapter
+```
+
+
+
 
 ##### 1. Definición y Asignación de Roles
 

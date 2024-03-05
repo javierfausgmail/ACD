@@ -1,6 +1,6 @@
-#### Programación Orientada a Aspectos (AOP) en Spring
+# Programación Orientada a Aspectos (AOP). Intro teórica.
 
-- **Propósito:** AOP en Spring se utiliza para encapsular aspectos transversales (como seguridad, transacciones, registro) de manera que estos aspectos se puedan aplicar de manera declarativa a múltiples componentes sin modificar su código fuente.
+- **Propósito:** AOP se utiliza para encapsular aspectos transversales (como seguridad, transacciones, registro) de manera que estos aspectos se puedan aplicar de manera declarativa a múltiples componentes sin modificar su código fuente.
 - **Funcionamiento:** AOP trabaja interceptando llamadas a métodos y aplicando "consejos" (advice) en ciertos puntos de ejecución (join points) especificados a través de "puntos de corte" (pointcuts).
 
 
@@ -66,49 +66,123 @@ Ejemplos comunes son la **seguridad y el registro (logging)**.
 
 AOP no es un subconjunto de POO, sino una técnica complementaria. Mientras que POO encapsula el comportamiento en objetos, AOP encapsula comportamientos comunes en aspectos y permite aplicarlos declarativamente a diferentes partes del código. 
 
-### AOP en Spring Framework
+# AOP en Spring Framework
 
-La anotación `@Aspect` en Spring se utiliza para definir una clase como un aspecto que puede contener **advice** (acciones tomadas por un aspecto en un punto particular del programa), **pointcuts** (puntos en la ejecución del programa donde un aspecto puede intervenir) e **introductions** (añadiendo métodos o campos a clases existentes).
+Antes de profundizar, aproximemos como se utilizan los conceptos básicos de AOP a un nivel muy alto en Spring.
 
-Un ejemplo de cómo se podría implementar AOP en Spring para añadir transversalmente funcionalidad de registro (logging) a un método:
+- **Aspecto** (@Aspect): La preocupación transversal o la **funcionalidad** que nos gustaría aplicar a lo largo de la aplicación. En el ejemplo la clase LoggingAspect.
+- **Punto de unión** (Join Points): El punto del flujo de la aplicación donde queremos aplicar un **consejo** (los métodos que toque según la expresión "execution(* mi.paquete.*.*(..))").
+- **Consejo** (Advice): La **acción** que se debe ejecutar en un *punto de unión* específico. (es el **cuerpo del método** que programamos, por ejemplo logBefore() y logAfter()).
+- **Pointcut** : **Colección** de *puntos de unión* donde se debe **aplicar** un *consejo* y si hacerlo antes, despues, alrededor, etc.
+
+En Spring AOP, los **Join Points** son primordialmente representados por la ejecución de métodos. Sin embargo, a nivel de código, no se "ve" un Join Point de manera explícita como una anotación o una línea de código específica. En su lugar, los Join Points se identifican implícitamente por los puntos de ejecución que coinciden con los criterios definidos en los **@Pointcuts**.
+
+Un Pointcut define un conjunto de uno o más Join Points, utilizando expresiones específicas de AOP. Por ejemplo, un Pointcut puede definir que un aspecto se aplique a todos los métodos de un paquete particular o a métodos con ciertas anotaciones.
+
+Aquí un **primer ejemplo** ilustrativo de cómo se puede configurar un Advice (acción a ejecutar en el Join Point) y cómo se relaciona con un Pointcut (que define el conjunto de Join Points):
+
 
 ```java
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.JoinPoint;
+
 @Aspect
-@Component
-public class LoggingAspect {
+public class MiAspecto {
+    // Definición de un Pointcut que identifica los Join Points:
+    // En este caso, todos los métodos del paquete 'mi.paquete' se consideran Join Points.
+    @Pointcut("execution(* mi.paquete.*.*(..))")
+    public void todosLosMetodosDelPaquete() {}
 
-    @Before("execution(* com.example.service.*.*(..))") // este es el pointcut
-    public void logBefore(JoinPoint joinPoint) { // este es el advice
-        System.out.println("Voy a ejecutar: " + joinPoint.getSignature().getName());
-    }
-
-    @After("execution(* com.example.service.*.*(..))") // este es el pointcut
-    public void logAfter(JoinPoint joinPoint) {// este es el advice
-        System.out.println("He ejecutado: " + joinPoint.getSignature().getName());
+    // Advice que se ejecutará antes de los Join Points definidos por el Pointcut anterior.
+    @Before("todosLosMetodosDelPaquete()")
+    public void antesDelMetodo(JoinPoint joinPoint) {
+        // Lógica a ejecutar en el Join Point, por ejemplo, un log antes de la ejecución de cada método.
+        System.out.println("Antes de ejecutar el método: " + joinPoint.getSignature().getName());
     }
 }
+
 ```
+
+
+En este ejemplo, aunque el Join Point como tal no se marca directamente en el código, se define a través de la expresión `execution(* mi.paquete.*.*(..))` en el Pointcut. Esto indica que el advice `antesDelMetodo` se aplicará antes de la ejecución de cualquier método dentro del paquete `mi.paquete`, identificando así implícitamente los Join Points.
 
 En este código:
 
 - La anotación `@Aspect` indica que `LoggingAspect` es un aspecto.
-- La anotación `@Before` indica que el método `logBefore` debe ejecutarse antes de cualquier método en cualquier clase en el paquete `com.example.service`.
-- La anotación `@After` indica que el método `logAfter` debe ejecutarse después de cualquier método en cualquier clase en el paquete `com.example.service`.
-- `JoinPoint` proporciona información sobre el método que está siendo aconsejado por el aspecto.
+- La anotación `@Before` indica que el método `logBefore` debe ejecutarse antes de cualquier método en cualquier clase en el paquete `mi.paquete.*`.
+- La anotación `@After` indica que el método `logAfter` debe ejecutarse después de cualquier método en cualquier clase en el paquete `mi.paquete.*`.
 
 
-En el ejemplo mostrado, los pointcuts son expresados a través de las expresiones dentro de las anotaciones `@Before` y `@After`:
+**Segundo ejemplo** completo y su [código en GitHub](https://github.com/eugenp/tutorials/tree/master/spring-aop-2/src/main/java/com/baeldung/logging).
 
-1. `execution(* com.example.service.*.*(..))` para `@Before`: Este pointcut selecciona todos los métodos de cualquier clase dentro del paquete `com.example.service` para ser *aconsejados* antes de su ejecución.
-2. `execution(* com.example.service.*.*(..))` para `@After`: Este pointcut selecciona todos los métodos de cualquier clase dentro del paquete `com.example.service` para ser *aconsejados* después de su ejecución.
+El objeto `JoinPoint` utilizado en el código proporciona información sobre el método que está siendo aconsejado, permitiendo acceder a su nombre, sus argumentos, y el objeto objetivo sobre el que se está ejecutando el método, entre otras cosas. En el ejemplo proporcionado, el `JoinPoint` se pasa como argumento a los métodos `logBefore` y `logAfter` para permitir el acceso a la información del método que está siendo aconsejado.
 
-Ambos pointcuts son idénticos en este caso, pero podrían diferir para seleccionar diferentes métodos o momentos para aplicar el advice.
+```java
+package com.baeldung.logging;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+
+@Aspect
+@Component
+public class LoggingAspect {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
+
+    @Pointcut("execution(public * com.baeldung.logging.*.*(..))")
+    private void publicMethodsFromLoggingPackage() {
+    }
+
+    @Before(value = "publicMethodsFromLoggingPackage()")
+    public void logBefore(JoinPoint joinPoint) {
+        Object[] args = joinPoint.getArgs();
+        String methodName = joinPoint.getSignature().getName();
+        logger.debug(">> {}() - {}", methodName, Arrays.toString(args));
+    }
+
+    @AfterReturning(value = "publicMethodsFromLoggingPackage()", returning = "result")
+    public void logAfter(JoinPoint joinPoint, Object result) {
+        String methodName = joinPoint.getSignature().getName();
+        logger.debug("<< {}() - {}", methodName, result);
+    }
+
+    @AfterThrowing(pointcut = "publicMethodsFromLoggingPackage()", throwing = "exception")
+    public void logException(JoinPoint joinPoint, Throwable exception) {
+        String methodName = joinPoint.getSignature().getName();
+        logger.error("<< {}() - {}", methodName, exception.getMessage());
+    }
+
+    @Around(value = "publicMethodsFromLoggingPackage()")
+    public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object[] args = joinPoint.getArgs();
+        String methodName = joinPoint.getSignature().getName();
+        logger.debug(">> {}() - {}", methodName, Arrays.toString(args));
+        Object result = joinPoint.proceed();
+        logger.debug("<< {}() - {}", methodName, result);
+        return result;
+    }
+}
+
+```
 
 
-`JoinPoint` es una interfaz proporcionada por Spring AOP que representa un punto específico en la ejecución del programa, como la ejecución de un método. Un objeto `JoinPoint` proporciona información sobre el método que está siendo aconsejado, permitiendo acceder a su nombre, sus argumentos, y el objeto objetivo sobre el que se está ejecutando el método, entre otras cosas. En el ejemplo proporcionado, el `JoinPoint` se pasa como argumento a los métodos `logBefore` y `logAfter` para permitir el acceso a la información del método que está siendo aconsejado.
+Además, **vale la pena señalar que Spring AOP solo admite puntos de unión para la ejecución de métodos** . Deberíamos considerar el uso de bibliotecas en tiempo de compilación como [AspectJ](https://www.baeldung.com/aspectj) para crear aspectos para campos, constructores, inicializadores estáticos, etc.
 
 
-##### Spring añade el concepto de Introductions a AOP
+### Introductions en Spring AOP
 
 Las Introductions (o inter-type declarations) permiten añadir nuevos métodos o campos a clases existentes. Spring AOP soporta introductions en una manera limitada a través de una interfaz y una clase que implementa esa interfaz. Aquí hay un ejemplo simple:
 
@@ -366,13 +440,7 @@ public class MiControlador {
 Este ejemplo demuestra cómo los eventos personalizados pueden ser utilizados en Spring para comunicar información entre diferentes componentes de una manera desacoplada.
 
 
-#### 3: Proyecto Final
 
-##### Planificación y Esquema del Proyecto Final
-Los estudiantes deben planificar y diseñar una aplicación utilizando las habilidades y conocimientos adquiridos durante el curso. Se entrega documentación con los requisitos a implementar.
+# Referencias
 
-##### Trabajo en Clase y Consultas
-Se dedica tiempo en clase para trabajar en el proyecto, con la oportunidad de realizar consultas y obtener retroalimentación.
-
-##### Presentación de Proyectos y Retroalimentación
-Los proyectos finales se presentan al grupo, permitiendo compartir aprendizajes y recibir retroalimentación de compañeros y profesor/es.
+https://www.baeldung.com/spring-aspect-oriented-programming-logging
