@@ -43,6 +43,8 @@
 9. [**9. Anexos**](#**9.%20Anexos**)
    - 9.1 Monitorización Automática de Logs
 
+10. [**10. Preguntas tipo test**](#**10.%20Preguntas%20tipo%20test**)
+   - 9.1 Monitorización Automática de Logs
 ### 1. **Introducción al Logging en Java**
 
 El logging es una herramienta fundamental en el desarrollo de software, permitiendo a los desarrolladores generar mensajes en tiempo de ejecución que documentan el comportamiento del programa. Estos mensajes, conocidos como *logs*, son esenciales para monitorear, depurar y optimizar el software, así como para detectar y corregir errores en entornos de desarrollo y producción.
@@ -732,7 +734,7 @@ En aplicaciones modernas, es común que los servicios estén desplegados en la n
 
 La monitorización automática de logs es un complemento esencial para un sistema de logging bien diseñado. Permite detectar problemas a tiempo, gestionar grandes volúmenes de datos de log de manera eficiente, y actuar sobre ellos antes de que impacten de manera significativa a los usuarios o el rendimiento del sistema. Herramientas como ELK Stack, Graylog, Splunk y soluciones en la nube ofrecen una gran variedad de opciones para implementar un sistema de monitorización efectivo, asegurando que los logs no solo se generen, sino que también se utilicen de manera proactiva.
 
-### Preguntas tipo test
+### **10. Preguntas tipo test**
 
 
 1. **¿Cuál es la función principal del logging en una aplicación?**
