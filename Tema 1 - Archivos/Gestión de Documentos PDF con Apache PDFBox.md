@@ -131,7 +131,7 @@ Apache PDFBox es una biblioteca de código abierto mantenida por Apache Software
 <dependency>
     <groupId>org.apache.pdfbox</groupId>
     <artifactId>pdfbox</artifactId>
-    <version>2.0.29</version>
+    <version>3.0.1</version>
 </dependency>
 ```
 
@@ -940,150 +940,152 @@ En este caso, vamos a construir un documento PDF llamado `InformeCompleto.pdf` q
 Para comenzar, importamos las clases de PDFBox y creamos un documento con múltiples páginas.
 
 ```java
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.apache.pdfbox.pdmodel.PDRectangle;
-import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
-import java.io.File;
-import java.io.FileInputStream;
-
-public class PDFCompleteDocument {
-    public static void main(String[] args) {
-        try (PDDocument document = new PDDocument()) {
-            // Crear la portada
-            PDPage portada = new PDPage();
-            document.addPage(portada);
-            agregarPortada(document, portada, "Informe Anual 2024", "portada.jpg");
-
-            // Crear página de introducción
-            PDPage paginaIntroduccion = new PDPage();
-            document.addPage(paginaIntroduccion);
-            agregarParrafo(document, paginaIntroduccion, "Introducción",
-                "Este documento presenta un análisis exhaustivo del rendimiento anual...");
-            
-            // Crear página con una tabla de datos
-            PDPage paginaTabla = new PDPage();
-            document.addPage(paginaTabla);
-            agregarTabla(document, paginaTabla);
-            
-            // Crear página con párrafo y segunda imagen
-            PDPage paginaConclusiones = new PDPage();
-            document.addPage(paginaConclusiones);
-            agregarParrafo(document, paginaConclusiones, "Conclusión",
-                "A lo largo del año se observaron importantes avances en todas las áreas...");
-            agregarImagen(document, paginaConclusiones, "conclusion.jpg", 100, 350, 300, 200);
-
-            // Guardar el documento
-            document.save("InformeCompleto.pdf");
-            System.out.println("Documento PDF creado con éxito.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Método para añadir la portada con título e imagen
-    private static void agregarPortada(PDDocument document, PDPage page, String titulo, String imagePath) throws Exception {
-        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 24);
-            contentStream.newLineAtOffset(220, 700);
-            contentStream.showText(titulo);
-            contentStream.endText();
-
-            PDImageXObject image = PDImageXObject.createFromFile(imagePath, document);
-            contentStream.drawImage(image, 150, 400, 300, 250); // Tamaño y posición de la imagen
-        }
-    }
-
-    // Método para añadir un párrafo en una página
-    private static void agregarParrafo(PDDocument document, PDPage page, String titulo, String texto) throws Exception {
-        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
-            contentStream.newLineAtOffset(100, 700);
-            contentStream.showText(titulo);
-            contentStream.endText();
-
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
-            contentStream.setLeading(14.5f);
-            contentStream.newLineAtOffset(100, 660);
-
-            String[] palabras = texto.split(" ");
-            StringBuilder linea = new StringBuilder();
-            for (String palabra : palabras) {
-                if ((linea.length() + palabra.length()) < 60) {
-                    linea.append(palabra).append(" ");
-                } else {
-                    contentStream.showText(linea.toString().trim());
-                    contentStream.newLine();
-                    linea = new StringBuilder(palabra).append(" ");
-                }
-            }
-            contentStream.showText(linea.toString().trim());
-            contentStream.endText();
-        }
-    }
-
-    // Método para añadir una tabla en una página
-    private static void agregarTabla(PDDocument document, PDPage page) throws Exception {
-        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
-            contentStream.beginText();
-            contentStream.newLineAtOffset(100, 700);
-            contentStream.showText("Tabla de Datos Anuales");
-            contentStream.endText();
-
-            contentStream.setFont(PDType1Font.HELVETICA, 10);
-            String[] headers = {"Mes", "Ventas", "Ingresos", "Gastos"};
-            String[][] data = {
-                {"Enero", "2000", "15000", "5000"},
-                {"Febrero", "2100", "15500", "5200"},
-                {"Marzo", "2200", "16000", "5300"}
-            };
-
-            float margin = 100;
-            float yStart = 650;
-            float tableWidth = 400;
-            float rowHeight = 20f;
-            float yPosition = yStart;
-
-            // Dibuja las cabeceras
-            for (String header : headers) {
-                contentStream.beginText();
-                contentStream.newLineAtOffset(margin, yPosition);
-                contentStream.showText(header);
-                contentStream.endText();
-                margin += tableWidth / headers.length;
-            }
-            yPosition -= rowHeight;
-
-            // Dibuja las filas de la tabla
-            margin = 100;
-            for (String[] row : data) {
-                for (String cell : row) {
-                    contentStream.beginText();
-                    contentStream.newLineAtOffset(margin, yPosition);
-                    contentStream.showText(cell);
-                    contentStream.endText();
-                    margin += tableWidth / headers.length;
-                }
-                yPosition -= rowHeight;
-                margin = 100;
-            }
-        }
-    }
-
-    // Método para añadir una imagen en una página
-    private static void agregarImagen(PDDocument document, PDPage page, String imagePath, int x, int y, int width, int height) throws Exception {
-        PDImageXObject image = PDImageXObject.createFromFile(imagePath, document);
-        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-            contentStream.drawImage(image, x, y, width, height);
-        }
-    }
+package ejemplos;  
+  
+import org.apache.pdfbox.pdmodel.PDDocument;  
+import org.apache.pdfbox.pdmodel.PDPage;  
+import org.apache.pdfbox.pdmodel.PDPageContentStream;  
+import org.apache.pdfbox.pdmodel.font.PDType1Font;  
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;  
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;  
+import org.apache.pdfbox.pdmodel.common.PDRectangle;  
+  
+import java.io.File;  
+  
+public class PDFCompleteDocument {  
+    public static void main(String[] args) {  
+        try (PDDocument document = new PDDocument()) {  
+            // Crear la portada  
+            PDPage portada = new PDPage();  
+            document.addPage(portada);  
+            agregarPortada(document, portada, "Informe Anual 2024", "portada.jpg");  
+  
+            // Crear página de introducción  
+            PDPage paginaIntroduccion = new PDPage();  
+            document.addPage(paginaIntroduccion);  
+            agregarParrafo(document, paginaIntroduccion, "Introducción",  
+                    "Este documento presenta un análisis exhaustivo del rendimiento anual...");  
+  
+            // Crear página con una tabla de datos  
+            PDPage paginaTabla = new PDPage();  
+            document.addPage(paginaTabla);  
+            agregarTabla(document, paginaTabla);  
+  
+            // Crear página con párrafo y segunda imagen  
+            PDPage paginaConclusiones = new PDPage();  
+            document.addPage(paginaConclusiones);  
+            agregarParrafo(document, paginaConclusiones, "Conclusión",  
+                    "A lo largo del año se observaron importantes avances en todas las áreas...");  
+            agregarImagen(document, paginaConclusiones, "conclusion.jpg", 100, 350, 300, 200);  
+  
+            // Guardar el documento  
+            document.save("InformeCompleto.pdf");  
+            System.out.println("Documento PDF creado con éxito.");  
+        } catch (Exception e) {  
+            e.printStackTrace();  
+        }  
+    }  
+  
+    // Método para añadir la portada con título e imagen  
+    private static void agregarPortada(PDDocument document, PDPage page, String titulo, String imagePath) throws Exception {  
+        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {  
+            contentStream.beginText();  
+            contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 24);  
+            contentStream.newLineAtOffset(220, 700);  
+            contentStream.showText(titulo);  
+            contentStream.endText();  
+  
+            PDImageXObject image = PDImageXObject.createFromFile(imagePath, document);  
+            contentStream.drawImage(image, 150, 400, 300, 250); // Tamaño y posición de la imagen  
+        }  
+    }  
+  
+    // Método para añadir un párrafo en una página  
+    private static void agregarParrafo(PDDocument document, PDPage page, String titulo, String texto) throws Exception {  
+        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {  
+            contentStream.beginText();  
+            contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 18);  
+            contentStream.newLineAtOffset(100, 700);  
+            contentStream.showText(titulo);  
+            contentStream.endText();  
+  
+            contentStream.beginText();  
+            contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);  
+            contentStream.setLeading(14.5f);  
+            contentStream.newLineAtOffset(100, 660);  
+  
+            String[] palabras = texto.split(" ");  
+            StringBuilder linea = new StringBuilder();  
+            for (String palabra : palabras) {  
+                if ((linea.length() + palabra.length()) < 60) {  
+                    linea.append(palabra).append(" ");  
+                } else {  
+                    contentStream.showText(linea.toString().trim());  
+                    contentStream.newLine();  
+                    linea = new StringBuilder(palabra).append(" ");  
+                }  
+            }  
+            contentStream.showText(linea.toString().trim());  
+            contentStream.endText();  
+        }  
+    }  
+  
+    // Método para añadir una tabla en una página  
+    private static void agregarTabla(PDDocument document, PDPage page) throws Exception {  
+        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {  
+            contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 14);  
+            contentStream.beginText();  
+            contentStream.newLineAtOffset(100, 700);  
+            contentStream.showText("Tabla de Datos Anuales");  
+            contentStream.endText();  
+  
+            contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 10);  
+            String[] headers = {"Mes", "Ventas", "Ingresos", "Gastos"};  
+            String[][] data = {  
+                    {"Enero", "2000", "15000", "5000"},  
+                    {"Febrero", "2100", "15500", "5200"},  
+                    {"Marzo", "2200", "16000", "5300"}  
+            };  
+  
+            float margin = 100;  
+            float yStart = 650;  
+            float tableWidth = 400;  
+            float rowHeight = 20f;  
+            float yPosition = yStart;  
+  
+            // Dibuja las cabeceras  
+            for (String header : headers) {  
+                contentStream.beginText();  
+                contentStream.newLineAtOffset(margin, yPosition);  
+                contentStream.showText(header);  
+                contentStream.endText();  
+                margin += tableWidth / headers.length;  
+            }  
+            yPosition -= rowHeight;  
+  
+            // Dibuja las filas de la tabla  
+            margin = 100;  
+            for (String[] row : data) {  
+                for (String cell : row) {  
+                    contentStream.beginText();  
+                    contentStream.newLineAtOffset(margin, yPosition);  
+                    contentStream.showText(cell);  
+                    contentStream.endText();  
+                    margin += tableWidth / headers.length;  
+                }  
+                yPosition -= rowHeight;  
+                margin = 100;  
+            }  
+        }  
+    }  
+  
+    // Método para añadir una imagen en una página  
+    private static void agregarImagen(PDDocument document, PDPage page, String imagePath, int x, int y, int width, int height) throws Exception {  
+        PDImageXObject image = PDImageXObject.createFromFile(imagePath, document);  
+        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {  
+            contentStream.drawImage(image, x, y, width, height);  
+        }  
+    }  
 }
 ```
 
@@ -1309,9 +1311,6 @@ public class ExtraerTextoPDF {
 
 Para analizar los datos, el texto extraído se puede procesar adicionalmente. Por ejemplo, si contiene datos tabulares, se puede dividir en líneas y columnas, y almacenar en una estructura de datos como un array o una tabla para su posterior análisis.
 
----
-
-A continuación se desarrolla el punto 13 del tutorial, que cubre temas avanzados de seguridad y protección de documentos PDF, como la **encriptación**, el **establecimiento de permisos** y la **firma digital** utilizando **Apache PDFBox**.
 
 ---
 
