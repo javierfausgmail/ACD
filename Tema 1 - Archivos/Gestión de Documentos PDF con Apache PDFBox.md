@@ -447,9 +447,6 @@ annotations.clear(); // Elimina todas las anotaciones de la página
 
 ---
 
-A continuación se desarrollan los puntos 5, 6, 7 y 8 del tutorial.
-
----
 
 ### 5. **Manejo de Fuentes y Estilos de Texto**
 
