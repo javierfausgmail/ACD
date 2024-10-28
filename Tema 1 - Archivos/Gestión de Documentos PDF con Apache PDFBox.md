@@ -238,7 +238,6 @@ acroForm.getFields().add(textField);
 page.getAnnotations().add(textField.getWidget());
 ```
 
-Aquí se desarrolla el punto 4 del tutorial, que aborda las operaciones CRUD (Crear, Leer, Actualizar y Eliminar) en un documento PDF usando **Apache PDFBox**.
 
 ---
 
@@ -650,9 +649,6 @@ Los marcadores se pueden organizar en jerarquías, lo cual es útil para estruct
 
 ---
 
-A continuación se desarrolla la sección 9 del tutorial, que aborda la creación y gestión de formularios interactivos en documentos PDF utilizando **Apache PDFBox**.
-
----
 
 ### 9. **Creación y Gestión de Formularios en PDF**
 
@@ -784,10 +780,6 @@ if (!aceptarCheckBox.isChecked()) {
 ```
 
 Además, al procesar formularios, es posible exportar los valores de los campos o generar un nuevo PDF basado en los datos proporcionados por el usuario.
-
----
-
-A continuación se desarrollan los puntos 10 y 11 del tutorial, abordando los metadatos y la optimización de documentos PDF en Apache PDFBox.
 
 ---
 
