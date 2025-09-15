@@ -129,7 +129,7 @@ El archivo `pom.xml` es el descriptor de Maven que gestionará las dependencias 
 </project>
 ```
 
-#### Explicación de las dependencias:
+Explicación de las dependencias:
 - **commons-csv**: Para leer y escribir archivos CSV.
 - **Apache POI**: Para leer y escribir archivos Excel (formato `.xls` y `.xlsx`).
 - **JDOM**: Para trabajar con archivos XML.
@@ -141,14 +141,92 @@ Este archivo `pom.xml` establece Java 17 como versión de compilación y agrega 
 
 Podemos crear un archivo de configuración en `src/main/resources` para almacenar la ruta predeterminada donde se encontrarán los archivos que vamos a procesar. Este archivo será opcional pero útil si queremos que el directorio de archivos sea configurable sin modificar el código.
 
-Creamos un archivo llamado `application.properties` en la carpeta `resources`:
+Para utilizar un archivo de configuración (`application.properties`) en tu proyecto Maven y definir las rutas de los archivos de entrada de datos, debes seguir estos pasos:
 
-```properties
-# Ruta del directorio donde se encuentran los archivos a procesar
-app.filepath=/ruta/al/directorio/de/archivos
+1. **Alojar el archivo `application.properties` en la carpeta adecuada del proyecto**.
+2. **Leer el archivo `application.properties` desde el código Java utilizando la clase `Properties`**.
+3. **Utilizar los valores del archivo `properties` para configurar las rutas de los archivos de entrada de datos en tu aplicación**.
+
+##### 1.3.1: Alojar `application.properties` en tu proyecto Maven
+
+En un proyecto Maven típico, los archivos de recursos como `application.properties` deben alojarse en la carpeta `src/main/resources`. Esta carpeta se considera el lugar adecuado para todos los archivos de configuración que se van a empaquetar con el proyecto.
+
+La estructura de tu proyecto se verá así:
+
+```
+my-employee-app
+│
+├── src
+│   ├── main
+│   │   ├── java
+│   │   ├── resources
+│   │   │   └── application.properties
+│   └── test
+│       └── java
+└── pom.xml
 ```
 
-Este archivo podrá ser cargado en nuestro código para acceder a configuraciones dinámicamente. *Investiga sobre los [archivos de propiedades](https://youtu.be/hyimmrepPhE?si=5r1OSSi6Kc9ibsuw) en Java y como utilizarlos en tus programas.*
+Dentro del archivo `application.properties`, puedes definir las rutas de los archivos de entrada de datos. Aquí te doy un ejemplo de cómo sería el contenido del archivo:
+
+```properties
+# application.properties
+
+ruta.txt=src/main/resources/empleados.txt
+ruta.csv=src/main/resources/empleados.csv
+ruta.xlsx=src/main/resources/empleados.xlsx
+ruta.xml=src/main/resources/empleados.xml
+ruta.json=src/main/resources/empleados.json
+```
+
+##### 1.3.2: Leer `application.properties` en Java
+
+Para leer las propiedades desde el archivo `application.properties` en Java, puedes utilizar la clase `Properties` de la siguiente manera:
+
+```java
+package com.mycompany.employeeapp;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+public class Configuracion {
+
+    private Properties properties;
+
+    public Configuracion() {
+        properties = new Properties();
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
+            if (input == null) {
+                System.out.println("Lo siento, no se pudo encontrar application.properties");
+                return;
+            }
+            // Cargar el archivo de propiedades
+            properties.load(input);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    // Método para obtener el valor de una propiedad por su clave
+    public String getProperty(String key) {
+        return properties.getProperty(key);
+    }
+}
+```
+
+Explicación del código:
+
+1. **Clase `Configuracion`**: Esta clase se encarga de cargar el archivo `application.properties` en un objeto `Properties`.
+
+2. **`getResourceAsStream("application.properties")`**: Este método obtiene el archivo `application.properties` de la carpeta `resources` utilizando el cargador de clases.
+
+3. **`getProperty(String key)`**: Este método te permite obtener el valor de una propiedad en función de su clave.
+
+##### 1.3.3: Utilizar `Configuracion` para acceder a las rutas
+
+Ahora, puedes usar la clase `Configuracion` en tu aplicación para obtener las rutas de los archivos de entrada. Por ejemplo, en la clase `MenuSeleccion` y `DataSetEmpleados` puedes utilizar el código para obtener las rutas desde el archivo de propiedades, esto lo verás implementeado más adelante en este tutorial.
+
+Con esta implementación, puedes gestionar la configuración de las rutas de archivos de manera centralizada, mejorando la flexibilidad y la facilidad de mantenimiento de tu aplicación.
 
 
 ### Paso 2: Implementación de la Clase `Empleado`
@@ -235,7 +313,7 @@ public class Empleado {
 }
 ```
 
-#### Explicación del código:
+Explicación del código:
 
 1. **Atributos**: La clase `Empleado` tiene cuatro atributos: 
    - `id`: un identificador único para cada empleado.
@@ -317,30 +395,40 @@ public class DataSetEmpleados {
     }
 
   // Métodos para escribir el dataset (datos generados) en diferentes formatos 
-    public static void escribirDatasetTXT(String rutaArchivo, List<Empleado> empleados) throws IOException {
-        EscritorArchivoTXT.escribirDatosGenerados(rutaArchivo, empleados);
-    }
+    public static void escribirDatasetTXT(List<Empleado> empleados) throws IOException {
+    Configuracion configuracion = new Configuracion();
+    String rutaArchivo = configuracion.getProperty("ruta.txt");
+    EscritorArchivoTXT.escribirDatosOriginales(rutaArchivo, empleados);
+}
 
-    public static void escribirDatasetCSV(String rutaArchivo, List<Empleado> empleados) throws IOException {
-        EscritorArchivoCSV.escribirDatosGenerados(rutaArchivo, empleados);
-    }
+public static void escribirDatasetCSV(List<Empleado> empleados) throws IOException {
+    Configuracion configuracion = new Configuracion();
+    String rutaArchivo = configuracion.getProperty("ruta.csv");
+    EscritorArchivoCSV.escribirDatosOriginales(rutaArchivo, empleados);
+}
 
-    public static void escribirDatasetExcel(String rutaArchivo, List<Empleado> empleados) throws IOException {
-        EscritorArchivoExcel.escribirDatosGenerados(rutaArchivo, empleados);
-    }
+public static void escribirDatasetExcel(List<Empleado> empleados) throws IOException {
+    Configuracion configuracion = new Configuracion();
+    String rutaArchivo = configuracion.getProperty("ruta.xlsx");
+    EscritorArchivoExcel.escribirDatosOriginales(rutaArchivo, empleados);
+}
 
-    public static void escribirDatasetXML(String rutaArchivo, List<Empleado> empleados) throws IOException {
-        EscritorArchivoXML.escribirDatosGenerados(rutaArchivo, empleados);
-    }
+public static void escribirDatasetXML(List<Empleado> empleados) throws IOException {
+    Configuracion configuracion = new Configuracion();
+    String rutaArchivo = configuracion.getProperty("ruta.xml");
+    EscritorArchivoXML.escribirDatosOriginales(rutaArchivo, empleados);
+}
 
-    public static void escribirDatasetJSON(String rutaArchivo, List<Empleado> empleados) throws IOException {
-        EscritorArchivoJSON.escribirDatosGenerados(rutaArchivo, empleados);
-    }
+public static void escribirDatasetJSON(List<Empleado> empleados) throws IOException {
+    Configuracion configuracion = new Configuracion();
+    String rutaArchivo = configuracion.getProperty("ruta.json");
+    EscritorArchivoJSON.escribirDatosOriginales(rutaArchivo, empleados);
+}
 
 }
 ```
 
-#### Explicación del código:
+Explicación del código:
 
 1. **Clase `DataSetEmpleados`**: Contiene un método estático `generarEmpleados()` que devuelve una lista de objetos `Empleado`. Generamos 25 empleados utilizando nombres y DNIs de ejemplo.
 
@@ -432,7 +520,7 @@ public class LectorArchivoTXT {
 }
 ```
 
-#### Explicación del código:
+Explicación del código:
 1. **BufferedReader**: Se utiliza para leer el archivo línea por línea.
 2. **División de la línea**: La línea se divide en sus componentes (`id`, `nombre`, `dni`, sueldos) utilizando el método `split()` con el espacio como delimitador.
 3. **Parseo de datos**: Se convierten los datos necesarios a los tipos correspondientes (`int`, `double`).
@@ -658,7 +746,7 @@ public class LectorArchivoExcel {
 }
 ```
 
-#### Explicación del código:
+Explicación del código:
 1. **FileInputStream**: Se utiliza para leer el archivo Excel desde el disco.
 2. **Workbook y Sheet**: Utilizamos la clase `Workbook` de Apache POI para representar el archivo Excel, y `Sheet` para acceder a una hoja de cálculo específica (en este caso, la primera).
 3. **Row y Cell**: Cada fila (`Row`) representa un empleado, y cada celda (`Cell`) contiene los datos correspondientes (`id`, `nombre`, `dni` y sueldos).
@@ -758,7 +846,7 @@ public class EscritorArchivoExcel {
 }
 ```
 
-#### Explicación del código:
+Explicación del código:
 1. **Workbook y Sheet**: Creamos un nuevo archivo Excel (`Workbook`) y una hoja de cálculo (`Sheet`).
 2. **HeaderRow**: Creamos la fila de encabezado con los nombres de las columnas (`ID`, `Nombre`, `DNI`, `Sueldo Medio`, `Sueldo 1`, `Sueldo 2`, etc.).
 3. **Iteración sobre empleados**: Iteramos sobre la lista de empleados y escribimos cada uno de sus atributos en las celdas correspondientes.
@@ -842,7 +930,7 @@ public class LectorArchivoXML {
 }
 ```
 
-#### Explicación del código:
+Explicación del código:
 
 1. **SAXBuilder y Document**: Utilizamos `SAXBuilder` para construir el documento XML y obtener su representación en memoria.
 2. **RootElement**: Extraemos el elemento raíz (`empleados`) que contiene todos los elementos `empleado`.
@@ -931,7 +1019,7 @@ public class EscritorArchivoXML {
 }
 ```
 
-#### Explicación del código:
+Explicación del código:
 
 1. **Element y Document**: Creamos un nuevo elemento raíz (`empleados`) y lo almacenamos en un documento XML.
 2. **Creación de empleados**: Por cada `Empleado`, creamos un elemento `empleado` que contiene los subelementos `id`, `nombre`, `dni` y `sueldos`.
@@ -1004,7 +1092,7 @@ public class LectorArchivoJSON {
 }
 ```
 
-#### Explicación del código:
+Explicación del código:
 
 1. **ObjectMapper**: Jackson proporciona la clase `ObjectMapper` que facilita la conversión de archivos JSON a objetos Java y viceversa.
 2. **EmpleadosWrapper**: Creamos una clase `EmpleadosWrapper` como un contenedor para mapear la estructura del JSON, que contiene una lista de empleados.
@@ -1066,7 +1154,7 @@ public class EscritorArchivoJSON {
 }
 ```
 
-#### Explicación del código:
+Explicación del código:
 
 1. **ObjectMapper**: Utilizamos el `ObjectMapper` de Jackson para convertir la lista de empleados en un archivo JSON.
 2. **Pretty Printer**: Usamos `writerWithDefaultPrettyPrinter()` para que el archivo JSON esté bien formateado y sea legible.
@@ -1179,7 +1267,107 @@ public class MenuSeleccion {
 }
 ```
 
-#### Explicación del código:
+```java
+package es.fempa.acd.sumariosalarios;
+
+import java.util.List;
+import java.util.Scanner;
+
+public class MenuSeleccion {
+
+    public static void mostrarMenu() throws Exception {
+        // Crear una instancia de Configuracion para obtener las rutas de los archivos
+        Configuracion configuracion = new Configuracion();
+
+        // Generar el dataset y escribir los archivos de datos
+        List<Empleado> empleados = DataSetEmpleados.generarEmpleados();
+        generarArchivosDeDatos(empleados);
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Seleccione el tipo de archivo a procesar:");
+        System.out.println("1. TXT");
+        System.out.println("2. CSV");
+        System.out.println("3. Excel");
+        System.out.println("4. XML");
+        System.out.println("5. JSON");
+        System.out.println("0. Salir");
+
+        int opcion = scanner.nextInt();
+        scanner.nextLine(); // Consumir la línea nueva después del número
+
+        String rutaArchivo = null;
+        List<Empleado> empleadosLeidos = null;
+
+        switch (opcion) {
+            case 1:
+                rutaArchivo = configuracion.getProperty("ruta.txt");
+                empleadosLeidos = LectorArchivoTXT.leerArchivoTXT(rutaArchivo);
+                break;
+            case 2:
+                rutaArchivo = configuracion.getProperty("ruta.csv");
+                empleadosLeidos = LectorArchivoCSV.leerArchivoCSV(rutaArchivo);
+                break;
+            case 3:
+                rutaArchivo = configuracion.getProperty("ruta.xlsx");
+                empleadosLeidos = LectorArchivoExcel.leerArchivoExcel(rutaArchivo);
+                break;
+            case 4:
+                rutaArchivo = configuracion.getProperty("ruta.xml");
+                empleadosLeidos = LectorArchivoXML.leerArchivoXML(rutaArchivo);
+                break;
+            case 5:
+                rutaArchivo = configuracion.getProperty("ruta.json");
+                empleadosLeidos = LectorArchivoJSON.leerArchivoJSON(rutaArchivo);
+                break;
+            case 0:
+                System.out.println("Saliendo del programa...");
+                return;
+            default:
+                System.out.println("Opción no válida.");
+                return;
+        }
+
+        if (empleadosLeidos != null) {
+            mostrarSumario(empleadosLeidos);
+            System.out.println("Introduzca la ruta para el archivo de salida:");
+            String rutaSalida = scanner.nextLine();
+
+            // Guardar el archivo en el mismo formato que el archivo de entrada
+            switch (opcion) {
+                case 1:
+//hacer
+                    break;
+                case 2:
+//hacer
+                    break;
+                case 3:
+//hacer
+                    break;
+                case 4:
+//hacer
+                    break;
+                case 5:
+//hacer
+                    break;
+            }
+        }
+    }
+    
+    // Método para mostrar el sumario en consola
+    private static void mostrarSumario(List<Empleado> empleados) {
+	//hacer
+    }
+
+    // Método para generar los archivos de datos
+    private static void generarArchivosDeDatos(List<Empleado> empleados) throws IOException {
+        Configuracion configuracion = new Configuracion();
+      // hacer
+    }
+}
+```
+
+
+Explicación del código:
 
 1. **Menú de selección**: Utilizamos un `Scanner` para capturar la opción del usuario. Dependiendo de la selección, llamamos al método correspondiente para leer el archivo del tipo elegido (TXT, CSV, Excel, XML o JSON).
    
