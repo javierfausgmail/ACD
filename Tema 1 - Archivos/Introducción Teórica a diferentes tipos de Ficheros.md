@@ -103,6 +103,172 @@ Por ejemplo, en nuestro tutorial, un archivo XML de empleados podría tener la s
 
 Este ejemplo muestra cómo se puede estructurar la información del empleado utilizando etiquetas, lo cual hace que el archivo XML sea legible y permita una representación jerárquica clara de los datos.
 
+
+A continuación se añade una explicación breve y más precisa de la **estructura jerárquica** de un documento XML y de cómo se denominan sus partes y etiquetas según su **posición en el árbol**. Además, se corrige el ejemplo para garantizar que el XML sea **bien formado** (un único elemento raíz).
+
+#### Estructura jerárquica y denominación de las partes
+
+1. **Documento XML**  
+    Es la unidad completa. Puede comenzar con una **declaración XML** opcional y contener comentarios, instrucciones de procesamiento, una declaración de tipo de documento (DTD) y, obligatoriamente, **un único elemento raíz**.
+    
+2. **Declaración XML (prólogo)** _(opcional)_  
+    Indica versión y, habitualmente, la codificación de caracteres.
+    
+    ```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    ```
+    
+3. **Comentarios e instrucciones de procesamiento** _(opcionales)_
+    
+    - Comentario: `<!-- texto -->`
+        
+    - Instrucción de procesamiento: `<?target datos?>`
+        
+4. **Elemento raíz (root element)**  
+    Es el **ancestro común** de todos los demás elementos. Debe haber **exactamente uno**. En el ejemplo: `<empleados>…</empleados>`.
+    
+5. **Elementos contenedores (padres) y elementos hijos**  
+    Un elemento puede **contener otros elementos** (entonces es “padre” respecto de ellos) y, a su vez, ser **hijo** de su contenedor inmediato.  
+    En el ejemplo: `<empleados>` es padre de múltiples elementos `<empleado>`; cada `<empleado>` es hijo de `<empleados>`.
+    
+6. **Elementos hermanos (siblings)**  
+    Son elementos que comparten el mismo elemento padre.  
+    En el ejemplo: los distintos `<empleado>` son hermanos entre sí.
+    
+7. **Elementos hoja (leaf nodes)**  
+    No contienen otros elementos, solo **texto** (nodos de texto) o, en su caso, **atributos**.  
+    En el ejemplo: `<id>`, `<nombre>`, `<dni>`, `<sueldoMax>`, `<sueldoMin>`, `<sueldoMedio>` son hojas.
+    
+8. **Atributos** _(opcionales)_  
+    Son **pares nombre–valor** asociados a un elemento; no forman parte del contenido de texto. Se usan para **metadatos** o identificadores cuando procede.  
+    Ejemplo alternativo: `<empleado id="1" dni="94738265Y">…</empleado>`.
+    
+9. **Espacios de nombres (namespaces)** _(opcionales)_  
+    Evitan colisiones de nombres cuando se combinan vocabularios. Se declaran con `xmlns` y, opcionalmente, un **prefijo**.  
+    Ejemplo: `<empleados xmlns:hr="http://ejemplo.org/hr">…</empleados>` y luego `<hr:empleado>…</hr:empleado>`.
+    
+10. **Contenido del elemento**
+    
+    - **Solo texto** (p. ej., `<nombre>María López</nombre>`).
+        
+    - **Solo elementos** (element-only).
+        
+    - **Mixto** (texto + elementos).
+        
+    - **Vacío** (sin contenido, a veces como etiqueta autocontenida: `<etiqueta/>`).
+        
+
+---
+
+#### Ejemplo con elemento raíz y prólogo
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<empleados>
+  <empleado>
+    <id>1</id>
+    <nombre>Diego Romero</nombre>
+    <dni>94738265Y</dni>
+    <sueldoMax>1966.49</sueldoMax>
+    <sueldoMin>1224.74</sueldoMin>
+    <sueldoMedio>1578.12</sueldoMedio>
+  </empleado>
+  <empleado>
+    <id>2</id>
+    <nombre>María López</nombre>
+    <dni>12345678X</dni>
+    <sueldoMax>2100.00</sueldoMax>
+    <sueldoMin>1300.50</sueldoMin>
+    <sueldoMedio>1700.25</sueldoMedio>
+  </empleado>
+</empleados>
+```
+
+> Nota: En XML bien formado debe existir **un único elemento raíz** que los agrupe (aquí, `<empleados>`).
+
+---
+
+#### Vista en forma de árbol (relaciones jerárquicas)
+
+```
+Documento
+└── empleados                   ← Elemento raíz
+    ├── empleado                ← Hijo de <empleados> (1º), hermano de otros <empleado>
+    │   ├── id                  ← Hojas (texto)
+    │   ├── nombre
+    │   ├── dni
+    │   ├── sueldoMax
+    │   ├── sueldoMin
+    │   └── sueldoMedio
+    └── empleado                ← Hijo de <empleados> (2º)
+        ├── id
+        ├── nombre
+        ├── dni
+        ├── sueldoMax
+        ├── sueldoMin
+        └── sueldoMedio
+```
+
+- **Ancestro / descendiente**: `<empleados>` es ancestro de cualquier `<id>`, que a su vez es descendiente de `<empleados>`.
+    
+- **Padre / hijo**: cada `<empleado>` es padre de `<id>`, `<nombre>`, etc.
+    
+- **Hermanos**: los dos `<empleado>` son hermanos; también lo son `<id>`, `<nombre>`, `<dni>`, etc. dentro del mismo `<empleado>`.
+    
+
+---
+
+#### Denominaciones habituales y cómo referenciar posiciones (XPath)
+
+- **Ruta absoluta al primer DNI**: `/empleados/empleado[1]/dni`
+    
+- **Todos los sueldos medios**: `/empleados/empleado/sueldoMedio`
+    
+- **Segundo empleado por posición**: `/empleados/empleado[2]`
+    
+- **Todos los descendientes llamados `dni`**: `//dni`
+    
+
+---
+
+#### Tabla-resumen de “partes” y “nombres” por posición
+
+|Posición / rol en el árbol|Nombre habitual|Descripción breve|Ejemplo / XPath|
+|---|---|---|---|
+|Documento completo|Documento XML|Unidad completa que contiene todo|_(n/a)_|
+|Inicio del documento|Declaración XML|Prólogo con versión/codificación|`<?xml version="1.0" encoding="UTF-8"?>`|
+|Raíz|Elemento raíz|Ancestro común y único|`/empleados`|
+|Contenedor intermedio|Elemento padre|Elemento que contiene hijos|`/empleados/empleado`|
+|Hijo de un contenedor|Elemento hijo|Elemento contenido en un padre|`/empleados/empleado/dni`|
+|Mismo nivel|Elementos hermanos|Elementos con el mismo padre|Dos `<empleado>` bajo `<empleados>`|
+|Terminal sin hijos|Elemento hoja|Elemento cuyo contenido es texto|`<nombre>María López</nombre>`|
+|Texto de un elemento|Nodo de texto|Cadena de caracteres dentro de un elemento|`"12345678X"` dentro de `<dni>`|
+|Metadatos del elemento|Atributo|Par nombre–valor en la etiqueta de inicio|`<empleado id="2" dni="123...">`|
+|Ámbito de nombres|Namespace|URI que califica nombres y evita colisiones|`xmlns:hr="http://ejemplo.org/hr"`|
+
+---
+
+#### Nota práctica (librería JDOM, por si se integra en el código del proyecto)
+
+En lalibrería **JDOM 2** las estructuras anteriores se modelan con:
+
+- `org.jdom2.Document` (documento),
+    
+- `org.jdom2.Element` (elementos como `empleados`, `empleado`, `dni`, etc.),
+    
+- `org.jdom2.Attribute` (atributos como `id`, `dni` si se usan como atributos),
+    
+- `org.jdom2.Text` (nodos de texto),
+    
+- `org.jdom2.Comment` (comentarios).
+    
+
+Esto facilita razonar y navegar por **padres/hijos/hermanos** en el árbol con métodos como `getChild`, `getChildren`, `getParentElement`, etc.
+
+---
+
+Con esta descripción, el lector puede identificar con precisión **qué es cada etiqueta** según su **posición jerárquica** y **cómo referenciarla** en validaciones, consultas (XPath) o código (p. ej., JDOM). Este apartado puede insertarse justo tras la presentación del formato XML y antes de los ejemplos de lectura y escritura.
+
 ### Archivos Excel (XLSX)
 
 **Excel** es un formato de hoja de cálculo muy usado, especialmente para el análisis y almacenamiento de datos tabulares, ya que permite representar datos con columnas, filas, cálculos y visualizaciones. En el proyecto, usamos archivos Excel para almacenar la información de los empleados y trabajamos con la librería **Apache POI**, que nos permite leer y escribir hojas de cálculo de manera programática.
