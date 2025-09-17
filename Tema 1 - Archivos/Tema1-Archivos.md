@@ -366,7 +366,7 @@ public class EjemploPractico {
 }
 ```
 
-### 5. Acceso a datos utilizando archivos binarios en Java
+### 5. Acceso a datos utilizando archivos   en Java
 
 #### 5.1 Lectura de archivos binarios (`DataInputStream`, `FileInputStream`)
 
@@ -542,10 +542,9 @@ public class GestionDatosBinarios {
                 float altura = dis.readFloat();
                 boolean matriculado = dis.readBoolean();
 
-                System.out.println("\nNombre: " + nombre);
-                System.out.println("Edad: " + edad);
-                System.out.println("Altura: " + altura);
-                System.out.println("Matriculado: " + matriculado);
+				Persona persona = new Persona(nombre, edad, altura, matriculado);
+	            System.out.println(persona);
+               
             }
         } catch (EOFException e) {
             // Fin de archivo alcanzado
@@ -555,11 +554,14 @@ public class GestionDatosBinarios {
     }
 }
 
-class Persona {
+class Persona implements Serializable {
     String nombre;
     int edad;
     float altura;
     boolean matriculado;
+    float peso;
+
+	long 
 
     Persona(String nombre, int edad, float altura, boolean matriculado) {
         this.nombre = nombre;
@@ -613,7 +615,7 @@ Se utilizan dos bibliotecas principales: **Jackson** (JSON) y **JAXB** (XML).
 2. **XML (JAXB)**: `JAXBContext` con `Marshaller`/`Unmarshaller`.
     
 
-#### 6.3 Ejemplos prácticos
+#### 6.3 Ejemplos prácticos básicos
 
 **Ejemplo con Jackson (JSON)**
 
@@ -792,6 +794,447 @@ public class XmlExampleLista {
     }
 }
 ```
+
+
+#### 6.4 Ejemplos avanzados
+
+#### Nota práctica (JSON con Jackson, ampliada)
+
+- **Dependencias Maven (Jackson + utilidades recomendadas):**
+    
+    ```xml
+    <!-- Núcleo Jackson -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.17.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.17.2</version>
+    </dependency>
+    <!-- Tipos Java Time (si en el futuro hay LocalDate, etc.) -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>2.17.2</version>
+    </dependency>
+    <!-- JSONPath para consultas -->
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <version>2.9.0</version>
+    </dependency>
+    <!-- Validador de JSON Schema (ejemplo con NetworkNT) -->
+    <dependency>
+      <groupId>com.networknt</groupId>
+      <artifactId>json-schema-validator</artifactId>
+      <version>1.5.3</version>
+    </dependency>
+    ```
+    
+- **Modelo de datos (recomendación: `BigDecimal` para importes):**
+    
+    ```java
+    import java.math.BigDecimal;
+    
+    public record Empleado(
+        int id,
+        String nombre,
+        String dni,
+        BigDecimal sueldoMax,
+        BigDecimal sueldoMin,
+        BigDecimal sueldoMedio
+    ) {}
+    ```
+    
+- **Configuración del `ObjectMapper` (lectura/escritura segura y precisa):**
+    
+    ```java
+    import com.fasterxml.jackson.databind.*;
+    import com.fasterxml.jackson.core.*;
+    import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+    
+    ObjectMapper mapper = new ObjectMapper();
+    
+    // Legibilidad (solo para desarrollo)
+    mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    
+    // Precisión numérica: leer floats como BigDecimal y escribir sin notación científica
+    mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
+    mapper.configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+    
+    // Robustez frente a campos inesperados en entrada
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    
+    // Soporte para Java Time (si se usa en el futuro)
+    mapper.registerModule(new JavaTimeModule());
+    
+    // Seguridad básica: evitar polimorfismo implícito
+    mapper.deactivateDefaultTyping(); // por claridad; no usar DefaultTyping sin validador explícito
+    ```
+    
+- **Lectura (deserialización) de una lista de empleados:**
+    
+    ```java
+    import com.fasterxml.jackson.core.type.TypeReference;
+    import java.nio.file.*;
+    import java.nio.charset.StandardCharsets;
+    import java.util.List;
+    
+    Path jsonPath = Paths.get("empleados.json");
+    String json = Files.readString(jsonPath, StandardCharsets.UTF_8);
+    
+    List<Empleado> empleados = mapper.readValue(json, new TypeReference<List<Empleado>>() {});
+    ```
+    
+- **Escritura (serialización) con “pretty print” en UTF-8:**
+    
+    ```java
+    import java.nio.file.Files;
+    import java.util.List;
+    
+    String salida = mapper.writerWithDefaultPrettyPrinter()
+                          .writeValueAsString(empleados);
+    
+    Files.writeString(Paths.get("empleados.json"), salida, StandardCharsets.UTF_8);
+    ```
+    
+- **Streaming para archivos grandes (procesamiento incremental):**
+    
+    ```java
+    import com.fasterxml.jackson.core.*;
+    import com.fasterxml.jackson.databind.ObjectReader;
+    import java.io.File;
+    import java.util.ArrayList;
+    import java.util.List;
+    
+    List<Empleado> resultado = new ArrayList<>();
+    ObjectReader reader = mapper.readerFor(Empleado.class);
+    
+    try (JsonParser p = mapper.getFactory().createParser(new File("empleados.json"))) {
+        if (p.nextToken() != JsonToken.START_ARRAY) {
+            throw new IllegalStateException("Se esperaba un array como raíz");
+        }
+        while (p.nextToken() == JsonToken.START_OBJECT) {
+            Empleado emp = reader.readValue(p);  // consume el objeto actual
+            resultado.add(emp);
+        }
+        // p.nextToken() ahora debe ser END_ARRAY
+    }
+    ```
+    
+- **Consultas con JSONPath (selecciones análogas a XPath):**
+    
+    ```java
+    import com.jayway.jsonpath.JsonPath;
+    import com.jayway.jsonpath.ReadContext;
+    import java.util.List;
+    import java.math.BigDecimal;
+    
+    String documento = Files.readString(Paths.get("empleados.json"), StandardCharsets.UTF_8);
+    ReadContext ctx = JsonPath.parse(documento);
+    
+    // DNI del primer empleado
+    String dni0 = ctx.read("$[0].dni");
+    
+    // Todos los sueldos medios
+    List<BigDecimal> sueldosMedios = ctx.read("$[*].sueldoMedio");
+    
+    // Empleados con sueldoMax > 2000
+    List<Object> filtrados = ctx.read("$[?(@.sueldoMax > 2000)]");
+    ```
+    
+- **Validación con JSON Schema (garantizar estructura y tipos):**
+    
+    - **Schema de ejemplo (`empleados.schema.json`)**:
+        
+        ```json
+        {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "title": "Empleados",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "nombre", "dni", "sueldoMax", "sueldoMin", "sueldoMedio"],
+            "additionalProperties": false,
+            "properties": {
+              "id":        { "type": "integer", "minimum": 1 },
+              "nombre":    { "type": "string",  "minLength": 1 },
+              "dni":       { "type": "string",  "pattern": "^[0-9]{8}[A-Z]$" },
+              "sueldoMax": { "type": "number" },
+              "sueldoMin": { "type": "number" },
+              "sueldoMedio": { "type": "number" }
+            }
+          }
+        }
+        ```
+        
+    - **Código de validación (NetworkNT):**
+        
+        ```java
+        import com.fasterxml.jackson.databind.JsonNode;
+        import com.networknt.schema.*;
+        
+        JsonNode jsonNode = mapper.readTree(Files.readString(Paths.get("empleados.json"), StandardCharsets.UTF_8));
+        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012);
+        JsonSchema schema = factory.getSchema(Files.newBufferedReader(Paths.get("empleados.schema.json")));
+        
+        Set<ValidationMessage> errores = schema.validate(jsonNode);
+        if (!errores.isEmpty()) {
+            errores.forEach(msg -> System.err.println("Error de schema: " + msg));
+            throw new IllegalArgumentException("JSON inválido respecto al schema");
+        }
+        ```
+        
+- **Anotaciones Jackson útiles (mapeo fino):**
+    
+    ```java
+    import com.fasterxml.jackson.annotation.*;
+    
+    public record Empleado(
+        @JsonProperty("id") int id,
+        @JsonProperty("nombre") String nombre,
+        @JsonProperty("dni") String dni,
+        @JsonProperty("sueldoMax") java.math.BigDecimal sueldoMax,
+        @JsonProperty("sueldoMin") java.math.BigDecimal sueldoMin,
+        @JsonProperty("sueldoMedio") java.math.BigDecimal sueldoMedio
+    ) {}
+    
+    // Omitir campos nulos al serializar
+    // mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    
+    // Ignorar propiedades desconocidas a nivel de tipo
+    // @JsonIgnoreProperties(ignoreUnknown = true)
+    ```
+    
+- **Conversores personalizados (cuando el formato difiere):**
+    
+    ```java
+    import com.fasterxml.jackson.core.JsonGenerator;
+    import com.fasterxml.jackson.databind.SerializerProvider;
+    import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+    import java.io.IOException;
+    import java.math.BigDecimal;
+    
+    // Serializador que fuerza 2 decimales en BigDecimal
+    public class BigDecimal2Serializer extends StdSerializer<BigDecimal> {
+        public BigDecimal2Serializer() { super(BigDecimal.class); }
+        @Override
+        public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeNumber(value.setScale(2, BigDecimal.ROUND_HALF_UP));
+        }
+    }
+    // Registro:
+    // SimpleModule m = new SimpleModule().addSerializer(BigDecimal.class, new BigDecimal2Serializer());
+    // mapper.registerModule(m);
+    ```
+    
+- **Criterios rápidos de diseño de estructura:**
+    
+    - **Objeto vs. Array**:
+        
+        - Objeto (`{}`) para entidades **nombradas** por clave (propiedades).
+            
+        - Array (`[]`) para **colecciones ordenadas** y homogéneas (empleados).
+            
+    - **Tipos numéricos**: usar `BigDecimal` en Java y `number` en JSON; el separador decimal es **punto**.
+        
+    - **Campos opcionales**: si se prevén ausencias, considerar `@JsonInclude(Include.NON_NULL)` y reflejarlo en el **schema** (`"required": [...]` adecuado).
+        
+- **Archivos grandes y rendimiento:**
+    
+    - Preferir **streaming** (como arriba) o `MappingIterator` (`reader.readValues(...)`) para no cargar todo en memoria.
+        
+    - Reutilizar `ObjectReader`/`ObjectWriter` configurados; son **thread-safe** y más rápidos en escenarios repetitivos.
+        
+    - Evitar `pretty print` en producción si el tamaño es crítico.
+        
+- **Consideraciones de seguridad al deserializar:**
+    
+    - **No** activar tipado por defecto global (`activateDefaultTyping`) salvo que use un `PolymorphicTypeValidator` restrictivo y una lista de tipos de confianza.
+        
+    - Validar con **JSON Schema** cuando los datos procedan de terceros.
+        
+    - Establecer límites razonables (tamaño máximo de entrada, profundidad de anidamiento) a nivel de canal de entrada.
+        
+- **I/O y codificación:**
+    
+    - Leer y escribir siempre en **UTF-8**.
+        
+    - Controlar separadores de línea si el entorno lo exige (`System.lineSeparator()` si se construyen cadenas manualmente).
+        
+
+Con este ejemplo, queda cubierta la serialización/deserialización habitual con Jackson, las consultas intermedias con JSONPath, la validación con JSON Schema y el tratamiento de archivos grandes.
+
+##### Ejemplo práctico XML con JDOM
+
+- **Dependencia Maven (JDOM 2):**
+    
+    ```xml
+    <dependency>
+      <groupId>org.jdom</groupId>
+      <artifactId>jdom2</artifactId>
+      <version>2.0.6.1</version>
+    </dependency>
+    ```
+    
+- **Lectura (parseo seguro) y mapeo a objetos:**
+    
+    ```java
+    import org.jdom2.*;
+    import org.jdom2.input.SAXBuilder;
+    import org.jdom2.input.sax.XMLReaders;
+    import java.math.BigDecimal;
+    import java.nio.file.*;
+    import java.nio.charset.StandardCharsets;
+    import java.util.*;
+    
+    // POJO mínimo (puede ajustarse a su modelo)
+    record Empleado(int id, String nombre, String dni,
+                    BigDecimal sueldoMax, BigDecimal sueldoMin, BigDecimal sueldoMedio) {}
+    
+    Path path = Paths.get("empleados.xml");
+    
+    SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);
+    // Endurecer el parser frente a XXE y entidades externas
+    builder.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+    builder.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    builder.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    
+    Document doc = builder.build(path.toFile());
+    Element raiz = doc.getRootElement(); // <empleados>
+    List<Element> nodos = raiz.getChildren("empleado");
+    
+    List<Empleado> empleados = new ArrayList<>();
+    for (Element e : nodos) {
+        int id = Integer.parseInt(e.getChildText("id"));
+        String nombre = e.getChildText("nombre");
+        String dni = e.getChildText("dni");
+        BigDecimal max = new BigDecimal(e.getChildText("sueldoMax"));
+        BigDecimal min = new BigDecimal(e.getChildText("sueldoMin"));
+        BigDecimal medio = new BigDecimal(e.getChildText("sueldoMedio"));
+        empleados.add(new Empleado(id, nombre, dni, max, min, medio));
+    }
+    ```
+    
+- **Escritura (generación con formato legible):**
+    
+    ```java
+    import org.jdom2.output.XMLOutputter;
+    import org.jdom2.output.Format;
+    import java.io.Writer;
+    import java.nio.file.Files;
+    
+    Element root = new Element("empleados");
+    Document docOut = new Document(root);
+    
+    for (Empleado emp : empleados) {
+        Element e = new Element("empleado");
+        e.addContent(new Element("id").setText(String.valueOf(emp.id())));
+        e.addContent(new Element("nombre").setText(emp.nombre()));
+        e.addContent(new Element("dni").setText(emp.dni()));
+        e.addContent(new Element("sueldoMax").setText(emp.sueldoMax().toPlainString()));
+        e.addContent(new Element("sueldoMin").setText(emp.sueldoMin().toPlainString()));
+        e.addContent(new Element("sueldoMedio").setText(emp.sueldoMedio().toPlainString()));
+        root.addContent(e);
+    }
+    
+    XMLOutputter out = new XMLOutputter(
+        Format.getPrettyFormat()
+              .setEncoding("UTF-8")
+              .setIndent("  ")
+    );
+    
+    try (Writer w = Files.newBufferedWriter(Paths.get("empleados.xml"), StandardCharsets.UTF_8)) {
+        out.output(docOut, w);
+    }
+    ```
+    
+- **Consultas con XPath (JDOM 2):**
+    
+    ```java
+    import org.jdom2.filter.Filters;
+    import org.jdom2.xpath.XPathExpression;
+    import org.jdom2.xpath.XPathFactory;
+    
+    XPathFactory xpf = XPathFactory.instance();
+    XPathExpression<Element> expr = xpf.compile(
+        "/empleados/empleado[dni='12345678X']",
+        Filters.element()
+    );
+    List<Element> encontrados = expr.evaluate(doc);
+    ```
+    
+- **Validación con XSD (esquema):**
+    
+    ```java
+    import javax.xml.XMLConstants;
+    import javax.xml.validation.Schema;
+    import javax.xml.validation.SchemaFactory;
+    import java.io.File;
+    
+    SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+    Schema schema = sf.newSchema(new File("empleados.xsd"));
+    
+    SAXBuilder valBuilder = new SAXBuilder(XMLReaders.XSDVALIDATING);
+    valBuilder.setSchema(schema);
+    // Mantener endurecimiento de parser
+    valBuilder.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+    valBuilder.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    valBuilder.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    
+    Document validado = valBuilder.build(Paths.get("empleados.xml").toFile());
+    ```
+    
+    **Esqueleto mínimo de `empleados.xsd`:**
+    
+    ```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+      <xs:element name="empleados">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="empleado" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="id" type="xs:integer"/>
+                  <xs:element name="nombre" type="xs:string"/>
+                  <xs:element name="dni" type="xs:string"/>
+                  <xs:element name="sueldoMax" type="xs:decimal"/>
+                  <xs:element name="sueldoMin" type="xs:decimal"/>
+                  <xs:element name="sueldoMedio" type="xs:decimal"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+    ```
+    
+- **Espacios de nombres (namespaces), si procede:**
+    
+    ```java
+    import org.jdom2.Namespace;
+    
+    Namespace hr = Namespace.getNamespace("hr", "http://ejemplo.org/hr");
+    Element rootNs = new Element("empleados", hr);
+    Element emp = new Element("empleado", hr);
+    rootNs.addContent(emp);
+    ```
+    
+- **Criterios rápidos “atributo vs. elemento”:**
+    
+    - **Atributo**: metadatos, identificadores, banderas cortas, datos invariables (p. ej., `id`).
+        
+    - **Elemento**: datos de negocio, contenidos extensibles, valores que pueden tener estructura interna, listas o texto largo (p. ej., `nombre`, `sueldoMedio`).
+        
+- **Archivos grandes:** si el tamaño crece mucho, conviene **procesar en streaming** (SAX/StAX, p. ej., Woodstox) en lugar de construir todo el árbol con JDOM.
+    
+- **Codificación y formato:** usar **UTF-8**, evitar conversión implícita de decimales a `double` (transformarlos con `BigDecimal`), y emitir con **pretty print** solo en entornos de desarrollo (en producción puede interesar salida compacta).
+
 
 ### 7. Buenas prácticas y manejo de excepciones
 
