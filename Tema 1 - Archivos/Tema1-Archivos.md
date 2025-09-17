@@ -798,7 +798,7 @@ public class XmlExampleLista {
 
 #### 6.4 Ejemplos avanzados
 
-#### Nota práctica (JSON con Jackson, ampliada)
+##### Ejemplo práctico JSON con Jackson
 
 - **Dependencias Maven (Jackson + utilidades recomendadas):**
     
