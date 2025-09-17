@@ -1,4 +1,4 @@
-En este documento introduciremos distintos tipos de ficheros ( TXT, JSON, XML, CSV y Excel ) para aprender a leer, escribir y procesar datos. Cada uno de estos tipos de fichero tiene sus propias características y aplicaciones específicas, y es importante entender qué los hace únicos y cómo trabajar con ellos. A continuación, se presentan los conceptos fundamentales de cada tipo de fichero y su relación directa con el proyecto que implementaremos posteriormente en este tutorial.
+En este documento introduciremos distintos tipos de ficheros ( TXT, CSV, JSON y XML) para aprender a leer, escribir y procesar datos. Cada uno de estos tipos de fichero tiene sus propias características y aplicaciones específicas, y es importante entender qué los hace únicos y cómo trabajar con ellos. A continuación, se presentan los conceptos fundamentales de cada tipo de fichero y su relación directa con el proyecto que implementaremos posteriormente en este tutorial.
 
 ### Ficheros de Texto Plano (TXT)
 
