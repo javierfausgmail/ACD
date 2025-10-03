@@ -1359,7 +1359,7 @@ En este ejercicio, usted desarrollará un programa en Java que, utilizando Apach
      - **Cantidad Vendida**
      - **Precio Unitario**
      - **Ingresos Totales**
-   - Ingrese al menos cinco filas de datos ficticios de productos en la tabla.
+   - Ingrese al menos cinco filas de datos de productos en la tabla.
    - Asegúrese de calcular y mostrar el valor en la columna “Ingresos Totales” (Cantidad Vendida x Precio Unitario).
 
 4. **Conclusiones:**
