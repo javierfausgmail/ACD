@@ -1,8 +1,9 @@
+
+# Ejercicio 1 - API Básico
+
 Proyecto Spring Boot con **solo Spring Web**, sin seguridad ni BBDD todavía.
 
----
-
-## Contexto del proyecto de ejemplo
+### Contexto del proyecto de ejemplo
 
 Vamos a trabajar con un mini-proyecto:
 
@@ -16,9 +17,9 @@ public record CashCard(Long id, Double amount, String ownerName) {}
 
 ---
 
-# Lección 1 – ¿Qué es una API REST y qué vamos a construir?
+## Lección 1 – ¿Qué es una API REST y qué vamos a construir?
 
-### Objetivos
+#### Objetivos
 
 - Entender qué es una API REST.
     
@@ -27,7 +28,7 @@ public record CashCard(Long id, Double amount, String ownerName) {}
 - Conocer el proyecto de ejemplo (Family Cash Card).
     
 
-### Conceptos clave 
+#### Conceptos clave 
 
 - **API**: puerta de entrada para que otros programas hablen con el tuyo.
     
@@ -48,7 +49,7 @@ public record CashCard(Long id, Double amount, String ownerName) {}
     - `ownerName`: nombre del hijo/hija.
         
 
-### Endpoints que veremos en el módulo 1
+#### Endpoints que veremos en el módulo 1
 
 Solo lectura y errores básicos:
 
@@ -70,16 +71,16 @@ Más adelante (otros módulos) se podrían añadir:
 
 ---
 
-# Lección 2 – Crear el proyecto con Spring Boot
+## Lección 2 – Crear el proyecto con Spring Boot
 
-### Objetivos
+#### Objetivos
 
 - Crear un proyecto con **Spring Initializr**.
     
 - Ejecutar la app y comprobar que responde.
     
 
-### Pasos con Spring Initializr
+#### Pasos con Spring Initializr
 
 1. Ir a [start.spring.io](https://start.spring.io/) ([spring.academy](https://spring.academy/courses/building-a-rest-api-with-spring-boot?utm_source=chatgpt.com "Building a REST API with Spring Boot"))
     
@@ -108,7 +109,7 @@ Más adelante (otros módulos) se podrían añadir:
 
 Descargar y abrir en IntelliJ/Eclipse/STS.
 
-### Clase principal
+#### Clase principal
 
 ```java
 package com.example.cashcard;
@@ -136,16 +137,16 @@ Si abres `http://localhost:8080` en el navegador, verás un **error Whitelabel**
 
 ---
 
-# Lección 3 – Primer endpoint REST sencillo
+## Lección 3 – Primer endpoint REST sencillo
 
-### Objetivos
+#### Objetivos
 
 - Entender qué es un **@RestController**.
     
 - Crear un endpoint `GET /hello` que devuelva un texto.
     
 
-### Código
+#### Código
 
 ```java
 package com.example.cashcard;
@@ -178,16 +179,16 @@ curl http://localhost:8080/hello
 
 ---
 
-# Lección 4 – Definir el recurso `CashCard` y devolver JSON
+## Lección 4 – Definir el recurso `CashCard` y devolver JSON
 
-### Objetivos
+#### Objetivos
 
 - Crear la clase/record del recurso.
     
 - Devolver un objeto como JSON.
     
 
-### Record `CashCard`
+#### Record `CashCard`
 
 ```java
 package com.example.cashcard;
@@ -195,7 +196,7 @@ package com.example.cashcard;
 public record CashCard(Long id, Double amount, String ownerName) {}
 ```
 
-### Endpoint que devuelve una tarjeta
+#### Endpoint que devuelve una tarjeta
 
 ```java
 package com.example.cashcard;
@@ -233,16 +234,16 @@ Verás algo como:
 
 ---
 
-# Lección 5 – Devolver una lista de recursos (colecciones)
+## Lección 5 – Devolver una lista de recursos (colecciones)
 
-### Objetivos
+#### Objetivos
 
 - Devolver varias tarjetas en un solo endpoint.
     
 - Entender que una **colección** se representa como un **array JSON**.
     
 
-### Lista en memoria
+#### Lista en memoria
 
 De momento, sin BBDD: usamos una lista fija.
 
@@ -287,16 +288,16 @@ Actividades:
 
 ---
 
-# Lección 6 – `@PathVariable`: obtener un recurso por su ID
+## Lección 6 – `@PathVariable`: obtener un recurso por su ID
 
-### Objetivos
+#### Objetivos
 
 - Usar **variables de ruta** (`/cashcards/{id}`).
     
 - Introducir `Optional` y pasar de lista a “repositorio” en memoria.
     
 
-### Repositorio muy simple en memoria
+#### Repositorio muy simple en memoria
 
 ```java
 package com.example.cashcard;
@@ -327,7 +328,7 @@ public class CashCardRepository {
 }
 ```
 
-### Controlador con `@PathVariable`
+#### Controlador con `@PathVariable`
 
 ```java
 package com.example.cashcard;
@@ -374,16 +375,16 @@ Explicación didáctica:
 
 ---
 
-# Lección 7 – `@RequestParam` (filtrar recursos por parámetros)
+## Lección 7 – `@RequestParam` (filtrar recursos por parámetros)
 
-### Objetivos
+#### Objetivos
 
 - Introducir **parámetros de consulta**: `?ownerName=Lucía`.
     
 - Ver cómo son opcionales.
     
 
-### Código
+#### Código
 
 ```java
 @GetMapping(params = "ownerName")
@@ -416,16 +417,16 @@ Spring decide qué método llamar según la presencia del parámetro `ownerName`
 
 ---
 
-# Lección 8 – Códigos de estado HTTP y diseño de endpoints
+## Lección 8 – Códigos de estado HTTP y diseño de endpoints
 
-### Objetivos
+#### Objetivos
 
 - Entender cuándo devolver 200, 404, 400…
     
 - Introducir buenas prácticas básicas de diseño REST.
     
 
-### Códigos de estado que ya usamos
+#### Códigos de estado que ya usamos
 
 - `200 OK` → cuando una lectura se realiza con éxito.
     
@@ -447,7 +448,7 @@ public ResponseEntity<CashCard> findById(@PathVariable Long id) {
 }
 ```
 
-### Buenas prácticas de diseño REST
+#### Buenas prácticas de diseño REST
 
 Comentar:
 
@@ -475,29 +476,29 @@ Actividad:
 
 ---
 
-# Lección 9 – Probar la API (curl, Postman) y tests básicos
+## Lección 9 – Probar la API (curl, Postman) y tests básicos
 
-### Objetivos
+#### Objetivos
 
 - Practicar pruebas manuales con **curl** o **Postman/Insomnia**.
     
 - Ver un ejemplo de test de integración muy simple.
     
 
-### Pruebas manuales con curl
+#### Pruebas manuales con curl
 
 Ejemplos:
 
 ```bash
-# Lista todas las tarjetas
+## Lista todas las tarjetas
 curl http://localhost:8080/cashcards
 
-# Ver una tarjeta concreta
+## Ver una tarjeta concreta
 curl http://localhost:8080/cashcards/1
 
-# Tarjeta inexistente
+## Tarjeta inexistente
 curl -i http://localhost:8080/cashcards/99
-# Fíjate en el código de estado HTTP en la respuesta
+## Fíjate en el código de estado HTTP en la respuesta
 ```
 
 Con Postman / Insomnia:
@@ -509,7 +510,7 @@ Con Postman / Insomnia:
 - Mirar pestaña “Status”, “Headers” y “Body”.
     
 
-### Test de integración básico con Spring Boot
+#### Test de integración básico con Spring Boot
 
 Añadir dependencia en `pom.xml` (si no viene ya) ([spring.academy](https://spring.academy/courses/building-a-rest-api-with-spring-boot?utm_source=chatgpt.com "Building a REST API with Spring Boot"))
 
@@ -561,4 +562,512 @@ class CashcardApplicationTests {
 ```
 
 ---
+
+
+
+
+
+    
+
+---
+
+# Ejercicio 2 – Developing a Secure App
+
+Se asume que ya tienes el ejercicio 1 hecho:
+
+- Proyecto `cashcard` con Spring Boot.
+    
+- Endpoints `GET /cashcards`, `GET /cashcards/{id}` y alguno sencillo como `GET /hello`.
+
+Objetivo:
+
+> Pasar de una API abierta a una API **protegida con Spring Security**, con:
+> 
+> - Autenticación (¿quién eres?)
+>     
+> - Autorización (¿qué puedes hacer?)
+>     
+> - Usuarios y roles en memoria.
+>     
+> - Tests de integración que incluyan seguridad.
+>     
+
+Tecnología: **Spring Boot 3 + Spring Security 6**.
+
+---
+
+## Lección 1 – Activar Spring Security en la API
+
+#### Objetivos
+
+- Entender qué añade **Spring Security** por defecto.
+    
+- Ver qué pasa cuando “enciendes” seguridad en una API REST que ya funciona.
+    
+
+#### 1. Añadir dependencia al `pom.xml`
+
+En el `pom.xml` añade:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+Guarda, recarga Maven y arranca la aplicación otra vez.
+
+#### 2. Comportamiento por defecto
+
+Al arrancar, Spring Boot:
+
+- Activa una **configuración de seguridad por defecto**.
+    
+- Protege **todas** las URLs.
+    
+- Crea un usuario por defecto:
+    
+    - **username**: `user`
+        
+    - **password**: aleatoria, aparece en el log de arranque.
+        
+
+En consola verás algo como:
+
+```text
+Using generated security password: 8e557245-73e2-4286-969a-ff57fe326336
+```
+
+#### 3. Efecto en la API
+
+Si haces:
+
+```bash
+curl http://localhost:8080/cashcards
+```
+
+Verás una respuesta `401 Unauthorized` o el navegador te pedirá usuario/contraseña.
+
+Si repites con credenciales:
+
+```bash
+curl -u user:LA_CONTRASEÑA_DEL_LOG http://localhost:8080/cashcards
+```
+
+Ahora sí deberías ver los datos.
+
+> **Mensaje importante**:  
+> “Spring Security, con una simple dependencia, pone un **candado** global a la API. Todo está protegido hasta que _tú_ digas lo contrario.”
+
+---
+
+## Lección 2 – Configuración básica con `SecurityFilterChain`
+
+#### Objetivos
+
+- Dejar de usar la configuración “mágica” por defecto.
+    
+- Definir nuestras **reglas de seguridad**:
+    
+    - Qué endpoints son públicos.
+        
+    - Cuáles requieren autenticación.
+        
+    - Usar **HTTP Basic** para la API.
+        
+    - Desactivar CSRF en una API stateless.
+        
+
+#### 1. Crear clase de configuración
+
+Crea `SecurityConfig.java`:
+
+```java
+package com.example.cashcard;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.Customizer;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            // Para API REST sin sesiones, solemos desactivar CSRF
+            .csrf(csrf -> csrf.disable())
+            // Reglas de autorización
+            .authorizeHttpRequests(auth -> auth
+                // Endpoint público
+                .requestMatchers("/hello").permitAll()
+                // (Opcional) healthcheck público si usas Actuator
+                .requestMatchers("/actuator/health").permitAll()
+                // Todo lo demás requiere autenticación
+                .anyRequest().authenticated()
+            )
+            // Autenticación HTTP Basic (usuario/contraseña en cabecera Authorization)
+            .httpBasic(Customizer.withDefaults());
+
+        return http.build();
+    }
+}
+```
+
+Puntos didácticos:
+
+- Ahora la seguridad ya **no es la por defecto**, es la que tú defines con el bean `SecurityFilterChain`.
+    
+- `csrf.disable()` es razonable en **APIs stateless** sin sesión ni formularios HTML.
+    
+- `requestMatchers("/hello").permitAll()` deja el “hola” sin candado para probar.
+    
+
+#### 2. Probar comportamiento
+
+- `GET /hello` → debería funcionar sin credenciales.
+    
+- `GET /cashcards` → debe pedir usuario/contraseña.
+    
+
+Con curl:
+
+```bash
+## público
+curl http://localhost:8080/hello
+
+## protegido
+curl http://localhost:8080/cashcards              # 401
+curl -u user:PWD http://localhost:8080/cashcards  # 200
+```
+
+---
+
+## Lección 3 – Usuarios, contraseñas y roles en memoria
+
+#### Objetivos
+
+- Dejar de usar el usuario por defecto y crear los nuestros.
+    
+- Entender:
+    
+    - `UserDetails`
+        
+    - `UserDetailsService`
+        
+    - `PasswordEncoder` (BCrypt).
+        
+
+#### 1. Definir un `PasswordEncoder`
+
+En `SecurityConfig`:
+
+```java
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Bean
+public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+}
+```
+
+> BCrypt genera hashes robustos, y es el enfoque recomendado para contraseñas.
+
+#### 2. Crear usuarios en memoria
+
+Seguimos en `SecurityConfig`:
+
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+@Bean
+public UserDetailsService userDetailsService(PasswordEncoder encoder) {
+    UserDetails parent = User.withUsername("parent")
+            .password(encoder.encode("parent123"))
+            .roles("PARENT")  // se convertirá en ROLE_PARENT
+            .build();
+
+    UserDetails admin = User.withUsername("admin")
+            .password(encoder.encode("admin123"))
+            .roles("ADMIN")
+            .build();
+
+    return new InMemoryUserDetailsManager(parent, admin);
+}
+```
+
+Explicación:
+
+- `UserDetailsService` es el **“servicio de usuarios”**.
+    
+- `InMemoryUserDetailsManager` guarda usuarios simplemente en memoria (ideal para demo y tests).
+    
+- `.roles("PARENT")` en realidad genera la autoridad `ROLE_PARENT`.
+    
+
+#### 3. Probar con curl
+
+```bash
+## Falla sin credenciales
+curl -i http://localhost:8080/cashcards
+
+## Con usuario parent
+curl -u parent:parent123 http://localhost:8080/cashcards
+
+## Con admin
+curl -u admin:admin123 http://localhost:8080/cashcards
+```
+
+De momento, ambos usuarios tienen acceso (aún no hemos aplicado reglas por rol).
+
+---
+
+## Lección 4 – Autorización basada en roles en los endpoints
+
+#### Objetivos
+
+- Distinguir entre:
+    
+    - **Autenticación**: quién eres.
+        
+    - **Autorización**: qué se te permite hacer.
+        
+- Restringir ciertos endpoints a un rol concreto:
+    
+    - Ej: `PARENT` puede ver sus tarjetas.
+        
+    - `ADMIN` podría realizar operaciones más sensibles (en módulos posteriores).
+        
+
+#### 1. Reglas por rol en HTTP
+
+Modifica tu `securityFilterChain`:
+
+```java
+@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/hello").permitAll()
+            // Ejemplo: sólo usuarios autenticados pueden leer cashcards
+            .requestMatchers(HttpMethod.GET, "/cashcards/**")
+                .hasAnyRole("PARENT", "ADMIN")
+            // (En siguientes módulos) POST/PUT/DELETE sólo para ADMIN
+            // .requestMatchers(HttpMethod.POST, "/cashcards/**").hasRole("ADMIN")
+            .anyRequest().authenticated()
+        )
+        .httpBasic(Customizer.withDefaults());
+
+    return http.build();
+}
+```
+
+Explicación:
+
+- `hasAnyRole("PARENT", "ADMIN")` → se traduce internamente a `hasAnyAuthority("ROLE_PARENT","ROLE_ADMIN")`.
+    
+- Si haces `curl` sin credenciales → `401 Unauthorized`.
+    
+- Si haces `curl` con credenciales pero sin los roles adecuados (en otros escenarios) → `403 Forbidden`.
+    
+
+> Aquí puedes introducir el concepto de **Principio de mínimo privilegio**:  
+> dar a cada rol sólo los permisos necesarios para su tarea.
+
+#### 2. Conectar esto con el dominio “Family Cash Card”
+
+Para:
+
+- `PARENT` → padre/madre que puede ver sus tarjetas.
+    
+- `ADMIN` → rol del sistema que desde un panel interno podría crear/borrar tarjetas, gestionar usuarios, etc.
+    
+
+Más adelante (otro módulo) podríais:
+
+- Introducir un campo `owner` y hacer que el usuario autenticado solo pueda ver sus tarjetas (`Principal.getName()` + filtrado).
+    
+- Añadir operaciones `POST`, `PUT`, `DELETE` y limitarlas a `ADMIN`.
+    
+
+---
+
+## Lección 5 – Tests de integración con seguridad
+
+#### Objetivos
+
+- Escribir tests que comprueben:
+    
+    - Que sin credenciales no se accede.
+        
+    - Que con el usuario correcto sí se accede.
+        
+- Usar `TestRestTemplate` con HTTP Basic.
+    
+
+#### 1. Configurar el test
+
+En `pom.xml` ya deberías tener:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+Crea `CashcardSecurityTests.java`:
+
+```java
+package com.example.cashcard;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class CashcardSecurityTests {
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Test
+    void anonymousUserCannotAccessCashcards() {
+        ResponseEntity<String> response =
+                restTemplate.getForEntity("/cashcards", String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void parentUserCanAccessCashcards() {
+        ResponseEntity<String> response =
+                restTemplate
+                        .withBasicAuth("parent", "parent123")
+                        .getForEntity("/cashcards", String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void unknownUserCannotAccessCashcards() {
+        ResponseEntity<String> response =
+                restTemplate
+                        .withBasicAuth("intruso", "wrong")
+                        .getForEntity("/cashcards", String.class);
+
+        // Spring responde 401 si las credenciales no son válidas
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+}
+```
+
+Puntos a remarcar:
+
+- `WebEnvironment.RANDOM_PORT` levanta la app real en un puerto de test.
+    
+- `TestRestTemplate` hace peticiones HTTP “de verdad” (no es un mock).
+    
+- `withBasicAuth` añade la cabecera `Authorization: Basic ...`.
+    
+
+Mini ejercicio extra:
+
+- Añadir un test que compruebe que `/hello` **sí** es accesible sin credenciales (`200 OK`).
+    
+
+---
+
+## Lección 6 – Buenas prácticas y siguientes pasos
+
+#### Objetivos
+
+- Conectar lo que han hecho con prácticas reales en producción.
+    
+- Introducir conceptos para módulos futuros: JWT, OAuth2, sesiones, etc.
+    
+
+#### 1. Buenas prácticas para una API REST protegida
+
+Atento:
+
+1. **No guardar contraseñas en texto plano**
+    
+    - Usar `PasswordEncoder` (BCrypt, Argon2, etc.).
+        
+2. **API stateless**:
+    
+    - Desactivar sesiones (`SessionCreationPolicy.STATELESS`) y CSRF si no hay formularios y usas tokens/Basic Auth.
+        
+3. **Principio de mínimo privilegio**:
+    
+    - Roles con permisos justos, no `ADMIN` para todo.
+        
+4. **No exponer información sensible**:
+    
+    - Mensajes de error genéricos (“credenciales inválidas”) mejor que “usuario no existe”.
+        
+5. **Pruebas automáticas de seguridad**:
+    
+    - Tests como los de la lección 5 son imprescindibles.
+        
+
+Ejemplo de configuración más “realista” para API stateless:
+
+```java
+import org.springframework.security.config.http.SessionCreationPolicy;
+
+@Bean
+SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/hello").permitAll()
+            .requestMatchers(HttpMethod.GET, "/cashcards/**")
+                .hasAnyRole("PARENT", "ADMIN")
+            .anyRequest().authenticated()
+        )
+        .httpBasic(Customizer.withDefaults());
+
+    return http.build();
+}
+```
+
+#### 2. En el mundo real
+
+Atención:
+
+- En un entorno real, en vez de `InMemoryUserDetailsManager`:
+    
+    - usarías **Base de Datos** (Spring Data + `UserEntity`).
+        
+    - o un **proveedor externo** (OAuth2, OpenID Connect, Keycloak, etc.).
+        
+- Para APIs móviles / SPAs modernas:
+    
+    - lo típico es usar **JWT** o **tokens de acceso OAuth2**, no Basic Auth.
+        
+
+
+
 
