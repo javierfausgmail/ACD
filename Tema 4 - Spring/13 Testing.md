@@ -221,11 +221,286 @@ En un IDE (IntelliJ, Eclipse, VS Code con extensión Java):
 - O ejecutarlos todos desde la vista de tests.
     
 
+
+# Organización código de los tests
+
+Ejemplo claro usando el estilo **Given / When / Then** (Given = contexto, When = acción, Then = verificación).
+
+### Clase a probar
+
+```java
+// Código de producción
+public class CuentaBancaria {
+
+    private int saldo;
+
+    public CuentaBancaria(int saldoInicial) {
+        this.saldo = saldoInicial;
+    }
+
+    public void ingresar(int cantidad) {
+        saldo += cantidad;
+    }
+
+    public int getSaldo() {
+        return saldo;
+    }
+}
+```
+
+### Test con comentarios Given / When / Then
+
+```java
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class CuentaBancariaTest {
+
+    @Test
+    void ingresar_deberiaIncrementarSaldo() {
+        // ============================
+        // GIVEN (DADO / CONTEXTO INICIAL)
+        // ============================
+        // - Estado inicial del sistema bajo prueba (SUT)
+        // - Objetos necesarios y datos iniciales
+        CuentaBancaria cuenta = new CuentaBancaria(100);
+
+        // ============================
+        // WHEN (CUANDO / ACCIÓN)
+        // ============================
+        // - Acción que se quiere probar (un único “cuando” por test, si es posible)
+        cuenta.ingresar(50);
+
+        // ============================
+        // THEN (ENTONCES / VERIFICACIÓN)
+        // ============================
+        // - Comprobaciones mediante aserciones
+        // - El test pasa solo si TODAS las aserciones se cumplen
+        assertEquals(150, cuenta.getSaldo(), "El saldo debe incrementarse en 50");
+    }
+}
+```
+
+### Variante con nombre de método en estilo Given/When/Then
+
+```java
+@Test
+void givenCuentaConSaldo100_whenIngresar50_thenSaldoEs150() {
+    // Given
+    CuentaBancaria cuenta = new CuentaBancaria(100);
+
+    // When
+    cuenta.ingresar(50);
+
+    // Then
+    assertEquals(150, cuenta.getSaldo());
+}
+```
+
+Piezas clave del patrón en el test:
+
+- **Given** → preparar el escenario (instancias, datos iniciales).
+    
+- **When** → ejecutar la acción que se quiere probar.
+    
+- **Then** → comprobar el resultado con `assert...`.
+    
+
+Atención, porque aquí se mezclan **dos cosas distintas**:
+
+- El estilo **Given / When / Then** → forma de **explicar/estructurar el test**.
+    
+- Las anotaciones **@BeforeEach / @BeforeAll** → forma de **reutilizar código de preparación**.
+    
+
+No son contradictorias, son **complementarias**.
+
 ---
+
+## 1. ¿Qué representa realmente el “Given”?
+
+El **Given** es el **estado inicial del test**:  
+objetos creados, datos preparados, mocks configurados, etc.
+
+Ese “Given” se puede escribir:
+
+1. **Dentro del propio método de test**  
+    (explícito en cada test, muy legible):
+    
+    ```java
+    @Test
+    void givenCuentaConSaldo100_whenIngresar50_thenSaldoEs150() {
+        // GIVEN
+        CuentaBancaria cuenta = new CuentaBancaria(100);
+    
+        // WHEN
+        cuenta.ingresar(50);
+    
+        // THEN
+        assertEquals(150, cuenta.getSaldo());
+    }
+    ```
+    
+2. **Parcialmente o totalmente en un @BeforeEach**  
+    (para no repetir siempre el mismo setup):
+    
+    ```java
+    class CuentaBancariaTest {
+    
+        private CuentaBancaria cuenta;
+    
+        @BeforeEach
+        void setUp() {
+            // GIVEN común a TODOS los tests de esta clase
+            cuenta = new CuentaBancaria(100);
+        }
+    
+        @Test
+        void whenIngresar50_thenSaldoEs150() {
+            // WHEN
+            cuenta.ingresar(50);
+    
+            // THEN
+            assertEquals(150, cuenta.getSaldo());
+        }
+    
+        @Test
+        void whenIngresar0_thenSaldoNoCambia() {
+            // WHEN
+            cuenta.ingresar(0);
+    
+            // THEN
+            assertEquals(100, cuenta.getSaldo());
+        }
+    }
+    ```
+    
+
+Fíjate: el **Given sigue existiendo**, pero parte está “escondida” en `@BeforeEach`.
+
+---
+
+## 2. ¿Cuándo usar Given dentro del test y cuándo @BeforeEach?
+
+### Given **dentro del test** (recomendado cuando…)
+
+- Quieres que el test sea **autoexplicativo** y se pueda leer de arriba a abajo sin buscar en otros métodos.
+    
+- El contexto inicial **cambia de un test a otro**:
+    
+    - `givenCuentaConSaldo100...`
+        
+    - `givenCuentaConSaldo0...`
+        
+    - `givenCuentaEnRojo...`
+        
+- Estás enseñando o quieres máxima claridad docente / conceptual.
+    
+
+ Ventaja: el test se lee como una historia: **Given / When / Then** sin “magia oculta”.
+
+---
+
+### @BeforeEach / @BeforeAll (recomendado cuando…)
+
+- Hay un **setup repetitivo e idéntico** para muchos tests:
+    
+    - Crear un `EntityManager`, un `MockMvc`, un `Service` con mocks, etc.
+        
+- El código de preparación empieza a ser **muy verboso** y ensucia demasiado la parte interesante del test (el When/Then).
+    
+- Quieres evitar _boilerplate_ duplicado.
+    
+
+ Ventaja: reduces repetición y dejas el test más corto, pero escondes parte del Given fuera.
+
+---
+
+## 3. ¿Y @BeforeAll?
+
+`@BeforeAll` se usa para inicializar **recursos caros/compartidos** para toda la clase:
+
+```java
+@BeforeAll
+static void initAll() {
+    // Por ejemplo, levantar un servidor embebido, crear pool pesado, etc.
+}
+```
+
+Suele participar en el “Given” de alto nivel (infraestructura),  
+pero **no en el estado concreto de cada test** (eso -> mejor `@BeforeEach` o dentro del test).
+
+---
+
+## 4. ¿En qué sentido son complementarios?
+
+- El patrón **Given / When / Then** es **semántico** (forma de pensar el test).
+    
+- `@BeforeEach` / `@BeforeAll` son **técnicos** (dónde colocas físicamente el código).
+    
+
+Puedes tener perfectamente:
+
+- **Given en @BeforeEach + Given extra en el test**, y luego el When/Then:
+    
+    ```java
+    class TransferenciaTest {
+    
+        private Banco banco;
+    
+        @BeforeEach
+        void setUp() {
+            // Given global: banco ya creado
+            banco = new Banco();
+        }
+    
+        @Test
+        void givenDosCuentasConSaldo_whenTransferir_thenSeActualizanSaldos() {
+            // Given específico de este test
+            Cuenta origen = new Cuenta(100);
+            Cuenta destino = new Cuenta(50);
+            banco.addCuenta(origen);
+            banco.addCuenta(destino);
+    
+            // When
+            banco.transferir(origen, destino, 30);
+    
+            // Then
+            assertEquals(70, origen.getSaldo());
+            assertEquals(80, destino.getSaldo());
+        }
+    }
+    ```
+    
+
+Aquí el **Given está repartido**:
+
+- Parte en `@BeforeEach` (crear `Banco`).
+    
+- Parte dentro del propio test (crear cuentas y añadirlas).
+    
+
+---
+
+## 5. Recomendación práctica (y didáctica)
+
+- Para ejemplos sencillos o introductorios →  
+    **mantener el Given dentro del test** suele ser más claro.
+    
+- Para baterías grandes de tests sobre el mismo SUT con mucho código repetido →  
+    mover la parte común a `@BeforeEach` y dejar en el test solo el Given que realmente cambia + When + Then.
+    
+
+En resumen:  **no hay contradicción en absoluto**.  
+El patrón Given/When/Then describe el _qué_ de cada parte del test;  
+los `@Before...` solo te ayudan a decidir _dónde_ pones físicamente el código del Given.
+
+
 # Mini-Proyecto
  
  
-## 1. Objetivo del mini-tutorial
+## 1. Objetivo del mini-proyecto
 
 - Entender **qué es un test unitario** y qué es un test de integración.
     
