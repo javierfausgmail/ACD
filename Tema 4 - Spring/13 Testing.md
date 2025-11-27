@@ -449,7 +449,7 @@ class CalculatorServiceTest {
 }
 ```
 
-**Ideas clave para explicar:**
+**Ideas clave:**
 
 - `@Test`: marca un método como caso de prueba.
     
@@ -503,7 +503,7 @@ class CalculatorServiceSpringTest {
     
 - Útil para **tests de integración** donde nos interesa comprobar que los beans se crean bien, funcionan juntos, etc.
     
-- Es más **lento** que un test unitario puro → explicar por qué normalmente preferimos muchos **unit tests** y menos **integration tests**.
+- Es más **lento** que un test unitario puro → por esonormalmente preferimos muchos **unit tests** y menos **integration tests**.
     
 
 ---
