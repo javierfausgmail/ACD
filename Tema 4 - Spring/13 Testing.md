@@ -224,7 +224,7 @@ En un IDE (IntelliJ, Eclipse, VS Code con extensión Java):
 
 # Organización código de los tests
 
-Ejemplo claro usando el estilo **Given / When / Then** (Given = contexto, When = acción, Then = verificación).
+Veamos un ejemplo claro usando el estilo **Given / When / Then** (Given = contexto, When = acción, Then = verificación).
 
 ### Clase a probar
 
@@ -307,7 +307,7 @@ Piezas clave del patrón en el test:
 - **Then** → comprobar el resultado con `assert...`.
     
 
-Atención, porque aquí se mezclan **dos cosas distintas**:
+Atención, porque puede que mezcles o confundas **dos cosas distintas**:
 
 - El estilo **Given / When / Then** → forma de **explicar/estructurar el test**.
     
