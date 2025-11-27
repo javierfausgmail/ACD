@@ -1,4 +1,230 @@
+# Intro
+## 1. ¿Qué es JUnit y para qué sirve?
 
+- **Qué es**: una librería Java para escribir **tests automáticos**. Es el framework estándar de testing unitario para Java.  
+    
+- **Para qué sirve**:
+    
+    - Verificar que una clase o método hace lo que debe.
+        
+    - Detectar errores cuando se cambia o refactoriza código.
+        
+    - Integrarse con Maven/Gradle y CI para lanzar baterías de tests.
+        
+
+Hoy en día se usa sobre todo **JUnit 5 (Jupiter)**.
+
+---
+
+## 2. Añadir JUnit 5 a un proyecto Maven
+
+```xml
+<!-- pom.xml -->
+<dependencies>
+    <!-- Dependencia principal de JUnit 5 -->
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>5.10.2</version>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+
+<build>
+    <plugins>
+        <!-- Asegura que se ejecutan los tests con JUnit 5 -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.2.5</version>
+            <configuration>
+                <useModulePath>false</useModulePath>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+Los tests se colocan en `src/test/java`.
+
+---
+
+## 3. Estructura de un test con JUnit 5
+
+Ejemplo: hay una clase `Calculadora`:
+
+```java
+// src/main/java/com/ejemplo/Calculadora.java
+package com.ejemplo;
+
+public class Calculadora {
+
+    public int sumar(int a, int b) {
+        return a + b;
+    }
+
+    public int dividir(int a, int b) {
+        if (b == 0) {
+            throw new IllegalArgumentException("No se puede dividir entre cero");
+        }
+        return a / b;
+    }
+}
+```
+
+Test asociado:
+
+```java
+// src/test/java/com/ejemplo/CalculadoraTest.java
+package com.ejemplo;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class CalculadoraTest {
+
+    @Test
+    void sumar_deberiaDevolverLaSuma() {
+        Calculadora calc = new Calculadora();
+        int resultado = calc.sumar(2, 3);
+
+        assertEquals(5, resultado, "2 + 3 debe ser 5");
+    }
+
+    @Test
+    void dividir_entreCero_deberiaLanzarExcepcion() {
+        Calculadora calc = new Calculadora();
+
+        assertThrows(IllegalArgumentException.class,
+                     () -> calc.dividir(10, 0),
+                     "Dividir entre cero debe lanzar IllegalArgumentException");
+    }
+}
+```
+
+Puntos clave:
+
+- `@Test`: marca un método como test.
+    
+- `assertEquals`, `assertThrows`, etc.: verifican condiciones.
+    
+- Si una aserción falla → el test se marca como **fallido**.
+    
+
+---
+
+## 4. Aserciones más comunes
+
+Importando:
+
+```java
+import static org.junit.jupiter.api.Assertions.*;
+```
+
+Se usan, por ejemplo:
+
+```java
+assertEquals(esperado, real);
+assertNotEquals(noEsperado, real);
+assertTrue(condicion);
+assertFalse(condicion);
+assertNull(obj);
+assertNotNull(obj);
+assertThrows(TipoExcepcion.class, () -> { /* código que debe fallar */ });
+```
+
+Cada aserción puede llevar un mensaje al final:
+
+```java
+assertTrue(lista.isEmpty(), "La lista debería venir vacía al inicio");
+```
+
+---
+
+## 5. Ciclo de vida del test
+
+Para preparar y limpiar antes/después de cada test:
+
+```java
+import org.junit.jupiter.api.*;
+
+class EjemploLifecycleTest {
+
+    @BeforeAll
+    static void antesDeTodos() {
+        // Se ejecuta UNA vez antes de todos los tests de la clase
+    }
+
+    @AfterAll
+    static void despuesDeTodos() {
+        // Se ejecuta UNA vez al final
+    }
+
+    @BeforeEach
+    void antesDeCadaTest() {
+        // Se ejecuta ANTES de cada @Test
+    }
+
+    @AfterEach
+    void despuesDeCadaTest() {
+        // Se ejecuta DESPUÉS de cada @Test
+    }
+
+    @Test
+    void test1() { }
+
+    @Test
+    void test2() { }
+}
+```
+
+---
+
+## 6. Tests parametrizados (idea rápida)
+
+Permiten ejecutar el mismo test con varios datos:
+
+```java
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+class CalculadoraParamTest {
+
+    @ParameterizedTest
+    @CsvSource({
+            "1, 2, 3",
+            "2, 2, 4",
+            "-1, 1, 0"
+    })
+    void sumar_variosCasos(int a, int b, int esperado) {
+        Calculadora calc = new Calculadora();
+        assertEquals(esperado, calc.sumar(a, b));
+    }
+}
+```
+
+---
+
+## 7. Cómo se ejecuta
+
+En un proyecto Maven:
+
+```bash
+mvn test
+```
+
+En un IDE (IntelliJ, Eclipse, VS Code con extensión Java):
+
+- Se puede hacer clic derecho sobre la clase de tests → **Run ‘CalculadoraTest’**.
+    
+- O ejecutarlos todos desde la vista de tests.
+    
+
+---
+# Mini-Proyecto
+ 
+ 
 ## 1. Objetivo del mini-tutorial
 
 - Entender **qué es un test unitario** y qué es un test de integración.
@@ -345,7 +571,7 @@ class CalculatorControllerTest {
 
 ---
 
-## 7. Resumen de conceptos fundamentales (para la pizarra)
+## 7. Resumen de conceptos fundamentales
 
 1. **Tipos de tests**
     
