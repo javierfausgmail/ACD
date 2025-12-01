@@ -306,9 +306,9 @@ https://spring.io/guides/gs/testing-web
 
 **Ejercicios**
 
-1. **Nivel Fácil (Sesión 1):** Configurar Spring Security para una aplicación simple, permitiendo acceso sin restricciones a una ruta específica.
+1. **Nivel Fácil :** Configurar Spring Security para una aplicación simple, permitiendo acceso sin restricciones a una ruta específica.
    - **Solución:** Implementar la clase `SecurityConfig` con la configuración adecuada para permitir el acceso a ciertas URLs.
 
-2. **Nivel Medio (Sesión 2):** Escribir un test para un repositorio, comprobando la correcta ejecución de una operación CRUD.
+2. **Nivel Medio (Investiga):** Escribir un test para un repositorio, comprobando la correcta ejecución de una operación CRUD.
    - **Solución:** Utilizar `@DataJpaTest` para probar un repositorio, creando un test que guarde un objeto y luego lo recupere y verifique su existencia.
 
