@@ -1,126 +1,343 @@
-### Clase 5: Seguridad y Testing en Spring
+### Clase 5: Seguridad en Spring
+# Seguridad en Spring Web — Explicado con Analogías
 
-#### Sesión 1: Spring Security
+Como introducción vamos a traducir lo técnico a un lenguaje simple, con ejemplos de la vida real. Imaginad que estamos hablando de **la seguridad de un edificio** con puertas, llaves, tarjetas identificativas y guardias.
 
-##### Fundamentos de Seguridad en Aplicaciones
-La seguridad web abarca la **autenticación** (verificar la identidad del usuario) y la **autorización** (controlar el acceso a recursos).
+---
 
-Spring Security proporciona un marco para la seguridad de aplicaciones, incluyendo autenticación y autorización.
+##  ¿Qué es la Seguridad?
 
-La autenticación se logra mediante proveedores de autenticación, mientras que la autorización se maneja mediante la asignación de roles y el control de acceso a URLs.
+En software, "seguridad" es como la **seguridad de un edificio**:
 
-El **Control de Acceso Basado en Roles (autenticación)** y la **Gestión de Permisos (autorización)**  son aspectos esenciales de la autorización en aplicaciones web, y Spring Boot proporciona herramientas poderosas y flexibles para implementar estas funcionalidades. Aquí se muestra cómo aplicar estos conceptos específicamente en el contexto de Spring Boot y el Spring Security Framework.
+- Controlar quién entra.
+    
+- Controlar qué puede hacer cada persona dentro.
+    
+- Evitar que gente no autorizada se cuele.
+    
 
-##### Control de Acceso Basado en Roles (RBAC)
-En RBAC, los **accesos** se otorgan en función de los **roles** asignados a los usuarios. En Spring Boot, esto se gestiona típicamente con Spring Security:
+En esta lección veremos cómo funciona la seguridad en aplicaciones web usando **Spring Security**.
 
-1. **Definición de Roles**: Los roles representan un conjunto de permisos. Por ejemplo, podrías tener roles como `ADMIN`, `USER`, `MANAGER`, etc.
+---
 
-2. **Asignación de Roles a Usuarios**: Cuando un usuario se autentica, se le asignan roles. Estos roles se pueden almacenar y gestionar en la base de datos.
+##  Autenticación = “¿Quién eres?”
 
-3. **Configuración de Spring Security**:
-   - En el `WebSecurityConfigurerAdapter`, defines las reglas de seguridad, especificando qué roles tienen acceso a qué rutas o métodos en tu aplicación.
-   - Ejemplo de configuración de seguridad:
+**Autenticación** es como cuando llegas a un edificio y el guardia te pide:
+
+> “Enséñame tu identificación.”
+
+En software:
+
+- El “usuario” puede ser una persona o incluso otro programa → lo llamamos **Principal**.
+    
+- Para demostrar quién eres, aportas **credenciales** (usuario y contraseña, por ejemplo).
+    
+
+Si las credenciales son correctas → **el sistema te reconoce y te deja entrar**.
+
+###  Problema: HTTP no recuerda nada
+
+HTTP es como un guardia **muy despistado**:
+
+👉 Cada vez que entras al edificio, te vuelve a pedir la identificación.  
+No recuerda tu cara.
+
+Eso es muy incómodo.
+
+###  Solución: Cookies con Tokens (una tarjeta identificativa)
+
+Para evitar que el guardia pida DNI cada vez:
+
+- El servidor crea un **Token** (como una tarjeta magnética del edificio).
+    
+- Ese Token se guarda en una **Cookie** del navegador.
+    
+- Cada vez que haces una petición, la Cookie va sola, como si pasaras la tarjeta por el lector.
+    
+
+Así no necesitas estar poniendo usuario y contraseña todo el rato.
+
+---
+
+##  Spring Security y la Autenticación
+
+Spring Security coloca un **filtro** (un guardia de seguridad) **antes de llegar al controlador**.
+
+- Mira la petición.
+    
+- Comprueba si la Cookie/Token es válida.
+    
+- Si NO lo es → devuelve **401 UNAUTHORIZED**  
+    (equivalente a: “Lo siento, no puede pasar”).
+    
+
+---
+
+##  Autorización = “¿Qué puedes hacer?”
+
+Una vez el sistema sabe **quién eres**, toca decidir **qué te permite hacer**.
+
+Esto es la **autorización**, como dentro de un edificio:
+
+- Un vigilante puede acceder al cuarto de control.
+    
+- Un visitante puede entrar solo al hall.
+    
+- Un técnico puede entrar al cuarto de máquinas.
+    
+
+Spring Security usa **Roles** para esto:
+
+- `ADMIN`
+    
+- `USER`
+    
+- `OWNER`
+    
+- etc.
+    
+
+Cada endpoint o función puede decir:
+
+> “Solo entran ADMIN”,  
+> “Solo entran propietarios”,  
+> “Todos pueden ver, pero solo algunos pueden editar”, etc.
+
+---
+
+##  Same Origin Policy (SOP)
+
+El SOP es como una **valla** alrededor del edificio que evita que desconocidos puedan interactuar con tu sistema.
+
+Significa:
+
+Solo las páginas que vienen del MISMO sitio web pueden enviar peticiones libres al servidor.
+
+Es la forma básica de evitar ataques.
+
+### Ejemplo con banco:
+
+Imagina que estás conectado en tu banco en una pestaña.  
+Si no existiera SOP:
+
+- Abres otra web maliciosa.
+    
+- Esa web podría enviar peticiones al banco usando tus Cookies.
+    
+- El banco pensaría que has pedido una transferencia.
+    
+
+Por eso existe el SOP.
+
+---
+
+##  CORS: Permitido cruzar la valla, pero solo a quien tú digas
+
+A veces TIENES que dejar que otras webs (otros orígenes) te llamen.  
+Ejemplo: tu frontend en React (localhost:3000) llama al backend (localhost:8080).
+
+Para eso existe **CORS**, una excepción segura a SOP.
+
+En Spring se hace con:
+
 ```java
-@EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-            .authorizeRequests()
-                .antMatchers("/", "/home").permitAll()
-                .anyRequest().authenticated()
-            .and()
-            .formLogin()
-                .loginPage("/login")
-                .permitAll()
-            .and()
-            .logout()
-                .permitAll();
-    }
-}
+@CrossOrigin
 ```
 
-   - Otro ejemplo con control por ROLES:
-     ```java
-     @Override
-     protected void configure(HttpSecurity http) throws Exception {
-         http
-             .authorizeRequests()
-             .antMatchers("/admin/**").hasRole("ADMIN")
-             .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-             .antMatchers("/").permitAll()
-             .and()
-             .formLogin();
-     }
-     ```
-Este código configura las rutas para que solo sean accesibles por usuarios con los roles específicos.
+⚠️ Si usas `@CrossOrigin` sin parámetros → permites a TODOS.  
+Como dejar la puerta del edificio abierta: peligroso.
 
-##### Gestión de Permisos
-Además de los roles, puedes gestionar permisos específicos para acciones más granulares:
+---
 
-1. **Permisos**: Son autorizaciones más específicas que los roles. Por ejemplo, un rol `USER` podría tener permisos como `READ_PROFILE`, `EDIT_PROFILE`.
+##  Ataques Comunes en la Web
 
-2. **Spring Method Security**: Puedes usar anotaciones de seguridad en los métodos para controlar el acceso basado en roles o permisos.
-   - Ejemplo:
-     ```java
-     @PreAuthorize("hasRole('ADMIN')")
-     public void someAdminMethod() {
-         // ...
-     }
+###  CSRF (Cross-Site Request Forgery)
 
-     @PreAuthorize("hasAuthority('READ_PROFILE')")
-     public void someUserMethod() {
-         // ...
-     }
-     ```
-   - `@PreAuthorize` permite definir la seguridad a nivel de método antes de que se ejecute el método.
+Analogia: **“un ladrón empuja tu tarjeta del edificio sin que tú lo sepas”**.
 
-##### Implementación Práctica en Spring Boot
-1. **Configurar Spring Security**: Añade Spring Security a tu proyecto de Spring Boot. Puedes hacerlo agregando la dependencia `spring-boot-starter-security` en tu archivo `pom.xml` o `build.gradle`.
+El ataque funciona así:
 
-2. **Clase de Configuración de Seguridad**: Crea una clase que extienda `WebSecurityConfigurerAdapter` para personalizar tu configuración de seguridad.
+1. Tú estás autenticado (tienes la Cookie).
+    
+2. Visitas una web maliciosa.
+    
+3. Esa web envía peticiones al servidor usando TU Cookie.
+    
+4. El servidor no tiene forma de saber si tú querías hacer eso o no.
+    
 
-3. **Servicio de Detalles de Usuario**: Implementa `UserDetailsService` para cargar datos específicos del usuario (como roles) desde la base de datos.
+Solución: **CSRF Token**, como un ticket único por cada acción.
 
-4. **Personalizar la Autenticación y Autorización**: Utiliza `AuthenticationManagerBuilder` para definir cómo se autenticarán los usuarios (por ejemplo, con base de datos, LDAP, etc.) y configura las reglas de autorización en el método `configure(HttpSecurity http)`. Puedes utilizar [[JWT]] para este proceso de autenticación y autorización de usuarios.
+- Cada formulario/petición lleva un Token único.
+    
+- Aunque tengan tu Cookie, sin el Token no pueden hacer nada.
+    
 
-5. **Pruebas y Validación**: Asegúrate de probar exhaustivamente la seguridad de tu aplicación, incluyendo la autenticación y la autorización, para verificar que los permisos y roles se manejan como se espera.
+Spring Security lo activa **por defecto**.
 
-Implementar RBAC y la gestión de permisos de manera efectiva en Spring Boot con Spring Security te permitirá tener un control detallado y seguro sobre quién puede acceder y realizar operaciones específicas en la aplicación.
+---
 
-##### Vídeo tutoriales completos con JWT
+###  XSS (Cross-Site Scripting)
 
-- https://www.youtube.com/watch?v=KBvBY5qyfEM (con código fuente: https://github.com/ali-bouali/spring-boot-3-jwt-security)
+Analogía: **meter un dispositivo explosivo dentro del edificio** para que explote cuando alguien lo vea.
 
-- https://www.youtube.com/playlist?list=PLr23_YfwEbPRCK4IbemQGwYdgSwfd2aZu (sin código fuente, capítulos 1 y 2).
+Un atacante consigue que tu aplicación ejecute código que NO debería.
 
-##### Ejemplos de la documentación oficial
-* https://docs.spring.io/spring-security/reference/samples.html
+Ejemplo típico:
+
+1. Un usuario malicioso guarda un texto con `<script>` en la base de datos.
+    
+2. Más tarde, otro usuario lo visualiza.
+    
+3. El navegador ejecuta ese script como si fuera tuyo.
+    
+
+Es más grave que CSRF: se ejecuta código arbitrario, no solo acciones autorizadas.
+
+#### Solución:
+
+- Filtrar y escapar correctamente todo el contenido mostrado.
+    
+- Nunca renderizar HTML “crudo” que venga de usuarios.
+    
+
+---
+
+##  Resumen final
+
+- **Autenticación** = “demostrar quién eres”.
+    
+- **Autorización** = “qué puedes hacer”.
+    
+- **Cookies con Tokens** = tu tarjeta de acceso.
+    
+- **Spring Security** = guardias en la puerta (filtros).
+    
+- **SOP** = la valla que separa tu edificio del resto del mundo.
+    
+- **CORS** = permisos especiales para invitados externos.
+    
+- **CSRF** = un atacante usando tu propia tarjeta sin que lo sepas.
+    
+- **XSS** = un atacante coloca código malicioso dentro de tu aplicación.
+    
+
+---
+
+# **Seguridad en Spring** Web— Explicado sin Analogías
+
+### **¿Qué es la Seguridad?**
+
+La seguridad del software puede significar muchas cosas. El campo es un tema enorme que merece su propio curso. En esta lección, hablaremos sobre Seguridad Web. Más específicamente, cubriremos cómo funcionan la Autenticación y la Autorización HTTP, las formas comunes en las que el ecosistema web es vulnerable a ataques y cómo podemos usar Spring Security para evitar el acceso no autorizado a nuestro servicio Family Cash Card.
+
+### **Autenticación**
+
+Un usuario de una API puede ser realmente una persona u otro programa, por lo que a menudo utilizaremos el término _Principal_ como sinónimo de “usuario”. La autenticación es el acto de que un Principal demuestre su identidad al sistema. Una forma de hacer esto es proporcionar credenciales (por ejemplo, un nombre de usuario y una contraseña usando Autenticación Básica). Decimos que, una vez que se han presentado las credenciales correctas, el Principal está autenticado, o en otras palabras, el usuario ha iniciado sesión correctamente.
+
+HTTP es un protocolo sin estado (_stateless_), por lo que cada petición debe contener datos que demuestren que proviene de un Principal autenticado. Aunque es posible presentar las credenciales en cada petición, hacerlo es ineficiente porque requiere más procesamiento en el servidor. En su lugar, se crea una Sesión de Autenticación (o _Auth Session_, o simplemente _Session_) cuando un usuario es autenticado. Las sesiones pueden implementarse de muchas maneras. Usaremos un mecanismo común: un Token de Sesión (una cadena de caracteres aleatorios) que se genera y se coloca en una Cookie. Una Cookie es un conjunto de datos almacenado en un cliente web (como un navegador) y asociado a un URI específico.
+
+Un par de cosas interesantes sobre las Cookies:
+
+- Las cookies se envían automáticamente al servidor con cada petición (no es necesario escribir código adicional para que esto ocurra). Mientras el servidor compruebe que el Token en la Cookie es válido, las peticiones no autenticadas pueden ser rechazadas.
+    
+- Las cookies pueden persistir durante un cierto tiempo incluso si la página web se cierra y se vuelve a visitar más tarde. Esta capacidad suele mejorar la experiencia de usuario del sitio web.
+    
+
+### **Spring Security y la Autenticación**
+
+Spring Security implementa la autenticación en la _Filter Chain_. La _Filter Chain_ es un componente de la arquitectura web Java que permite a los programadores definir una secuencia de métodos que se llaman antes del _Controller_. Cada filtro en la cadena decide si permite que continúe el procesamiento de la petición o no. Spring Security inserta un filtro que comprueba la autenticación del usuario y devuelve una respuesta **401 UNAUTHORIZED** si la petición no está autenticada.
+
+### **Autorización**
+
+Hasta ahora hemos hablado de autenticación. Pero en realidad, la autenticación es solo el primer paso. La autorización ocurre después de la autenticación y permite que distintos usuarios del mismo sistema tengan permisos diferentes.
+
+Spring Security proporciona Autorización mediante Control de Acceso Basado en Roles (_RBAC_). Esto significa que un Principal tiene varios Roles. Cada recurso (u operación) especifica qué Roles debe tener un Principal para realizar acciones con la autorización adecuada. Por ejemplo, es probable que un usuario con un Rol de Administrador esté autorizado a realizar más acciones que un usuario con un Rol de Propietario de Tarjeta. Puedes configurar autorización basada en roles tanto a nivel global como a nivel de cada método.
+
+### **Same Origin Policy**
+
+La web es un lugar peligroso, donde actores maliciosos están constantemente intentando explotar vulnerabilidades de seguridad. El mecanismo de protección más básico se basa en que los clientes y servidores HTTP implementen la _Same Origin Policy_ (SOP). Esta política establece que solo los scripts contenidos en una página web pueden enviar peticiones al origen (URI) de esa página.
+
+La SOP es fundamental para la seguridad de los sitios web porque, sin la política, cualquiera podría escribir una página web que contuviera un script capaz de enviar peticiones a cualquier otro sitio. Por ejemplo, veamos un sitio típico de banca. Si un usuario ha iniciado sesión en su cuenta bancaria y visita una página web maliciosa (en otra pestaña o ventana del navegador), las peticiones maliciosas podrían enviarse desde la web malicionsa (con las Cookies de Autenticación capturadas por este) al sitio bancario. Esto podría dar lugar a acciones no deseadas —como una retirada de dinero de la cuenta del usuario—.
+
+### **Cross-Origin Resource Sharing**
+
+A veces un sistema consiste en servicios que se ejecutan en varias máquinas con distintos URIs (es decir, microservicios). El _Cross-Origin Resource Sharing_ (CORS) es una forma de que navegadores y servidores cooperen para relajar la SOP. Un servidor puede permitir explícitamente una lista de “orígenes permitidos” para peticiones procedentes de un origen externo al servidor.
+
+Spring Security proporciona la anotación `@CrossOrigin`, que permite especificar una lista de sitios permitidos. ¡Ten cuidado! Si usas la anotación sin argumentos, permitirá todos los orígenes, así que tenlo en cuenta.
+
+### **Explotaciones Web Comunes**
+
+Además de aprovechar vulnerabilidades de seguridad conocidas, los actores maliciosos en la web también descubren constantemente nuevas vulnerabilidades. Afortunadamente, Spring Security proporciona un conjunto de herramientas potentes para proteger contra explotaciones de seguridad comunes. Analicemos dos explotaciones comunes, cómo funcionan y cómo Spring Security ayuda a mitigarlas.
+
+### **Cross-Site Request Forgery**
+
+Un tipo de vulnerabilidad es el _Cross-Site Request Forgery_ (CSRF), que a menudo se pronuncia “Sea-Surf” y también se conoce como _Session Riding_. El Session Riding está habilitado por el uso de Cookies. Los ataques CSRF ocurren cuando un fragmento de código malicioso envía una petición a un servidor donde un usuario está autenticado. Cuando el servidor recibe la Cookie de Autenticación, no tiene manera de saber si la víctima envió involuntariamente la petición dañina.
+
+Para protegerse contra ataques CSRF, puede usarse un Token CSRF. Un Token CSRF es diferente de un Token de Autenticación porque se genera un token único en cada petición. Esto hace más difícil que un actor externo se inserte en la “conversación” entre cliente y servidor.
+
+Afortunadamente, Spring Security tiene soporte integrado para tokens CSRF, que está habilitado por defecto.
+
+### **Cross-Site Scripting**
+
+Quizá incluso más peligrosa que la vulnerabilidad CSRF es el _Cross-Site Scripting_ (XSS). Esto ocurre cuando un atacante consigue “engañar” a la aplicación víctima para que ejecute código arbitrario. Hay muchas formas de hacer esto. Un ejemplo sencillo es guardar en una base de datos una cadena que contenga una etiqueta `<script>`, y luego esperar a que la cadena sea mostrada en una página web, haciendo que el script se ejecute.
+
+El XSS es potencialmente más peligroso que el CSRF. En el CSRF, solo pueden ejecutarse acciones para las que el usuario esté autorizado. Sin embargo, en el XSS se ejecuta código malicioso arbitrario en el cliente o en el servidor. Además, los ataques XSS no dependen de la Autenticación. Más bien, dependen de “agujeros” de seguridad causados por malas prácticas de programación.
+
+La manera principal de protegerse contra ataques XSS es procesar correctamente todos los datos provenientes de fuentes externas (como formularios web y cadenas de consulta en URIs). En el caso de nuestro ejemplo con la etiqueta `<script>`, los ataques pueden mitigarse escapando correctamente los caracteres especiales de HTML cuando se muestra la cadena.
+
+---
+
+La Seguridad Web es un tema muy amplio y diverso, pero ahora tienes una idea general de cómo puedes usar Spring Security para proteger a tus usuarios y aplicaciones.
 
 
-##### Ejemplo básico aplicado Reserva Hotel
-Vamos a detallar cada uno de los puntos mencionados con ejemplos concretos, aplicados al contexto del sistema de reservas de un hotel en Spring Boot:
-
-```
-**AVISO:** Con los cambios a partir de Spring 5.7.0-M2 WebSecurityConfigurerAdapter está *deprecated* así que podemos cambiar la configuración siguiendo estos pasos https://www.baeldung.com/spring-deprecated-websecurityconfigureradapter
-```
 
 
+# **Fundamentos Modernos de Seguridad en Spring Boot (Spring Security 6.x)**
 
+La seguridad en aplicaciones web implica dos procesos principales:
 
-##### 1. Definición y Asignación de Roles
+- **Autenticación** → verificar _quién es_ el usuario.
+    
+- **Autorización** → decidir _qué puede hacer_ ese usuario.
+    
 
-###### Base de Datos
-Imagina que tienes una tabla `usuarios` y una tabla `roles`. Los roles pueden ser `ADMIN`, `USER`, `MANAGER`, etc. Además, tendrías una tabla de unión `usuarios_roles` para representar la relación muchos-a-muchos entre usuarios y roles.
+Spring Security proporciona mecanismos robustos para implementar ambos, tanto con roles como con permisos específicos.
+
+En las versiones actuales (Spring Boot 3 / Spring Security 6):
+
+### Ya NO se usa:
+
+- `WebSecurityConfigurerAdapter` → **ELIMINADO**
+    
+- `antMatchers()` → reemplazado por `requestMatchers()`
+    
+
+### Ahora se usa:
+
+- Beans de configuración
+    
+- `SecurityFilterChain`
+    
+- `UserDetailsService`
+    
+- `PasswordEncoder`
+    
+- Anotaciones: `@EnableMethodSecurity`, `@PreAuthorize`, etc.
+    
+
+---
+
+# **Control de Acceso Basado en Roles (RBAC)**
+
+En RBAC, los usuarios reciben **roles**, que representan grupos de permisos (p. ej. `ADMIN`, `USER`, `MANAGER`).
+
+## 1. Roles en la base de datos
 
 ```sql
 CREATE TABLE usuarios (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL,
-    password VARCHAR(100) NOT NULL,
-    -- otros campos
+    password VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE roles (
@@ -136,14 +353,13 @@ CREATE TABLE usuarios_roles (
 );
 ```
 
-###### Entidades en Spring Boot
-Tendrías entidades `Usuario` y `Rol` en tu proyecto de Spring Boot.
+## 2. Entidades modernas en Spring Boot
 
 ```java
 @Entity
 public class Usuario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String username;
@@ -156,47 +372,50 @@ public class Usuario {
         inverseJoinColumns = @JoinColumn(name = "rol_id")
     )
     private Set<Rol> roles;
-    // Getters y setters
-}
-
-@Entity
-public class Rol {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String nombre;
-    // Getters y setters
 }
 ```
 
-##### 2. Clase de Configuración de Seguridad
+```java
+@Entity
+public class Rol {
 
-En Spring Boot, extiendes la clase `WebSecurityConfigurerAdapter` para configurar la seguridad:
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String nombre;
+}
+```
+
+---
+
+# **Configuración de Seguridad Moderna (Spring Boot 3.x / Security 6)**
+
+### Ya no se extiende ninguna clase.
+
+Ahora se declaran **beans explícitos**.
 
 ```java
 @Configuration
-@EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableMethodSecurity  // habilita @PreAuthorize, @PostAuthorize, etc.
+public class SecurityConfig {
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-            .authorizeRequests()
-            .antMatchers("/admin/**").hasRole("ADMIN")
-            .antMatchers("/reservas/**").hasAnyRole("USER", "MANAGER")
-            .antMatchers("/").permitAll()
-            .and()
-            .formLogin();
-            // Configuración adicional
-    }
-
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        return http
+            .csrf(csrf -> csrf.disable())                     // desactiva CSRF (activar si usas formularios)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/publico/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/reservas/**").hasAnyRole("USER", "MANAGER")
+                .anyRequest().authenticated()
+            )
+            .formLogin(login -> login
+                .loginPage("/login")
+                .permitAll()
+            )
+            .logout(logout -> logout.permitAll())
+            .build();
     }
 
     @Bean
@@ -206,109 +425,186 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 }
 ```
 
-##### 3. Servicio de Detalles de Usuario
+✔ **Roles deben ir prefijados internamente con `ROLE_`**, pero Spring lo hace automáticamente.
 
-Implementa `UserDetailsService` para cargar los usuarios y sus roles desde la base de datos:
+---
+
+# **UserDetailsService Moderno**
 
 ```java
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository repo;
+
+    public UserDetailsServiceImpl(UsuarioRepository repo) {
+        this.repo = repo;
+    }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
 
-        Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-        for (Rol rol : usuario.getRoles()) {
-            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + rol.getNombre()));
-        }
+        Usuario usuario = repo.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("No existe: " + username));
 
-        return new org.springframework.security.core.userdetails.User(usuario.getUsername(), usuario.getPassword(), grantedAuthorities);
+        Set<GrantedAuthority> authorities =
+                usuario.getRoles().stream()
+                    .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getNombre()))
+                    .collect(Collectors.toSet());
+
+        return new User(usuario.getUsername(), usuario.getPassword(), authorities);
     }
 }
 ```
-
-##### 4. Pruebas y Validación
-Las pruebas de seguridad implican:
-
-- Verificar que los endpoints están protegidos según los roles.
-- Comprobar que la autenticación funciona correctamente.
-- Asegurar que los roles se asignan y aplican correctamente.
-
-Puedes usar Spring Boot Test para escribir pruebas que validen tu configuración de seguridad:
-
-```java
-@SpringBootTest
-@AutoConfigureMockMvc
-public class SecurityTests {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    // Escribe pruebas para verificar la seguridad
-    // Por ejemplo, intentar acceder a rutas protegidas sin autenticación o con roles incorrectos
-}
-```
-
-Estos ejemplos proporcionan un punto de partida para la implementación de RBAC y la seguridad en general en una aplicación con Spring Boot, recuerda que la seguridad informática es un tema crítico en cualquier aplicación y debes de consultar con un experto si no tienes los conocimientos suficientes para hacerte cargo de este aspecto. 
-
-
-#### Sesión 2: Testing en Spring
-
-##### Principios de Testing en Spring
-El testing en Spring incluye pruebas unitarias y de integración, con el objetivo de verificar el correcto funcionamiento de componentes individuales y del sistema en conjunto.
-
-##### Uso de Spring Boot Test
-Spring Boot Test proporciona herramientas para pruebas, incluyendo anotaciones como `@SpringBootTest` para pruebas de integración.
-
-##### Creación de Tests para Repositorios y Controladores
-Los tests para repositorios pueden incluir operaciones CRUD, mientras que los tests para controladores pueden verificar respuestas HTTP y comportamientos de endpoints.
-
-**Ejemplo de Test para un Controlador:**
-
-```java
-@SpringBootTest
-@AutoConfigureMockMvc
-public class UsuarioControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Test
-    public void testSaludo() throws Exception {
-        this.mockMvc.perform(get("/saludo"))
-            .andExpect(status().isOk())
-            .andExpect(content().string(containsString("Hola")));
-    }
-}
-```
-
-##### Testing avanzado
-
-##### Pruebas de Integración en Spring
-Las pruebas de integración validan que los distintos módulos de la aplicación funcionen correctamente en conjunto.
-
-##### Testing de Microservicios
-En un entorno de microservicios, las pruebas de integración implican verificar la comunicación y la colaboración entre los servicios.
-
-##### Herramientas y Estrategias para Pruebas de Fin a Fin
-Incluyen simulación de escenarios de usuario, verificación de flujos de trabajo completos y uso de herramientas como Selenium para pruebas de interfaces de usuario.
-
-Ejemplos y explicaciones sobre testing:
-https://spring.io/guides/gs/testing-web
-
 
 ---
 
-**Ejercicios**
+# **Seguridad por Permisos (Authorities)**
 
-1. **Nivel Fácil :** Configurar Spring Security para una aplicación simple, permitiendo acceso sin restricciones a una ruta específica.
-   - **Solución:** Implementar la clase `SecurityConfig` con la configuración adecuada para permitir el acceso a ciertas URLs.
+Además de roles, puedes definir **permisos granulares**.
 
-2. **Nivel Medio (Investiga):** Escribir un test para un repositorio, comprobando la correcta ejecución de una operación CRUD.
-   - **Solución:** Utilizar `@DataJpaTest` para probar un repositorio, creando un test que guarde un objeto y luego lo recupere y verifique su existencia.
+Ejemplo:
+
+- Rol `USER` → `READ_PROFILE`
+    
+- Rol `ADMIN` → `DELETE_BOOKING`, `MANAGE_USERS`
+    
+
+### Uso en métodos:
+
+```java
+@PreAuthorize("hasRole('ADMIN')")
+public void adminMethod() {}
+
+@PreAuthorize("hasAuthority('DELETE_BOOKING')")
+public void deleteReserva() {}
+```
+
+✔ Requiere `@EnableMethodSecurity`.
+
+---
+
+# **Ejemplo Real: Sistema de Reservas de Hotel 
+### Control de acceso:
+
+- `/admin/**` → solo ADMIN
+    
+- `/reservas/**` → USER + MANAGER
+    
+- `/` → público
+    
+
+Configuración:
+
+```java
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+    return http
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/admin/**").hasRole("ADMIN")
+            .requestMatchers("/reservas/**").hasAnyRole("USER", "MANAGER")
+            .requestMatchers("/", "/publico/**").permitAll()
+            .anyRequest().authenticated()
+        )
+        .formLogin(Customizer.withDefaults())
+        .build();
+}
+```
+
+### Ejemplo de método restringido:
+
+```java
+@PreAuthorize("hasRole('MANAGER')")
+public Reserva aprobarReserva(Long idReserva) {
+    // ...
+}
+```
+
+---
+
+# **Ejemplo JWT Moderno (muy resumido)**
+
+Para Spring Security 6.x el flujo típico es:
+
+- Filtro que extrae el token del header
+    
+- Valida el JWT
+    
+- Crea un `UsernamePasswordAuthenticationToken`
+    
+- Lo guarda en el `SecurityContext`
+    
+
+Ejemplo de filtro moderno:
+
+```java
+@Component
+public class JwtFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+        throws ServletException, IOException {
+
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
+            String username = jwtService.extractUsername(jwt);
+
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                if (jwtService.isValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}
+```
+
+---
+
+# **Pruebas de Seguridad en Spring Boot (moderno)**
+
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+class SecurityTest {
+
+    @Autowired
+    MockMvc mvc;
+
+    @Test
+    void accesoNoAutenticado() throws Exception {
+        mvc.perform(get("/admin"))
+            .andExpect(status().isForbidden());
+    }
+}
+```
+
+---
+
+# **Referencias oficiales y tutoriales actuales**
+
+- Documentación oficial:  
+    [https://docs.spring.io/spring-security/reference/index.html](https://docs.spring.io/spring-security/reference/index.html)
+    
+- Muestras oficiales:  
+    [https://docs.spring.io/spring-security/reference/samples.html](https://docs.spring.io/spring-security/reference/samples.html)
+    
+
+
+
 
