@@ -883,7 +883,7 @@ Explicación:
 - Si haces `curl` con credenciales pero sin los roles adecuados (en otros escenarios) → `403 Forbidden`.
     
 
-> Aquí puedes introducir el concepto de **Principio de mínimo privilegio**:  
+> Aquí puedes aplicar el concepto de **Principio de mínimo privilegio**:  
 > dar a cada rol sólo los permisos necesarios para su tarea.
 
 #### 2. Conectar esto con el dominio “Family Cash Card”
