@@ -1,4 +1,4 @@
-### Clase 5: Seguridad en Spring
+# Clase 5: Seguridad en Spring
 # Seguridad en Spring Web — Explicado con Analogías
 
 Como introducción vamos a traducir lo técnico a un lenguaje simple, con ejemplos de la vida real. Imaginad que estamos hablando de **la seguridad de un edificio** con puertas, llaves, tarjetas identificativas y guardias.
