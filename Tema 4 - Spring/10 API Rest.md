@@ -12,6 +12,364 @@ Diagrama con anotaciones principales para uso en Spring Boot:
 Explicación de este diagrama en castellano: https://www.youtube.com/watch?v=YoBFTSKNrD0
 
 
+# **APIs REST**
+
+## 1. Introducción a las APIs y su propósito
+
+Una **API** (Application Programming Interface) es un conjunto de reglas y contratos que permiten que dos sistemas de software se comuniquen entre sí. Las APIs facilitan que un cliente pueda **solicitar datos o ejecutar acciones** sobre un servidor de manera estructurada y segura, sin necesidad de conocer los detalles internos de implementación.
+
+El diseño de una API actúa como un contrato entre:
+
+- **El consumidor**, que envía solicitudes.
+    
+- **El proveedor**, que expone recursos y devuelve respuestas estructuradas.
+    
+
+Este contrato define:
+
+- Qué datos puede solicitar el cliente.
+    
+- Cómo deben enviarse esas solicitudes.
+    
+- Cómo se representan las respuestas.
+    
+- Qué reglas de autenticación y control se aplican.
+    
+- Qué errores pueden producirse y cómo se comunican.
+    
+
+Las APIs permiten integrar aplicaciones, automatizar procesos y exponer servicios de forma controlada, eficiente y escalable.
+
+---
+
+# 2. Fundamentos de REST
+
+**REST** (Representational State Transfer) es un estilo arquitectónico para construir APIs utilizando las capacidades fundamentales del protocolo HTTP.
+
+No se trata de un estándar cerrado, sino de un conjunto de principios que guían el diseño de interfaces web claras, coherentes y orientadas a recursos.
+
+Una API REST opera sobre cuatro pilares:
+
+### ✔ Arquitectura Cliente–Servidor
+
+El cliente envía solicitudes; el servidor procesa y devuelve representaciones de recursos.
+
+### ✔ Comunicación sin estado (stateless)
+
+Cada petición debe contener toda la información necesaria para procesarla.  
+El servidor no almacena información de sesión entre solicitudes.
+
+### ✔ Recursos identificados por URIs
+
+Los recursos —entidades conceptuales como usuarios, facturas o pedidos— se identifican mediante URIs únicas.
+
+### ✔ Representaciones transferidas
+
+La respuesta contiene una representación del recurso, habitualmente en **JSON**, aunque también pueden usarse XML, HTML u otros formatos aceptados mediante cabeceras HTTP.
+
+---
+
+# 3. Diseño de Recursos y URIs
+
+El concepto central en REST es el **recurso**.  
+Un recurso representa una entidad o conjunto de entidades accesibles a través de una URI.
+
+### Reglas generales para definir URIs
+
+- **Usar sustantivos**, nunca verbos.  
+    Incorrecto: `/crearFactura`  
+    Correcto: `/facturas`
+    
+- **URIs únicas y estables** para cada recurso.  
+    Ejemplo: `/clientes/34/facturas/210`
+    
+- **Jerarquía lógica**:
+    
+    - Recurso padre → `/clientes/34`
+        
+    - Subrecurso → `/clientes/34/facturas`
+        
+- **Sin extensiones de formato**:
+    
+    - Incorrecto: `/facturas/210.pdf`
+        
+    - Correcto: `/facturas/210`  
+        El formato se negocia con `Accept`.
+        
+- **Los filtros no forman parte de la ruta**  
+    Ejemplo:
+    
+    ```
+    GET /facturas?desde=2020&orden=desc&pagina=3
+    ```
+    
+
+### Ejemplos correctos de URIs
+
+- Colección: `/productos`
+    
+- Elemento: `/productos/120`
+    
+- Subrecursos: `/productos/120/opiniones`
+    
+- Filtrado: `/productos?categoria=audio&stock=true`
+    
+
+---
+
+# 4. Métodos HTTP y sus propósitos
+
+REST utiliza los métodos HTTP para expresar operaciones:
+
+|Método|Propósito|Idempotencia|
+|---|---|---|
+|**GET**|Obtener recursos|✔ Idempotente|
+|**POST**|Crear un recurso nuevo|✘ No idempotente|
+|**PUT**|Reemplazar un recurso completo|✔ Idempotente|
+|**PATCH**|Modificar parcialmente un recurso|✘ No idempotente|
+|**DELETE**|Eliminar un recurso|✔ Idempotente|
+
+### Ejemplos típicos
+
+```
+GET     /clientes           → lista de clientes
+POST    /clientes           → crear cliente
+GET     /clientes/7         → obtener cliente 7
+PUT     /clientes/7         → sustituir datos del cliente 7
+PATCH   /clientes/7         → modificar un campo puntual
+DELETE  /clientes/7         → borrar cliente 7
+```
+
+---
+
+# 5. Códigos de Estado HTTP
+
+La respuesta HTTP debe comunicar siempre el resultado de la operación mediante **códigos estándar**.
+
+### Categorías principales:
+
+- **2xx – Éxito**
+    
+    - 200 OK
+        
+    - 201 Created
+        
+    - 204 No Content
+        
+- **4xx – Error del cliente**
+    
+    - 400 Bad Request
+        
+    - 401 Unauthorized
+        
+    - 403 Forbidden
+        
+    - 404 Not Found
+        
+    - 409 Conflict
+        
+    - 422 Unprocessable Entity
+        
+- **5xx – Error del servidor**
+    
+    - 500 Internal Server Error
+        
+    - 503 Service Unavailable
+        
+
+Ejemplo correcto:
+
+```
+Status: 400 Bad Request
+{
+  "message": "El campo 'email' es obligatorio"
+}
+```
+
+---
+
+# 6. Representación y Negociación de Contenidos
+
+REST utiliza las cabeceras HTTP para acordar formatos entre cliente y servidor:
+
+### Solicitar formato:
+
+```
+Accept: application/json, application/xml
+```
+
+### Respuesta:
+
+```
+Content-Type: application/json
+```
+
+Si el servidor no puede producir ninguno de los formatos solicitados:
+
+```
+406 Not Acceptable
+```
+
+Los formatos más utilizados:
+
+- **JSON** (estándar de facto)
+    
+- XML (en sistemas legacy)
+    
+- JSON-LD (datos semánticos)
+    
+- HAL / JSON:API (formatos hipermedia estructurados)
+    
+
+---
+
+# 7. Prácticas modernas en el diseño de APIs REST
+
+## 7.1 Versionado de APIs
+
+Una API debe permitir evolución manteniendo compatibilidad.
+
+Modalidades comunes:
+
+- En la ruta:
+    
+    ```
+    /v1/clientes
+    /v2/clientes
+    ```
+    
+- En cabecera custom:
+    
+    ```
+    Accept: application/vnd.miapi.v2+json
+    ```
+    
+
+## 7.2 Validación de entrada y estructura de errores
+
+Los errores deben seguir un formato consistente:
+
+```
+{
+  "error": "validation_error",
+  "details": [
+    { "field": "email", "message": "Formato inválido" }
+  ]
+}
+```
+
+## 7.3 Idempotencia en operaciones críticas
+
+Permite reintentos seguros ante fallos de red.  
+Especialmente en POST sensibles mediante claves idempotentes.
+
+## 7.4 Documentación obligatoria
+
+El estándar actual es:
+
+- **OpenAPI 3.0/3.1**
+    
+- Compatible con herramientas:
+    
+    - Swagger UI
+        
+    - ReDoc
+        
+    - Codegen automático de clientes y servidores
+        
+
+---
+
+# 8. Seguridad aplicable a APIs REST
+
+Cualquier API debe implementar autenticación y control de acceso.
+
+Los esquemas modernos incluyen:
+
+- **OAuth 2.1**
+    
+- **OpenID Connect**
+    
+- **JWT (JSON Web Tokens)**
+    
+- API Keys controladas
+    
+- mTLS en entornos corporativos
+    
+- Rate limiting y cuotas
+    
+
+El objetivo es:
+
+- Proteger endpoints
+    
+- Gestionar identidades
+    
+- Controlar permisos
+    
+- Limitar abusos
+    
+
+Cabeceras típicas:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+# 9. REST en el ecosistema actual
+
+Las APIs REST se utilizan para:
+
+- Exposición pública de servicios web
+    
+- Integraciones entre sistemas
+    
+- Mobile y frontend web
+    
+- Microservicios de baja latencia
+    
+
+REST convive y se complementa con:
+
+- **GraphQL** → consultas flexibles orientadas a clientes
+    
+- **gRPC** → servicios de alto rendimiento
+    
+- **WebSockets** / Event-Driven → comunicación en tiempo real
+    
+
+REST sigue siendo el estilo predominante para APIs accesibles vía HTTP por su simplicidad, estandarización y amplia compatibilidad.
+
+---
+
+# 10. Conclusión
+
+Una API REST moderna debe:
+
+- Exponer recursos bien definidos mediante URIs claras.
+    
+- Utilizar métodos HTTP de forma semántica.
+    
+- Producir respuestas coherentes y estandarizadas.
+    
+- Comunicar el resultado mediante códigos de estado correctos.
+    
+- Negociar formatos mediante cabeceras.
+    
+- Integrar versionado, validación y consistencia estructural.
+    
+- Ofrecer documentación formal mediante OpenAPI.
+    
+- Implementar mecanismos robustos de autenticación y seguridad.
+    
+
+REST sigue siendo una de las formas más eficientes, interoperables y escalables de diseñar interfaces web, y constituye la base del intercambio de datos en la mayoría de plataformas digitales actuales.
+
+---
+
+
 Tutorial con código para crear una API Rest: https://spring.io/guides/gs/accessing-data-rest
 
 # 2. Optimización de una API Rest
