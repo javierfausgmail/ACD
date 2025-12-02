@@ -50,20 +50,20 @@ No se trata de un estándar cerrado, sino de un conjunto de principios que guía
 
 Una API REST opera sobre cuatro pilares:
 
-### ✔ Arquitectura Cliente–Servidor
+### Arquitectura Cliente–Servidor
 
 El cliente envía solicitudes; el servidor procesa y devuelve representaciones de recursos.
 
-### ✔ Comunicación sin estado (stateless)
+### Comunicación sin estado (stateless)
 
 Cada petición debe contener toda la información necesaria para procesarla.  
 El servidor no almacena información de sesión entre solicitudes.
 
-### ✔ Recursos identificados por URIs
+### Recursos identificados por URIs
 
 Los recursos —entidades conceptuales como usuarios, facturas o pedidos— se identifican mediante URIs únicas.
 
-### ✔ Representaciones transferidas
+### Representaciones transferidas
 
 La respuesta contiene una representación del recurso, habitualmente en **JSON**, aunque también pueden usarse XML, HTML u otros formatos aceptados mediante cabeceras HTTP.
 
@@ -121,13 +121,13 @@ Un recurso representa una entidad o conjunto de entidades accesibles a través d
 
 REST utiliza los métodos HTTP para expresar operaciones:
 
-|Método|Propósito|Idempotencia|
-|---|---|---|
-|**GET**|Obtener recursos|✔ Idempotente|
-|**POST**|Crear un recurso nuevo|✘ No idempotente|
-|**PUT**|Reemplazar un recurso completo|✔ Idempotente|
-|**PATCH**|Modificar parcialmente un recurso|✘ No idempotente|
-|**DELETE**|Eliminar un recurso|✔ Idempotente|
+| Método     | Propósito                         | Idempotencia     |
+| ---------- | --------------------------------- | ---------------- |
+| **GET**    | Obtener recursos                  | Idempotente      |
+| **POST**   | Crear un recurso nuevo            | ✘ No idempotente |
+| **PUT**    | Reemplazar un recurso completo    | Idempotente      |
+| **PATCH**  | Modificar parcialmente un recurso | ✘ No idempotente |
+| **DELETE** | Eliminar un recurso               |  Idempotente     |
 
 ### Ejemplos típicos
 
