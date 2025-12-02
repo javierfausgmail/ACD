@@ -369,10 +369,10 @@ REST sigue siendo una de las formas más eficientes, interoperables y escalables
 
 ---
 
-
 Tutorial con código para crear una API Rest: https://spring.io/guides/gs/accessing-data-rest
 
-# 2. Optimización de una API Rest
+
+# Parte 2. Optimización de una API Rest
 
 Seis acciones prácticas que puedes hacer para optimizar tus APIs REST y que tengan un mejor rendimiento o un mejor tiempo de respuesta. 
 
