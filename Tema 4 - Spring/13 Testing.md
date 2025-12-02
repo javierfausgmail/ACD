@@ -222,7 +222,7 @@ En un IDE (IntelliJ, Eclipse, VS Code con extensión Java):
     
 
 
-# Organización código de los tests
+# Estructura del código de los tests
 
 Veamos un ejemplo claro usando el estilo **Given / When / Then** (Given = contexto, When = acción, Then = verificación).
 
@@ -483,7 +483,7 @@ Aquí el **Given está repartido**:
 
 ---
 
-## 5. Recomendación práctica (y didáctica)
+## 5. Recomendación práctica
 
 - Para ejemplos sencillos o introductorios →  
     **mantener el Given dentro del test** suele ser más claro.
@@ -492,7 +492,7 @@ Aquí el **Given está repartido**:
     mover la parte común a `@BeforeEach` y dejar en el test solo el Given que realmente cambia + When + Then.
     
 
-En resumen:  **no hay contradicción en absoluto**.  
+En resumen:  **no hay contradicción en absoluto entre ellos**.  
 El patrón Given/When/Then describe el _qué_ de cada parte del test;  
 los `@Before...` solo te ayudan a decidir _dónde_ pones físicamente el código del Given.
 
@@ -778,14 +778,22 @@ class CalculatorServiceSpringTest {
     
 - Útil para **tests de integración** donde nos interesa comprobar que los beans se crean bien, funcionan juntos, etc.
     
-- Es más **lento** que un test unitario puro → por esonormalmente preferimos muchos **unit tests** y menos **integration tests**.
+- Es más **lento** que un test unitario puro → por eso normalmente preferimos muchos **unit tests** y menos **integration tests**.
     
 
 ---
 
 ## 6. Test de controlador con `@WebMvcTest` + MockMvc
 
-Para testear solo la **capa web** (sin levantar toda la app) usamos **slice tests**:
+Para testear únicamente una **capa concreta** de la aplicación en lugar de cargar toda la aplicación completa, Spring ofrece los **slice tests**.
+
+Por ejemplo, si queremos probar solo la **capa web**, podemos usar `@WebMvcTest`, que carga exclusivamente los controladores, el motor MVC y la configuración necesaria para atender peticiones HTTP simuladas, **sin levantar servicios, repositorios ni el contexto completo**.
+
+Cuando dentro de estos slice tests necesitamos una dependencia que **no forma parte de la capa activada** (como un `Service` dentro de un test de la capa web), entonces usamos un **mock**: una “maqueta”, “imitación” o “falsificación controlada” del bean real.
+
+El mock se comporta como el original **solo en los casos que nosotros definimos explícitamente** en el test, permitiendo controlar sus respuestas (porque nosotros sabemos lo que el original debe contestar en los casos específicos del test y así se lo indicamos en el código al mock) y aislar el comportamiento del controlador.
+
+El siguiente ejemplo ilustra como hacer uso de ambos conceptos en un test:
 
 ```java
 // src/test/java/com/example/testingdemo/web/CalculatorControllerTest.java
@@ -808,14 +816,18 @@ class CalculatorControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // Spring creará un mock de este bean y lo inyectará en el controlador
-    @MockBean
-    private CalculatorService calculatorService;
+    //Así Spring creará un mock de este bean y lo inyectará en el controlador
+    //@MockBean
+    //private CalculatorService calculatorService;
 
     @Test
     void add_endpointDebeDevolverResultadoCorrecto() throws Exception {
         // Given
-        when(calculatorService.add(2, 3)).thenReturn(5);
+        CalculatorService serviceMock = mock(CalculatorService.class);
+        when(serviceMock.add(2, 3)).thenReturn(5);
+        //when(calculatorService.add(2, 3)).thenReturn(5);
+        
+        
 
         // When & Then
         mockMvc.perform(get("/api/add")
