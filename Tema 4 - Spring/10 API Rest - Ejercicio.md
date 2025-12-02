@@ -562,15 +562,6 @@ class CashcardApplicationTests {
 ```
 
 ---
-
-
-
-
-
-    
-
----
-
 # Ejercicio 2 – Developing a Secure App
 
 Se asume que ya tienes el ejercicio 1 hecho:
@@ -649,16 +640,9 @@ curl http://localhost:8080/cashcards
 
 Verás una respuesta `401 Unauthorized` o el navegador te pedirá usuario/contraseña.
 
-Si repites con credenciales:
-
-```bash
-curl -u user:LA_CONTRASEÑA_DEL_LOG http://localhost:8080/cashcards
-```
-
-Ahora sí deberías ver los datos.
-
 > **Mensaje importante**:  
-> “Spring Security, con una simple dependencia, pone un **candado** global a la API. Todo está protegido hasta que _tú_ digas lo contrario.”
+> “Spring Security, con una simple dependencia, pone un **candado** global a la API. Todo está protegido hasta que _tú_ digas lo contrario, por tanto NO podrás entrar a la aplición hasta que así lo configures.”
+
 
 ---
 
@@ -883,7 +867,7 @@ Explicación:
 - Si haces `curl` con credenciales pero sin los roles adecuados (en otros escenarios) → `403 Forbidden`.
     
 
-> Aquí puedes aplicar el concepto de **Principio de mínimo privilegio**:  
+> Aquí puedes introducir el concepto de **Principio de mínimo privilegio**:  
 > dar a cada rol sólo los permisos necesarios para su tarea.
 
 #### 2. Conectar esto con el dominio “Family Cash Card”
@@ -988,11 +972,7 @@ Puntos a remarcar:
     
 - `withBasicAuth` añade la cabecera `Authorization: Basic ...`.
     
-
-Mini ejercicio extra:
-
-- Añadir un test que compruebe que `/hello` **sí** es accesible sin credenciales (`200 OK`).
-    
+  
 
 ---
 
