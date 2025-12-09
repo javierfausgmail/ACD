@@ -291,6 +291,7 @@ public class Book {
     @Column(nullable = false)
     private String author;
 
+	@Column(name = "published_year") // year es a reserved keyword in some SQL databases
     private Integer year;
 
     public Book() {
