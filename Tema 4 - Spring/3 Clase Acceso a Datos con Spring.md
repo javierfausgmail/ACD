@@ -268,6 +268,10 @@ spring.h2.console.enabled=true
 spring.h2.console.path=/h2-console
 ```
 
+Acceso a la interfaz web de H2 (una especie de PHP Myadmin):  
+  
+- `http://localhost:8080/h2-console`  
+- JDBC URL: `jdbc:h2:mem:booksdb`
 ### 2.4. Paso 2: Entidad JPA `Book`
 
 Paquete sugerido: `com.example.bookstore.model`
