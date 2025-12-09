@@ -369,10 +369,38 @@ String emailTutor = repo.findById(id)            // Optional<Alumno>
 
 # Mini-Proyecto
 
+## 1. Objetivo del proyecto
 
-#### 🧱 Estructura del proyecto
+El propósito de este ejercicio es **aprender a usar `Optional<T>` de manera correcta y moderna** dentro de una pequeña arquitectura por capas:
 
-Dentro del ZIP encontrarás:
+- **Capa dominio**: `Alumno`, `Tutor`
+    
+- **Capa repositorio**: acceso a datos simulados en memoria
+    
+- **Capa servicio**: lógica con `map`, `flatMap`, `filter`, `orElse…`
+    
+- **Aplicación demo**: un `main` que muestra casos de uso funcionales
+    
+
+Al finalizar, el deberías saber:
+
+- cuándo usar Optional y cuándo no hacerlo
+    
+- cómo evitar `NullPointerException`
+    
+- cómo aplicar estilo funcional
+    
+- cómo integrar Optional con Streams
+    
+- cómo diseñar APIs más seguras
+    
+
+---
+
+# 2. Crear el proyecto Maven
+
+### 2.1. Crear directorios de un proyecto estándar
+#### Estructura del proyecto
 
 ```text
 optional-tutorial/
@@ -394,38 +422,411 @@ optional-tutorial/
 ```
 
 ---
+# 3. Crear el archivo **pom.xml**
 
-#### ▶️ Cómo ejecutarlo
+Copia y pega este POM mínimo, que incluye:
 
-1. Descomprime el ZIP.
+- Java 11
     
-2. En la carpeta del proyecto:
+- JUnit 5 para pruebas
     
 
-```bash
-mvn test        # ejecuta los tests JUnit
-mvn exec:java   # si tienes el plugin exec configurado
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>es.fempa.optional</groupId>
+    <artifactId>optional-tutorial</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>optional-tutorial</name>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit.version>5.10.0</junit.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>'
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
 ```
 
-O bien ejecuta el `main` de `App.java` desde tu IDE (IntelliJ/Eclipse/VS Code).
+---
 
-El `main` muestra por consola ejemplos tipo:
+# 4. Crear el **paquete `domain`**
 
-- `Optional` como valor de retorno en el repositorio.
+Ruta:
+
+```
+src/main/java/es/fempa/optional/domain/
+```
+
+---
+
+## 4.1. Clase `Tutor`
+
+Objetivo: representar un tutor que podría tener email o no.
+
+Crear **Tutor.java**:
+
+```java
+package es.fempa.optional.domain;
+
+public class Tutor {
+
+    private final Long id;
+    private final String nombre;
+    private final String email; // puede ser null
+
+    public Tutor(Long id, String nombre, String email) {
+        this.id = id;
+        this.nombre = nombre;
+        this.email = email;
+    }
+
+    public Long getId() { return id; }
+    public String getNombre() { return nombre; }
+    public String getEmail() { return email; }
+
+    @Override
+    public String toString() {
+        return "Tutor{" +
+                "id=" + id +
+                ", nombre='" + nombre + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
+}
+```
+
+**Concepto clave:** no usamos Optional como atributo. Accederemos a él desde métodos.
+
+---
+
+## 4.2. Clase `Alumno`
+
+Objetivo: mostrar cómo exponer GETTERS con Optional.
+
+Crear **Alumno.java**:
+
+```java
+package es.fempa.optional.domain;
+
+import java.util.Optional;
+
+public class Alumno {
+
+    private final Long id;
+    private final String nombre;
+    private final String email; // puede ser null
+    private final Tutor tutor;  // puede ser null
+
+    public Alumno(Long id, String nombre, String email, Tutor tutor) {
+        this.id = id;
+        this.nombre = nombre;
+        this.email = email;
+        this.tutor = tutor;
+    }
+
+    public Long getId() { return id; }
+    public String getNombre() { return nombre; }
+    public String getEmail() { return email; }
+    public Tutor getTutor() { return tutor; }
+
+    // ****************************
+    // Aquí empezamos con Optional
+    // ****************************
+    public Optional<String> getEmailOptional() {
+        return Optional.ofNullable(email);
+    }
+
+    public Optional<Tutor> getTutorOptional() {
+        return Optional.ofNullable(tutor);
+    }
+}
+```
+
+---
+
+# 5. Crear la **capa repositorio**
+
+Ruta:
+
+```
+src/main/java/es/fempa/optional/repository/
+```
+
+---
+
+## 5.1. Interfaz `AlumnoRepository`
+
+Objetivo: mostrar una API limpia basada en Optional.
+
+Crear **AlumnoRepository.java**:
+
+```java
+package es.fempa.optional.repository;
+
+import es.fempa.optional.domain.Alumno;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface AlumnoRepository {
+
+    Optional<Alumno> findById(Long id);
+
+    Optional<Alumno> findByEmail(String email);
+
+    List<Alumno> findAll();
+}
+```
+
+---
+
+## 5.2. Implementación en memoria
+
+Crear **InMemoryAlumnoRepository.java**:
+
+```java
+package es.fempa.optional.repository;
+
+import es.fempa.optional.domain.Alumno;
+import es.fempa.optional.domain.Tutor;
+
+import java.util.*;
+
+public class InMemoryAlumnoRepository implements AlumnoRepository {
+
+    private final List<Alumno> data = new ArrayList<>();
+
+    public InMemoryAlumnoRepository() {
+
+        Tutor tutorAna = new Tutor(1L, "Profesor García", "garcia@centro.es");
+        Tutor tutorLuis = new Tutor(2L, "Profesora Martínez", null);
+
+        data.add(new Alumno(1L, "Ana", "ana@example.com", tutorAna));
+        data.add(new Alumno(2L, "Luis", null, tutorLuis));
+        data.add(new Alumno(3L, "Marta", "marta@gmail.com", null));
+        data.add(new Alumno(4L, "Jorge", null, null));
+    }
+
+    @Override
+    public Optional<Alumno> findById(Long id) {
+        return data.stream()
+                .filter(a -> a.getId().equals(id))
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Alumno> findByEmail(String email) {
+        if (email == null) return Optional.empty();
+        return data.stream()
+                .filter(a -> email.equals(a.getEmail()))
+                .findFirst();
+    }
+
+    @Override
+    public List<Alumno> findAll() {
+        return Collections.unmodifiableList(data);
+    }
+}
+```
+
+---
+
+# 6. Crear la **capa servicio**
+
+Ruta:
+
+```
+src/main/java/es/fempa/optional/service/
+```
+
+Crear **AlumnoService.java**:
+
+```java
+package es.fempa.optional.service;
+
+import es.fempa.optional.domain.Alumno;
+import es.fempa.optional.domain.Tutor;
+import es.fempa.optional.repository.AlumnoRepository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public class AlumnoService {
+
+    private final AlumnoRepository repository;
+
+    public AlumnoService(AlumnoRepository repository) {
+        this.repository = repository;
+    }
+
+    public String obtenerEmailAlumno(Long idAlumno) {
+        return repository.findById(idAlumno)
+                .flatMap(Alumno::getEmailOptional)
+                .orElse("no-email@mi-centro.es");
+    }
+
+    public String obtenerEmailTutorAlumno(Long idAlumno) {
+        return repository.findById(idAlumno)
+                .flatMap(Alumno::getTutorOptional)
+                .map(Tutor::getEmail)
+                .orElse("tutor-no-disponible@mi-centro.es");
+    }
+}
+```
+
+Aquí se usan:
+
+- `flatMap`
     
-- Uso de `flatMap`, `map`, `orElse` y `ifPresentOrElse`.
+- `map`
     
-- Diferencias entre alumno con email / sin email, tutor con email / sin email.
+- `orElse`
     
 
 ---
 
-Incluye:
+# 7. Crear la clase `App.java`
 
-- Código completo (dominio, repositorios, servicios, tests).
-    
-- Ejemplos funcionales con `Optional`.
-    
-- **README pedagógico**:  explicación, objetivos, estructura, ejercicios guiados y reglas de estilo.   
+Ruta:
+
+```
+src/main/java/es/fempa/optional/app/
+```
+
+```java
+package es.fempa.optional.app;
+
+import es.fempa.optional.repository.InMemoryAlumnoRepository;
+import es.fempa.optional.service.AlumnoService;
+
+public class App {
+
+    public static void main(String[] args) {
+
+        InMemoryAlumnoRepository repo = new InMemoryAlumnoRepository();
+        AlumnoService service = new AlumnoService(repo);
+
+        System.out.println("Email alumno 1 → " +
+                service.obtenerEmailAlumno(1L));
+
+        System.out.println("Email alumno 2 → " +
+                service.obtenerEmailAlumno(2L));
+
+        System.out.println("Email tutor alumno 1 → " +
+                service.obtenerEmailTutorAlumno(1L));
+
+        System.out.println("Email tutor alumno 3 → " +
+                service.obtenerEmailTutorAlumno(3L));
+    }
+}
+```
+
+Ejecuta y verás cómo `Optional` controla perfectamente los valores ausentes.
 
 ---
+
+# 8. Crear pruebas unitarias
+
+Ruta:
+
+```
+src/test/java/es/fempa/optional/service/
+```
+
+Crear **AlumnoServiceTest.java**:
+
+```java
+package es.fempa.optional.service;
+
+import es.fempa.optional.repository.InMemoryAlumnoRepository;
+import org.junit.jupiter.api.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class AlumnoServiceTest {
+
+    private AlumnoService service;
+
+    @BeforeEach
+    void init() {
+        service = new AlumnoService(new InMemoryAlumnoRepository());
+    }
+
+    @Test
+    void emailAlumnoConEmail() {
+        assertEquals("ana@example.com", service.obtenerEmailAlumno(1L));
+    }
+
+    @Test
+    void emailAlumnoSinEmail() {
+        assertEquals("no-email@mi-centro.es", service.obtenerEmailAlumno(2L));
+    }
+}
+```
+
+Ejecutar:
+
+```
+mvn test
+```
+
+---
+
+# 9. Qué se ha aprendido
+
+Al finalizar el tutorial habremos aprendido:
+
+1. **Cómo diseñar APIs con Optional en los métodos de retorno.**
+    
+2. **Por qué Optional no debe usarse como atributo.**
+    
+3. Cómo usar:
+    
+    - `Optional.ofNullable`
+        
+    - `map`
+        
+    - `flatMap`
+        
+    - `filter`
+        
+    - `orElse` / `orElseGet`
+        
+    - `ifPresentOrElse`
+        
+4. Cómo estructurar una capa de dominio + repositorio + servicio.
+    
+5. Cómo evitar `NullPointerException`.
+    
+
+
+
