@@ -343,7 +343,7 @@ String emailTutor = repo.findById(id)            // Optional<Alumno>
 
 ### 6. Buenas prácticas y antipatrones
 
-✅ **Haz esto:**
+**Haz esto:**
 
 - Usa `Optional` como **tipo de retorno** cuando la ausencia de valor es normal.
     
@@ -354,7 +354,7 @@ String emailTutor = repo.findById(id)            // Optional<Alumno>
 - Usa `orElseThrow` cuando **no tener valor es un error**.
     
 
-❌ **Evita esto:**
+**Evita esto:**
 
 - Llamar a `.get()` sin comprobar antes. (huele mal, casi siempre hay una alternativa mejor).
     
@@ -605,6 +605,8 @@ public interface AlumnoRepository {
     List<Alumno> findAll();
 }
 ```
+
+Reflexiona: ¿Por qué el método findAll() no devuelve un Optional?
 
 ---
 
