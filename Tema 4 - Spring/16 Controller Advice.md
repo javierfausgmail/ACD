@@ -1,4 +1,4 @@
-Tutorial sobre **`@ControllerAdvice` en Spring Boot**, incluyendo también **cómo se relaciona con los conceptos de AOP (Programación Orientada a Aspectos)**, que es el fundamento técnico que permite a Spring interceptar excepciones, peticiones y comportamientos de los controladores y otros componentes. En este caso nos centraremos en los controladores.
+Introducción a **`@ControllerAdvice` en Spring Boot**, incluyendo también **cómo se relaciona con los conceptos de AOP (Programación Orientada a Aspectos)**, que es el fundamento técnico que permite a Spring interceptar excepciones, peticiones y comportamientos de los controladores y otros componentes. En este caso nos centraremos en los controladores.
 
 El objetivo es que el se entienda:
 
