@@ -246,3 +246,73 @@ En JDOM 2, las clases principales que utilizaremos son:
 | **XML** | Jerárquica | Documentos estructurados, validación y sistemas que utilizan esquemas XML | JDOM 2 |
 
 La elección del formato depende principalmente de la **estructura de los datos** y del sistema con el que deban intercambiarse. No existe un formato mejor en todos los casos: CSV es muy apropiado para tablas, JSON y XML para estructuras jerárquicas y TXT para contenidos sencillos cuyo formato controla la propia aplicación.
+
+---
+
+## Autoevaluación
+
+Seleccione una única respuesta correcta en cada pregunta.
+
+1. **¿Qué característica define mejor a un fichero TXT?**
+   - a) Siempre organiza los datos en filas y columnas.
+   - b) Contiene texto, pero su estructura depende de la aplicación.
+   - c) Siempre utiliza comas para separar campos.
+   - d) Debe tener un elemento raíz.
+
+2. **¿Qué formato resulta especialmente adecuado para representar datos tabulares?**
+   - a) XML
+   - b) JSON
+   - c) CSV
+   - d) TXT
+
+3. **¿Qué librería utilizamos en Java para trabajar con CSV en este tema?**
+   - a) Jackson
+   - b) Apache Commons CSV
+   - c) JDOM 2
+   - d) JDBC
+
+4. **¿Cuál de estos valores es válido en JSON?**
+   - a) `true`
+   - b) `'texto'`
+   - c) `// comentario`
+   - d) `{nombre: "Ana"}`
+
+5. **En un array JSON, ¿qué índice tiene el primer elemento?**
+   - a) 0
+   - b) 1
+   - c) -1
+   - d) Depende del fichero
+
+6. **¿Qué significa serializar un objeto Java a JSON?**
+   - a) Eliminar el objeto de memoria.
+   - b) Convertir el objeto Java a una representación JSON.
+   - c) Validar un XML mediante XSD.
+   - d) Leer una línea de un fichero TXT.
+
+7. **¿Cuántos elementos raíz puede tener un documento XML bien formado?**
+   - a) Ninguno
+   - b) Uno
+   - c) Dos
+   - d) Cualquier cantidad
+
+8. **¿Qué tecnología permite seleccionar elementos dentro de un documento XML mediante rutas?**
+   - a) JSONPath
+   - b) XPath
+   - c) CSVPath
+   - d) UTF-8
+
+9. **¿Qué diferencia existe entre las posiciones de XPath y los índices habituales de arrays en Java?**
+   - a) Ambos comienzan en 0.
+   - b) Ambos comienzan en 1.
+   - c) XPath comienza en 1 y los arrays de Java en 0.
+   - d) XPath comienza en 0 y los arrays de Java en 1.
+
+10. **¿Qué formato sería, en general, la opción más sencilla para intercambiar una tabla de miles de filas y columnas sin estructuras anidadas?**
+    - a) CSV
+    - b) XML
+    - c) JSON
+    - d) Todos son necesariamente igual de adecuados.
+
+### Soluciones
+
+1. **b** · 2. **c** · 3. **b** · 4. **a** · 5. **a** · 6. **b** · 7. **b** · 8. **b** · 9. **c** · 10. **a**
