@@ -291,7 +291,8 @@ flowchart LR
     APP --> OUT[Puerto de salida]
 
     OUT --> MEM[Adaptador memoria]
-    OUT --> SQL[Adaptador SQL]
+    OUT --> JSON[Adaptador JSON]
+    OUT --> SQL[Adaptador JDBC]
 ~~~
 
 La palabra “hexagonal” no significa que existan seis capas obligatorias. El hexágono es simplemente una forma gráfica de representar varios puntos de conexión con el exterior.
@@ -371,9 +372,9 @@ Más adelante podríamos crear:
 
 ~~~text
 PedidoRepositoryMemoria
+PedidoRepositoryJson
 PedidoRepositoryJdbc
 PedidoRepositoryJpa
-PedidoRepositoryMongo
 ~~~
 
 Todos implementarían el mismo puerto.
@@ -519,7 +520,7 @@ También se utiliza esta terminología:
 | Puerto primario | Puerto de entrada | CrearPedidoUseCase |
 | Adaptador primario | Driving adapter | REST, consola, GUI |
 | Puerto secundario | Puerto de salida | PedidoRepository |
-| Adaptador secundario | Driven adapter | JDBC, JPA, fichero |
+| Adaptador secundario | Driven adapter | memoria, JSON, JDBC |
 
 Una forma sencilla de recordarlo:
 
@@ -662,7 +663,9 @@ Esta posibilidad de ejecutar y probar la aplicación aislada de dispositivos ext
 
 ---
 
-# 13. Nivel medio: cambiar la persistencia
+# 13. Nivel medio opcional: cambiar la persistencia a JDBC
+
+Después de haber visto memoria y JSON, podemos dar un paso más.
 
 Supongamos que queremos utilizar JDBC.
 
@@ -838,7 +841,8 @@ pedidos-hexagonal
                             ├── in
                             │   └── Main.java
                             └── out
-                                └── PedidoRepositoryMemoria.java
+                                ├── PedidoRepositoryMemoria.java
+                                └── PedidoRepositoryJson.java
 ~~~
 
 ---
@@ -876,12 +880,20 @@ con este contenido:
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.22.3</version>
+        </dependency>
+    </dependencies>
+
 </project>
 ~~~
 
-Por ahora no necesitamos ninguna dependencia externa.
+La mayor parte del ejemplo utiliza únicamente la biblioteca estándar de Java.
 
-La aplicación utilizará únicamente clases de la biblioteca estándar de Java.
+La dependencia de **Jackson** se utilizará más adelante para implementar el adaptador que guarda los pedidos en un fichero JSON.
 
 ---
 
@@ -1432,48 +1444,290 @@ PedidoRepository   Repository
 
 ---
 
-## Paso 11. La prueba importante: cambiar una tecnología
+## Paso 11. Segundo adaptador de salida: guardar en JSON
 
-Suponga que mañana ya no queremos almacenar los pedidos en memoria.
+Hasta ahora los pedidos se guardan en memoria. Al cerrar el programa, desaparecen.
 
-Podríamos crear:
+Vamos a crear un segundo adaptador que implemente exactamente el mismo puerto `PedidoRepository`, pero que persista los datos en:
 
 ~~~text
-PedidoRepositoryJdbc
+pedidos.json
 ~~~
 
-que también implemente:
+Cree en:
+
+~~~text
+com.ejemplo.pedidos.adapters.out
+~~~
+
+el fichero:
+
+~~~text
+PedidoRepositoryJson.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.adapters.out;
+
+import com.ejemplo.pedidos.domain.LineaPedido;
+import com.ejemplo.pedidos.domain.Pedido;
+import com.ejemplo.pedidos.ports.PedidoRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+public class PedidoRepositoryJson
+        implements PedidoRepository {
+
+    private final Path archivo;
+    private final ObjectMapper mapper =
+            new ObjectMapper();
+
+    private final Map<UUID, Pedido> datos =
+            new HashMap<>();
+
+    public PedidoRepositoryJson(Path archivo) {
+        this.archivo = archivo;
+        cargar();
+    }
+
+    @Override
+    public void guardar(Pedido pedido) {
+        datos.put(pedido.getId(), pedido);
+        guardarArchivo();
+    }
+
+    @Override
+    public Optional<Pedido> buscarPorId(
+            UUID id
+    ) {
+        return Optional.ofNullable(
+                datos.get(id)
+        );
+    }
+
+    private void cargar() {
+
+        try {
+
+            if (Files.notExists(archivo) ||
+                    Files.size(archivo) == 0) {
+                return;
+            }
+
+            List<PedidoJson> pedidos =
+                    mapper.readValue(
+                        archivo.toFile(),
+                        new TypeReference<
+                            List<PedidoJson>
+                        >() {}
+                    );
+
+            for (PedidoJson dto : pedidos) {
+                Pedido pedido = aDominio(dto);
+                datos.put(
+                    pedido.getId(),
+                    pedido
+                );
+            }
+
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void guardarArchivo() {
+
+        try {
+
+            List<PedidoJson> pedidos =
+                    datos.values()
+                         .stream()
+                         .map(this::aJson)
+                         .toList();
+
+            mapper.writerWithDefaultPrettyPrinter()
+                  .writeValue(
+                      archivo.toFile(),
+                      pedidos
+                  );
+
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private PedidoJson aJson(Pedido pedido) {
+
+        List<LineaJson> lineas =
+                pedido.getLineas()
+                      .stream()
+                      .map(linea ->
+                          new LineaJson(
+                              linea.producto(),
+                              linea.precioUnitario(),
+                              linea.cantidad()
+                          )
+                      )
+                      .toList();
+
+        return new PedidoJson(
+                pedido.getId().toString(),
+                lineas
+        );
+    }
+
+    private Pedido aDominio(PedidoJson dto) {
+
+        Pedido pedido =
+                new Pedido(
+                    UUID.fromString(dto.id())
+                );
+
+        for (LineaJson linea : dto.lineas()) {
+            pedido.agregarLinea(
+                new LineaPedido(
+                    linea.producto(),
+                    linea.precioUnitario(),
+                    linea.cantidad()
+                )
+            );
+        }
+
+        return pedido;
+    }
+
+    public record PedidoJson(
+            String id,
+            List<LineaJson> lineas
+    ) {}
+
+    public record LineaJson(
+            String producto,
+            BigDecimal precioUnitario,
+            int cantidad
+    ) {}
+}
+~~~
+
+### ¿Qué está haciendo este adaptador?
+
+El puerto sigue siendo:
 
 ~~~java
 PedidoRepository
 ~~~
 
-La composición de la aplicación pasaría de:
+y no cambia.
+
+Lo nuevo está únicamente en el adaptador:
+
+~~~text
+PedidoRepositoryJson
+~~~
+
+Este adaptador realiza dos tareas:
+
+1. convierte los objetos del dominio a una representación sencilla para JSON;
+2. utiliza Jackson para leer y escribir el fichero.
+
+Observe que **Pedido** y **LineaPedido** no contienen código de Jackson.
+
+No añadimos anotaciones de persistencia al dominio.
+
+La transformación entre el modelo de dominio y el formato externo pertenece al adaptador.
+
+---
+
+### Cambiar de memoria a JSON
+
+En `Main`, sustituya:
 
 ~~~java
 PedidoRepository repository =
         new PedidoRepositoryMemoria();
 ~~~
 
-a:
+por:
 
 ~~~java
 PedidoRepository repository =
-        new PedidoRepositoryJdbc();
+        new PedidoRepositoryJson(
+            Path.of("pedidos.json")
+        );
 ~~~
 
-La idea importante es que no tendríamos que modificar:
+y añada:
+
+~~~java
+import java.nio.file.Path;
+~~~
+
+No es necesario modificar:
 
 ~~~text
 Pedido
 LineaPedido
 CrearPedidoUseCase
 CrearPedidoService
+PedidoRepository
 ~~~
 
-Este es precisamente uno de los objetivos de la Arquitectura Hexagonal:
+Ejecute el programa.
 
-> La tecnología externa puede cambiar sin obligarnos a reescribir el núcleo de la aplicación.
+Después de crear un pedido aparecerá un fichero parecido a:
+
+~~~json
+[
+  {
+    "id" : "4c93d193-0000-0000-0000-000000000000",
+    "lineas" : [
+      {
+        "producto" : "Monitor",
+        "precioUnitario" : 189.90,
+        "cantidad" : 2
+      },
+      {
+        "producto" : "Teclado",
+        "precioUnitario" : 35.50,
+        "cantidad" : 1
+      }
+    ]
+  }
+]
+~~~
+
+El identificador real será diferente.
+
+Ahora cierre y vuelva a ejecutar el programa.
+
+El adaptador vuelve a leer `pedidos.json` y reconstruye los objetos del dominio.
+
+Esta es la prueba importante:
+
+~~~text
+PedidoRepositoryMemoria
+          │
+          │ implementa
+          ▼
+   PedidoRepository
+          ▲
+          │ implementa
+          │
+PedidoRepositoryJson
+~~~
+
+El caso de uso trabaja con el puerto y **no necesita saber cuál de los dos adaptadores estamos utilizando**.
 
 ---
 
@@ -1487,7 +1741,7 @@ Antes de continuar, compruebe que puede explicar con sus propias palabras:
 4. por qué PedidoRepositoryMemoria está fuera del dominio;
 5. qué diferencia existe entre un puerto y un adaptador;
 6. por qué CrearPedidoService no conoce ninguna base de datos;
-7. qué cambiaría si sustituyéramos la consola por una API REST.
+7. qué piezas permanecen iguales al sustituir PedidoRepositoryMemoria por PedidoRepositoryJson.
 
 Si puede responder a estas preguntas, ya tiene la idea esencial de la combinación entre DDD y Arquitectura Hexagonal.
 
@@ -1535,9 +1789,15 @@ Adaptador de persistencia
 
 ## Ampliación
 
-Cree un segundo adaptador de persistencia que guarde los pedidos en un archivo.
+Sustituya `PedidoRepositoryMemoria` por `PedidoRepositoryJson` y compruebe que el ejercicio sigue funcionando sin modificar el dominio ni los casos de uso.
 
-El dominio y los casos de uso **no deben modificarse**.
+Como ampliación de nivel medio, cree un tercer adaptador:
+
+~~~text
+PedidoRepositoryJdbc
+~~~
+
+El dominio, los puertos y los casos de uso **no deben modificarse**.
 
 Al terminar, compruebe qué clases han cambiado al sustituir la persistencia.
 
@@ -1571,17 +1831,17 @@ Si la separación es correcta, los cambios deberían concentrarse principalmente
    - c) Un fichero JAR.
    - d) Una clase final obligatoriamente.
 
-5. **¿Cuál sería un adaptador de entrada?**
-   - a) Una implementación JDBC de un repositorio.
-   - b) Un controlador REST que invoca un caso de uso.
-   - c) Una entidad del dominio.
-   - d) Un Value Object.
+5. **¿Cuál sería un adaptador de entrada en nuestro ejemplo?**
+   - a) PedidoRepositoryJson.
+   - b) ConsoleController.
+   - c) Pedido.
+   - d) LineaPedido.
 
 6. **¿Cuál sería un adaptador de salida?**
-   - a) Una interfaz JavaFX.
-   - b) Un controlador REST.
-   - c) Una implementación JDBC de PedidoRepository.
-   - d) Un caso de uso.
+   - a) ConsoleController.
+   - b) CrearPedidoUseCase.
+   - c) PedidoRepositoryJson.
+   - d) Pedido.
 
 7. **¿DDD y Arquitectura Hexagonal son la misma cosa?**
    - a) Sí.
@@ -1589,7 +1849,7 @@ Si la separación es correcta, los cambios deberían concentrarse principalmente
    - c) DDD es una versión antigua de Hexagonal.
    - d) Hexagonal forma parte obligatoria de DDD.
 
-8. **¿Qué ventaja aporta depender de PedidoRepository en lugar de una implementación JDBC concreta?**
+8. **¿Qué ventaja aporta depender de PedidoRepository en lugar de una implementación concreta como JSON o JDBC?**
    - a) Permite sustituir la tecnología de persistencia con menor impacto.
    - b) Elimina la necesidad de almacenar datos.
    - c) Convierte automáticamente Java en SQL.
