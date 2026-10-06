@@ -42,9 +42,9 @@ DDD y Arquitectura Hexagonal ayudan a separar estas responsabilidades, aunque lo
 
 ---
 
-# 2. Domain-Driven Design (DDD)
+## 2. Domain-Driven Design (DDD)
 
-## 2.1 El dominio en el centro
+### 2.1 El dominio en el centro
 
 DDD propone diseñar el software alrededor del **dominio**, es decir, del problema real que la aplicación resuelve.
 
@@ -74,7 +74,7 @@ La tecnología es necesaria, pero no debería definir el modelo del negocio.
 
 ---
 
-## 2.2 Lenguaje ubicuo
+### 2.2 Lenguaje ubicuo
 
 DDD propone utilizar un **lenguaje ubicuo**: desarrolladores y personas expertas en el negocio utilizan los mismos términos.
 
@@ -92,7 +92,7 @@ en lugar de ocultarla detrás de nombres puramente técnicos.
 
 ---
 
-## 2.3 Entidades
+### 2.3 Entidades
 
 Una **entidad** es un objeto cuya identidad importa a lo largo del tiempo.
 
@@ -117,7 +117,7 @@ Dos pedidos pueden contener los mismos productos y cantidades, pero siguen siend
 
 ---
 
-## 2.4 Objetos valor
+### 2.4 Objetos valor
 
 Un **Value Object** u **Objeto Valor** se define principalmente por sus valores y normalmente no necesita una identidad propia.
 
@@ -135,7 +135,7 @@ public record LineaPedido(
             throw new IllegalArgumentException("El producto es obligatorio");
         }
 
-        if (precioUnitario.signum() < 0) {
+        if (precioUnitario == null || precioUnitario.signum() < 0) {
             throw new IllegalArgumentException("El precio no puede ser negativo");
         }
 
@@ -156,7 +156,7 @@ No permitimos crear una línea de pedido con una cantidad negativa.
 
 ---
 
-# 3. Ejemplo incremental: modelar un pedido
+## 3. Ejemplo incremental: modelar un pedido
 
 Añadimos comportamiento a la entidad Pedido:
 
@@ -172,10 +172,16 @@ public class Pedido {
     private final List<LineaPedido> lineas = new ArrayList<>();
 
     public Pedido(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El id es obligatorio");
+        }
         this.id = id;
     }
 
     public void agregarLinea(LineaPedido linea) {
+        if (linea == null) {
+            throw new IllegalArgumentException("La línea no puede ser null");
+        }
         lineas.add(linea);
     }
 
@@ -225,7 +231,7 @@ La clase Pedido no necesita saber nada de SQL, HTTP o archivos.
 
 ---
 
-## 3.1 Aggregate
+### 3.1 Aggregate
 
 DDD utiliza el concepto de **Aggregate** para agrupar objetos que deben mantener sus reglas de forma conjunta.
 
@@ -251,7 +257,7 @@ La raíz del agregado protege la consistencia del conjunto.
 
 ---
 
-## 3.2 Repository
+### 3.2 Repository
 
 Un **Repository** representa conceptualmente una colección de agregados.
 
@@ -275,7 +281,7 @@ La interfaz expresa **qué necesita la aplicación**, no qué tecnología utiliz
 
 ---
 
-# 4. Arquitectura Hexagonal
+## 4. Arquitectura Hexagonal
 
 La Arquitectura Hexagonal fue propuesta por Alistair Cockburn y también se conoce como **Ports and Adapters**.
 
@@ -284,14 +290,14 @@ La aplicación se sitúa en el centro y se comunica con el exterior mediante pue
 ~~~mermaid
 flowchart LR
     CLI[Consola] --> IN[Puerto de entrada]
-    REST[API REST] --> IN
+    JSONIN[Fichero JSON de entrada] --> IN
 
     IN --> APP[Aplicación y dominio]
 
     APP --> OUT[Puerto de salida]
 
     OUT --> MEM[Adaptador memoria]
-    OUT --> JSON[Adaptador JSON]
+    OUT --> JSONOUT[Adaptador JSON]
     OUT --> SQL[Adaptador JDBC]
 ~~~
 
@@ -299,13 +305,13 @@ La palabra “hexagonal” no significa que existan seis capas obligatorias. El 
 
 ---
 
-# 5. Puertos
+## 5. Puertos
 
 Un **puerto** define un contrato de comunicación.
 
 En Java suele representarse mediante una interfaz.
 
-## 5.1 Puerto de entrada
+### 5.1 Puerto de entrada
 
 Representa algo que el exterior puede pedirle a la aplicación.
 
@@ -319,9 +325,9 @@ public interface CrearPedidoUseCase {
 }
 ~~~
 
-Una interfaz gráfica, una API REST o una aplicación de consola podrían utilizar este mismo puerto.
+Una consola o un fichero JSON pueden utilizar este mismo puerto mediante adaptadores de entrada diferentes.
 
-## 5.2 Puerto de salida
+### 5.2 Puerto de salida
 
 Representa algo que la aplicación necesita pedir al exterior.
 
@@ -340,7 +346,7 @@ La aplicación necesita persistencia, pero no necesita conocer todavía cómo se
 
 ---
 
-# 6. Adaptadores
+## 6. Adaptadores
 
 Un **adaptador** conecta una tecnología concreta con un puerto.
 
@@ -381,7 +387,7 @@ Todos implementarían el mismo puerto.
 
 ---
 
-# 7. Caso de uso de aplicación
+## 7. Caso de uso de aplicación
 
 Implementamos ahora el puerto de entrada:
 
@@ -419,11 +425,11 @@ Eso permite sustituir la persistencia sin modificar el caso de uso.
 
 ---
 
-# 8. Adaptador de entrada: consola
+## 8. Primer adaptador de entrada: consola
 
-En este tutorial utilizaremos **únicamente una consola de texto** como entrada de la aplicación.
+Comenzaremos con una **consola de texto** como primera entrada de la aplicación.
 
-No necesitamos HTTP, una API REST ni JavaFX para entender la Arquitectura Hexagonal.
+No necesitamos HTTP, una API REST ni JavaFX para entender la Arquitectura Hexagonal. Más adelante añadiremos un segundo adaptador de entrada basado en un fichero JSON.
 
 El usuario interactuará mediante comandos sencillos y la consola será nuestro **adaptador de entrada**.
 
@@ -511,14 +517,14 @@ La idea importante es que **la lógica de negocio no se coloca dentro del contro
 
 ---
 
-# 9. Puertos y adaptadores primarios y secundarios
+## 9. Puertos y adaptadores primarios y secundarios
 
 También se utiliza esta terminología:
 
 | Tipo | También llamado | Ejemplo |
 |---|---|---|
 | Puerto primario | Puerto de entrada | CrearPedidoUseCase |
-| Adaptador primario | Driving adapter | REST, consola, GUI |
+| Adaptador primario | Driving adapter | consola, fichero JSON de entrada |
 | Puerto secundario | Puerto de salida | PedidoRepository |
 | Adaptador secundario | Driven adapter | memoria, JSON, JDBC |
 
@@ -548,7 +554,7 @@ TECNOLOGÍA EXTERNA
 
 ---
 
-# 10. Relación entre DDD y Arquitectura Hexagonal
+## 10. Relación entre DDD y Arquitectura Hexagonal
 
 No son lo mismo.
 
@@ -601,7 +607,7 @@ La combinación resulta especialmente útil cuando existe un dominio con cierta 
 
 ---
 
-# 11. Una posible estructura de paquetes
+## 11. Una posible estructura de paquetes
 
 ~~~text
 src/main/java
@@ -619,10 +625,13 @@ src/main/java
 │
 └── adapters
     ├── in
-    │   └── Main.java
+    │   ├── Main.java
+    │   ├── ConsoleController.java
+    │   └── CrearPedidoDesdeJson.java
     │
     └── out
-        └── PedidoRepositoryMemoria.java
+        ├── PedidoRepositoryMemoria.java
+        └── PedidoRepositoryJson.java
 ~~~
 
 Esta es solo una posibilidad.
@@ -631,7 +640,7 @@ Arquitectura Hexagonal no obliga a utilizar unos nombres concretos de carpetas. 
 
 ---
 
-# 12. Probar sin base de datos
+## 12. Probar sin base de datos
 
 Gracias al adaptador en memoria podemos probar el caso de uso sin instalar una base de datos:
 
@@ -663,9 +672,9 @@ Esta posibilidad de ejecutar y probar la aplicación aislada de dispositivos ext
 
 ---
 
-# 13. Nivel medio opcional: cambiar la persistencia a JDBC
+## 13. Nivel medio opcional: persistencia con JDBC
 
-Después de haber visto memoria y JSON, podemos dar un paso más.
+Como evolución posterior del ejemplo, podríamos sustituir la persistencia en memoria o JSON por una base de datos mediante JDBC.
 
 Supongamos que queremos utilizar JDBC.
 
@@ -710,7 +719,7 @@ La tecnología cambia; el núcleo permanece estable.
 
 ---
 
-# 14. DDD estratégico: Bounded Context
+## 14. DDD estratégico: Bounded Context
 
 DDD también contiene conceptos de nivel superior.
 
@@ -748,7 +757,7 @@ Para aplicaciones pequeñas no es necesario empezar creando muchos bounded conte
 
 ---
 
-# 15. Errores frecuentes
+## 15. Errores frecuentes
 
 ### Pensar que DDD significa crear muchas clases
 
@@ -791,7 +800,7 @@ El hexágono no representa seis capas obligatorias.
 
 ---
 
-# 16. Resumen
+## 16. Resumen
 
 | Concepto | Idea principal |
 |---|---|
@@ -812,7 +821,7 @@ La relación puede resumirse así:
 
 ---
 
-# Práctica guiada: proyecto Maven completo con DDD y Arquitectura Hexagonal
+## Práctica guiada: proyecto Maven completo con DDD y Arquitectura Hexagonal
 
 En esta práctica construiremos desde cero una pequeña aplicación de pedidos.
 
@@ -841,6 +850,7 @@ pedidos-hexagonal
                         └── adapters
                             ├── in
                             │   ├── Main.java
+                            │   ├── ConsoleController.java
                             │   └── CrearPedidoDesdeJson.java
                             └── out
                                 ├── PedidoRepositoryMemoria.java
@@ -849,7 +859,7 @@ pedidos-hexagonal
 
 ---
 
-## Paso 1. Crear el proyecto Maven
+### Paso 1. Crear el proyecto Maven
 
 Cree una carpeta llamada:
 
@@ -895,11 +905,11 @@ con este contenido:
 
 La mayor parte del ejemplo utiliza únicamente la biblioteca estándar de Java.
 
-La dependencia de **Jackson** se utilizará más adelante para implementar el adaptador que guarda los pedidos en un fichero JSON.
+La dependencia de **Jackson** se utilizará más adelante en los adaptadores que leen y escriben JSON.
 
 ---
 
-## Paso 2. Crear el dominio
+### Paso 2. Crear el dominio
 
 Cree el paquete:
 
@@ -956,7 +966,7 @@ public record LineaPedido(
 }
 ~~~
 
-### ¿Qué acabamos de hacer?
+#### ¿Qué acabamos de hacer?
 
 Hemos creado un **Value Object**.
 
@@ -972,7 +982,7 @@ Todavía no existe ninguna base de datos, API REST ni interfaz gráfica.
 
 ---
 
-## Paso 3. Crear la entidad Pedido
+### Paso 3. Crear la entidad Pedido
 
 En el mismo paquete cree:
 
@@ -1035,7 +1045,7 @@ public class Pedido {
 }
 ~~~
 
-### ¿Qué representa?
+#### ¿Qué representa?
 
 Pedido es una **entidad** porque tiene identidad propia mediante su UUID.
 
@@ -1059,7 +1069,7 @@ pedido.agregarLinea(linea);
 
 ---
 
-## Paso 4. Crear el puerto de salida
+### Paso 4. Crear el puerto de salida
 
 Ahora necesitamos guardar pedidos.
 
@@ -1093,7 +1103,7 @@ public interface PedidoRepository {
 }
 ~~~
 
-### ¿Por qué una interfaz?
+#### ¿Por qué una interfaz?
 
 La aplicación expresa:
 
@@ -1105,7 +1115,7 @@ Este es un **puerto de salida**.
 
 ---
 
-## Paso 5. Crear el puerto de entrada
+### Paso 5. Crear el puerto de entrada
 
 Cree el paquete:
 
@@ -1145,7 +1155,7 @@ Es un **puerto de entrada**.
 
 ---
 
-## Paso 6. Implementar el caso de uso
+### Paso 6. Implementar el caso de uso
 
 En el mismo paquete cree:
 
@@ -1193,7 +1203,7 @@ public class CrearPedidoService
 }
 ~~~
 
-### Observe la dependencia
+#### Observe la dependencia
 
 CrearPedidoService conoce:
 
@@ -1216,7 +1226,7 @@ Depende del **puerto**, no de la tecnología.
 
 ---
 
-## Paso 7. Crear el adaptador de salida en memoria
+### Paso 7. Crear el adaptador de salida en memoria
 
 Ahora sí elegimos una primera tecnología de persistencia.
 
@@ -1276,9 +1286,12 @@ Implementa el contrato PedidoRepository utilizando una tecnología concreta: mem
 
 ---
 
-## Paso 8. Crear el adaptador de entrada
+### Paso 8. Crear el adaptador de entrada por consola
 
-Utilizaremos una aplicación de consola.
+Utilizaremos una consola de texto. Para separar responsabilidades crearemos dos clases:
+
+- `ConsoleController`: lee datos del usuario y llama al caso de uso;
+- `Main`: crea y conecta las distintas piezas de la aplicación.
 
 Cree el paquete:
 
@@ -1286,7 +1299,99 @@ Cree el paquete:
 com.ejemplo.pedidos.adapters.in
 ~~~
 
-y dentro:
+#### 8.1 Crear ConsoleController
+
+Cree:
+
+~~~text
+ConsoleController.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.adapters.in;
+
+import com.ejemplo.pedidos.application.CrearPedidoUseCase;
+import com.ejemplo.pedidos.domain.LineaPedido;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Scanner;
+import java.util.UUID;
+
+public class ConsoleController {
+
+    private final CrearPedidoUseCase crearPedido;
+    private final Scanner scanner = new Scanner(System.in);
+
+    public ConsoleController(
+            CrearPedidoUseCase crearPedido
+    ) {
+        this.crearPedido = crearPedido;
+    }
+
+    public void iniciar() {
+
+        boolean salir = false;
+
+        while (!salir) {
+
+            System.out.println();
+            System.out.println("1. Crear pedido");
+            System.out.println("0. Salir");
+            System.out.print("Opción: ");
+
+            String opcion = scanner.nextLine();
+
+            switch (opcion) {
+                case "1" -> crearPedido();
+                case "0" -> salir = true;
+                default -> System.out.println(
+                        "Opción no válida"
+                );
+            }
+        }
+    }
+
+    private void crearPedido() {
+
+        System.out.print("Producto: ");
+        String producto = scanner.nextLine();
+
+        System.out.print("Precio: ");
+        BigDecimal precio = new BigDecimal(
+                scanner.nextLine()
+        );
+
+        System.out.print("Cantidad: ");
+        int cantidad = Integer.parseInt(
+                scanner.nextLine()
+        );
+
+        LineaPedido linea =
+                new LineaPedido(
+                        producto,
+                        precio,
+                        cantidad
+                );
+
+        UUID id = crearPedido.crearPedido(
+                List.of(linea)
+        );
+
+        System.out.println(
+                "Pedido creado: " + id
+        );
+    }
+}
+~~~
+
+El controlador de consola conoce el **puerto de entrada** `CrearPedidoUseCase`, pero no conoce el repositorio ni la tecnología de persistencia.
+
+Su responsabilidad es leer datos, convertirlos al formato que necesita la aplicación y mostrar el resultado.
+
+#### 8.2 Crear Main
+
+Cree:
 
 ~~~text
 Main.java
@@ -1297,14 +1402,8 @@ package com.ejemplo.pedidos.adapters.in;
 
 import com.ejemplo.pedidos.application.CrearPedidoService;
 import com.ejemplo.pedidos.application.CrearPedidoUseCase;
-import com.ejemplo.pedidos.domain.LineaPedido;
-import com.ejemplo.pedidos.domain.Pedido;
-import com.ejemplo.pedidos.ports.PedidoRepository;
 import com.ejemplo.pedidos.adapters.out.PedidoRepositoryMemoria;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.UUID;
+import com.ejemplo.pedidos.ports.PedidoRepository;
 
 public class Main {
 
@@ -1318,48 +1417,38 @@ public class Main {
                         repository
                 );
 
-        List<LineaPedido> lineas =
-                List.of(
-                    new LineaPedido(
-                        "Monitor",
-                        new BigDecimal("189.90"),
-                        2
-                    ),
-                    new LineaPedido(
-                        "Teclado",
-                        new BigDecimal("35.50"),
-                        1
-                    )
+        ConsoleController controller =
+                new ConsoleController(
+                        crearPedido
                 );
 
-        UUID id =
-                crearPedido.crearPedido(
-                        lineas
-                );
-
-        Pedido pedido =
-                repository
-                    .buscarPorId(id)
-                    .orElseThrow();
-
-        System.out.println(
-                "Pedido creado: " + id
-        );
-
-        System.out.println(
-                "Total: " + pedido.total()
-        );
+        controller.iniciar();
     }
 }
 ~~~
 
-La consola es ahora nuestro **adaptador de entrada**.
+`Main` actúa aquí como **punto de composición**: decide qué implementación concreta conecta con cada puerto.
 
-Es la pieza que inicia la interacción con la aplicación.
+El flujo es:
+
+~~~text
+Usuario
+   ↓
+ConsoleController
+   ↓
+CrearPedidoUseCase
+   ↓
+CrearPedidoService
+   ↓
+PedidoRepository
+   ↓
+PedidoRepositoryMemoria
+~~~
 
 ---
 
-## Paso 8.1. Segundo adaptador de entrada: fichero JSON
+
+### Paso 8.3. Segundo adaptador de entrada: fichero JSON
 
 Ya tenemos una entrada por consola. Ahora añadiremos una segunda forma de iniciar exactamente el mismo caso de uso: un fichero JSON.
 
@@ -1471,7 +1560,7 @@ public class CrearPedidoDesdeJson {
 }
 ~~~
 
-### ¿Qué hace este adaptador?
+#### ¿Qué hace este adaptador?
 
 La clase realiza tres tareas:
 
@@ -1501,7 +1590,7 @@ crear-pedido.json
               └──► CrearPedidoUseCase
 ~~~
 
-### Probar la entrada JSON
+#### Probar la entrada JSON
 
 En `Main`, después de crear `CrearPedidoUseCase`, puede ejecutar:
 
@@ -1511,13 +1600,13 @@ CrearPedidoDesdeJson entradaJson =
                 crearPedido
         );
 
-UUID id =
+UUID idDesdeJson =
         entradaJson.procesar(
                 Path.of("crear-pedido.json")
         );
 
 System.out.println(
-        "Pedido creado desde JSON: " + id
+        "Pedido creado desde JSON: " + idDesdeJson
 );
 ~~~
 
@@ -1531,7 +1620,7 @@ El caso de uso no ha cambiado.
 
 ---
 
-### Dos ficheros JSON, dos responsabilidades diferentes
+#### Dos ficheros JSON, dos responsabilidades diferentes
 
 Es importante no confundirlos:
 
@@ -1546,7 +1635,7 @@ La tecnología o el formato no determina si algo es un adaptador de entrada o de
 
 ---
 
-## Paso 9. Ejecutar la aplicación
+### Paso 9. Ejecutar la aplicación
 
 Desde el directorio raíz del proyecto ejecute:
 
@@ -1556,45 +1645,44 @@ mvn compile
 
 Si la compilación termina correctamente, ejecute Main desde su IDE.
 
-Debería aparecer algo parecido a:
+Desde el IDE, ejecute `Main`. Debería aparecer el menú:
 
 ~~~text
-Pedido creado: 4c93d193-...
-Total: 415.30
+1. Crear pedido
+0. Salir
+Opción:
 ~~~
+
+Seleccione `1`, introduzca un producto, su precio y una cantidad. El programa mostrará el identificador del pedido creado.
 
 El UUID será diferente en cada ejecución.
 
-Compruebe el cálculo:
-
-~~~text
-2 × 189.90 = 379.80
-1 × 35.50  =  35.50
---------------------
-TOTAL        415.30
-~~~
-
 ---
 
-## Paso 10. Identificar la arquitectura que hemos construido
+### Paso 10. Identificar la arquitectura que hemos construido
 
 Ahora podemos leer el programa siguiendo el flujo:
 
 ~~~text
 Main
  │
- ▼
+ └── conecta las dependencias
+          │
+          ▼
+ConsoleController
+          │
+          ▼
 CrearPedidoUseCase
- │
- ▼
+          │
+          ▼
 CrearPedidoService
- │
- ├───────────────► Pedido
- │
- └───────────────► PedidoRepository
-                         │
-                         ▼
-               PedidoRepositoryMemoria
+          │
+          ├──────────────► Pedido
+          │
+          └──────────────► PedidoRepository
+                                  │
+                                  ▼
+                        PedidoRepositoryMemoria
 ~~~
 
 En términos de Arquitectura Hexagonal:
@@ -1603,7 +1691,7 @@ En términos de Arquitectura Hexagonal:
 Consola                  crear-pedido.json
    │                             │
    ▼                             ▼
-Main / ConsoleController   CrearPedidoDesdeJson
+ConsoleController          CrearPedidoDesdeJson
    │                             │
    └──────────────┬──────────────┘
                   ▼
@@ -1633,7 +1721,7 @@ PedidoRepository   Repository
 
 ---
 
-## Paso 11. Segundo adaptador de salida: guardar en JSON
+### Paso 11. Segundo adaptador de salida: guardar en JSON
 
 Hasta ahora los pedidos se guardan en memoria. Al cerrar el programa, desaparecen.
 
@@ -1838,9 +1926,9 @@ La transformación entre el modelo de dominio y el formato externo pertenece al 
 
 ---
 
-### Cambiar de memoria a JSON
+#### Cambiar de memoria a JSON
 
-En `Main`, sustituya:
+En `Main`, que es nuestro punto de composición, sustituya:
 
 ~~~java
 PedidoRepository repository =
@@ -1920,7 +2008,7 @@ El caso de uso trabaja con el puerto y **no necesita saber cuál de los dos adap
 
 ---
 
-## Paso 12. Qué debe haber comprendido
+### Paso 12. Qué debe haber comprendido
 
 Antes de continuar, compruebe que puede explicar con sus propias palabras:
 
@@ -1937,7 +2025,7 @@ Si puede responder a estas preguntas, ya tiene la idea esencial de la combinaci�
 
 ---
 
-# Ejercicio propuesto
+## Ejercicio propuesto
 
 Amplíe el ejemplo incorporando el caso de uso **ConsultarPedido** y una pequeña interfaz de consola.
 
@@ -1947,7 +2035,7 @@ Debe crear:
 2. una implementación `ConsultarPedidoService`;
 3. reutilizar `PedidoRepository` como puerto de salida;
 4. utilizar `PedidoRepositoryMemoria`;
-5. crear o ampliar un `ConsoleController` que permita elegir operaciones desde consola;
+5. ampliar el `ConsoleController` existente para añadir la nueva opción;
 6. permitir al usuario introducir por teclado el identificador de un pedido;
 7. mostrar en consola los datos del pedido encontrado o un mensaje si no existe.
 
@@ -1977,7 +2065,7 @@ Puerto de salida
 Adaptador de persistencia
 ~~~
 
-## Ampliación
+### Ampliación
 
 Sustituya `PedidoRepositoryMemoria` por `PedidoRepositoryJson` y compruebe que el ejercicio sigue funcionando sin modificar el dominio ni los casos de uso.
 
@@ -1995,7 +2083,7 @@ Si la separación es correcta, los cambios deberían concentrarse principalmente
 
 ---
 
-# Autoevaluación
+## Autoevaluación
 
 1. **¿Cuál es el objetivo principal de DDD?**
    - a) Elegir una base de datos.
@@ -2023,9 +2111,9 @@ Si la separación es correcta, los cambios deberían concentrarse principalmente
 
 5. **¿Cuál sería un adaptador de entrada en nuestro ejemplo?**
    - a) PedidoRepositoryJson.
-   - b) ConsoleController.
-   - c) Pedido.
-   - d) LineaPedido.
+   - b) CrearPedidoDesdeJson.
+   - c) PedidoRepository.
+   - d) Pedido.
 
 6. **¿Cuál sería un adaptador de salida?**
    - a) ConsoleController.
@@ -2045,13 +2133,19 @@ Si la separación es correcta, los cambios deberían concentrarse principalmente
    - c) Convierte automáticamente Java en SQL.
    - d) Hace innecesarias las pruebas.
 
+9. **¿Por qué crear-pedido.json y pedidos.json tienen papeles distintos?**
+   - a) Porque uno contiene menos datos.
+   - b) Porque uno activa la aplicación y el otro se utiliza para persistencia.
+   - c) Porque solo uno de ellos es JSON válido.
+   - d) Porque los ficheros JSON solo pueden utilizarse en una dirección.
+
 ## Soluciones
 
-1. **b** · 2. **a** · 3. **b** · 4. **a** · 5. **b** · 6. **c** · 7. **b** · 8. **a**
+1. **b** · 2. **a** · 3. **b** · 4. **a** · 5. **b** · 6. **c** · 7. **b** · 8. **a** · 9. **b**
 
 ---
 
-# Referencias
+## Referencias
 
 - Eric Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*.
 - DDD Reference, Eric Evans: https://www.domainlanguage.com/ddd/reference/
