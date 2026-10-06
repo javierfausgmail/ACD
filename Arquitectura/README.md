@@ -420,7 +420,13 @@ Eso permite sustituir la persistencia sin modificar el caso de uso.
 
 # 8. Adaptador de entrada: consola
 
-Finalmente conectamos las piezas:
+En este tutorial utilizaremos **únicamente una consola de texto** como entrada de la aplicación.
+
+No necesitamos HTTP, una API REST ni JavaFX para entender la Arquitectura Hexagonal.
+
+El usuario interactuará mediante comandos sencillos y la consola será nuestro **adaptador de entrada**.
+
+Una primera versión puede ser tan simple como:
 
 ~~~java
 import java.math.BigDecimal;
@@ -457,9 +463,50 @@ public class Main {
 }
 ~~~
 
-La consola es un adaptador de entrada.
+Más adelante, para practicar mejor la separación de responsabilidades, podemos hacer que `Main` se limite a montar las dependencias y delegue la interacción en una clase `ConsoleController`.
 
-Podríamos sustituirla por un controlador REST o una interfaz JavaFX sin cambiar el dominio.
+Por ejemplo:
+
+~~~java
+public class Main {
+
+    public static void main(String[] args) {
+
+        PedidoRepository repository =
+                new PedidoRepositoryMemoria();
+
+        CrearPedidoUseCase crearPedido =
+                new CrearPedidoService(repository);
+
+        ConsoleController controller =
+                new ConsoleController(crearPedido);
+
+        controller.iniciar();
+    }
+}
+~~~
+
+El `ConsoleController` puede utilizar `Scanner` para mostrar un pequeño menú, leer datos y llamar al caso de uso correspondiente.
+
+Así el flujo queda:
+
+~~~text
+Usuario
+  │
+  ▼
+Consola / Scanner
+  │
+  ▼
+ConsoleController
+  │
+  ▼
+CrearPedidoUseCase
+  │
+  ▼
+CrearPedidoService
+~~~
+
+La idea importante es que **la lógica de negocio no se coloca dentro del controlador de consola**. La consola recoge datos y llama a la aplicación.
 
 ---
 
@@ -1448,15 +1495,43 @@ Si puede responder a estas preguntas, ya tiene la idea esencial de la combinaci�
 
 # Ejercicio propuesto
 
-Amplíe el ejemplo incorporando el caso de uso **ConsultarPedido**.
+Amplíe el ejemplo incorporando el caso de uso **ConsultarPedido** y una pequeña interfaz de consola.
 
 Debe crear:
 
-1. un puerto de entrada ConsultarPedidoUseCase;
-2. una implementación ConsultarPedidoService;
-3. reutilizar PedidoRepository como puerto de salida;
-4. utilizar PedidoRepositoryMemoria;
-5. mostrar el resultado desde un adaptador de consola.
+1. un puerto de entrada `ConsultarPedidoUseCase`;
+2. una implementación `ConsultarPedidoService`;
+3. reutilizar `PedidoRepository` como puerto de salida;
+4. utilizar `PedidoRepositoryMemoria`;
+5. crear o ampliar un `ConsoleController` que permita elegir operaciones desde consola;
+6. permitir al usuario introducir por teclado el identificador de un pedido;
+7. mostrar en consola los datos del pedido encontrado o un mensaje si no existe.
+
+Un menú posible sería:
+
+~~~text
+1. Crear pedido
+2. Consultar pedido
+0. Salir
+~~~
+
+No es necesario utilizar HTTP, APIs REST ni interfaces gráficas.
+
+El objetivo es practicar el flujo:
+
+~~~text
+Consola
+   ↓
+Adaptador de entrada
+   ↓
+Puerto de entrada
+   ↓
+Caso de uso
+   ↓
+Puerto de salida
+   ↓
+Adaptador de persistencia
+~~~
 
 ## Ampliación
 
