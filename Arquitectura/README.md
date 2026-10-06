@@ -823,6 +823,7 @@ Al terminar tendremos esta estructura:
 ~~~text
 pedidos-hexagonal
 ├── pom.xml
+├── crear-pedido.json
 └── src
     └── main
         └── java
@@ -839,7 +840,8 @@ pedidos-hexagonal
                         │   └── PedidoRepository.java
                         └── adapters
                             ├── in
-                            │   └── Main.java
+                            │   ├── Main.java
+                            │   └── CrearPedidoDesdeJson.java
                             └── out
                                 ├── PedidoRepositoryMemoria.java
                                 └── PedidoRepositoryJson.java
@@ -1357,6 +1359,193 @@ Es la pieza que inicia la interacción con la aplicación.
 
 ---
 
+## Paso 8.1. Segundo adaptador de entrada: fichero JSON
+
+Ya tenemos una entrada por consola. Ahora añadiremos una segunda forma de iniciar exactamente el mismo caso de uso: un fichero JSON.
+
+Cree en la raíz del proyecto:
+
+~~~text
+crear-pedido.json
+~~~
+
+con este contenido:
+
+~~~json
+{
+  "lineas": [
+    {
+      "producto": "Monitor",
+      "precioUnitario": 189.90,
+      "cantidad": 2
+    },
+    {
+      "producto": "Teclado",
+      "precioUnitario": 35.50,
+      "cantidad": 1
+    }
+  ]
+}
+~~~
+
+Este fichero **no es el repositorio de pedidos**.
+
+Representa una petición de entrada: “cree un pedido con estas líneas”.
+
+Ahora cree en:
+
+~~~text
+com.ejemplo.pedidos.adapters.in
+~~~
+
+el fichero:
+
+~~~text
+CrearPedidoDesdeJson.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.adapters.in;
+
+import com.ejemplo.pedidos.application.CrearPedidoUseCase;
+import com.ejemplo.pedidos.domain.LineaPedido;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.UUID;
+
+public class CrearPedidoDesdeJson {
+
+    private final CrearPedidoUseCase crearPedido;
+    private final ObjectMapper mapper =
+            new ObjectMapper();
+
+    public CrearPedidoDesdeJson(
+            CrearPedidoUseCase crearPedido
+    ) {
+        this.crearPedido = crearPedido;
+    }
+
+    public UUID procesar(Path archivo) {
+
+        try {
+
+            PedidoEntradaJson entrada =
+                    mapper.readValue(
+                        archivo.toFile(),
+                        PedidoEntradaJson.class
+                    );
+
+            List<LineaPedido> lineas =
+                    entrada.lineas()
+                           .stream()
+                           .map(linea ->
+                               new LineaPedido(
+                                   linea.producto(),
+                                   linea.precioUnitario(),
+                                   linea.cantidad()
+                               )
+                           )
+                           .toList();
+
+            return crearPedido.crearPedido(lineas);
+
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public record PedidoEntradaJson(
+            List<LineaEntradaJson> lineas
+    ) {}
+
+    public record LineaEntradaJson(
+            String producto,
+            BigDecimal precioUnitario,
+            int cantidad
+    ) {}
+}
+~~~
+
+### ¿Qué hace este adaptador?
+
+La clase realiza tres tareas:
+
+1. lee el fichero `crear-pedido.json`;
+2. transforma sus datos a objetos `LineaPedido`;
+3. llama al mismo puerto de entrada `CrearPedidoUseCase`.
+
+No contiene la lógica para crear el pedido.
+
+Esa lógica continúa en:
+
+~~~text
+CrearPedidoService
+~~~
+
+Por tanto tenemos dos formas distintas de activar el mismo caso de uso:
+
+~~~text
+Consola
+   │
+   └──► CrearPedidoUseCase
+
+crear-pedido.json
+   │
+   └──► CrearPedidoDesdeJson
+              │
+              └──► CrearPedidoUseCase
+~~~
+
+### Probar la entrada JSON
+
+En `Main`, después de crear `CrearPedidoUseCase`, puede ejecutar:
+
+~~~java
+CrearPedidoDesdeJson entradaJson =
+        new CrearPedidoDesdeJson(
+                crearPedido
+        );
+
+UUID id =
+        entradaJson.procesar(
+                Path.of("crear-pedido.json")
+        );
+
+System.out.println(
+        "Pedido creado desde JSON: " + id
+);
+~~~
+
+Añada:
+
+~~~java
+import java.nio.file.Path;
+~~~
+
+El caso de uso no ha cambiado.
+
+---
+
+### Dos ficheros JSON, dos responsabilidades diferentes
+
+Es importante no confundirlos:
+
+| Fichero | Papel arquitectónico | Dirección |
+|---|---|---|
+| `crear-pedido.json` | Entrada que solicita crear un pedido | Exterior → aplicación |
+| `pedidos.json` | Persistencia de los pedidos | Aplicación → exterior |
+
+Los dos utilizan JSON, pero cumplen funciones completamente distintas.
+
+La tecnología o el formato no determina si algo es un adaptador de entrada o de salida. Lo determina **la relación que mantiene con la aplicación**.
+
+---
+
 ## Paso 9. Ejecutar la aplicación
 
 Desde el directorio raíz del proyecto ejecute:
@@ -1411,15 +1600,15 @@ CrearPedidoService
 En términos de Arquitectura Hexagonal:
 
 ~~~text
-CONSOLa
-   │
-   ▼
-Adaptador de entrada
-Main
-   │
-   ▼
-Puerto de entrada
-CrearPedidoUseCase
+Consola                  crear-pedido.json
+   │                             │
+   ▼                             ▼
+Main / ConsoleController   CrearPedidoDesdeJson
+   │                             │
+   └──────────────┬──────────────┘
+                  ▼
+          Puerto de entrada
+          CrearPedidoUseCase
    │
    ▼
 Aplicación
@@ -1741,7 +1930,8 @@ Antes de continuar, compruebe que puede explicar con sus propias palabras:
 4. por qué PedidoRepositoryMemoria está fuera del dominio;
 5. qué diferencia existe entre un puerto y un adaptador;
 6. por qué CrearPedidoService no conoce ninguna base de datos;
-7. qué piezas permanecen iguales al sustituir PedidoRepositoryMemoria por PedidoRepositoryJson.
+7. qué piezas permanecen iguales al sustituir PedidoRepositoryMemoria por PedidoRepositoryJson;
+8. por qué crear-pedido.json es una entrada y pedidos.json es una salida aunque ambos sean JSON.
 
 Si puede responder a estas preguntas, ya tiene la idea esencial de la combinación entre DDD y Arquitectura Hexagonal.
 
