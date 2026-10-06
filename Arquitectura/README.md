@@ -626,6 +626,7 @@ src/main/java
 └── adapters
     ├── in
     │   ├── Main.java
+    │   ├── MainJson.java
     │   ├── ConsoleController.java
     │   └── CrearPedidoDesdeJson.java
     │
@@ -850,6 +851,7 @@ pedidos-hexagonal
                         └── adapters
                             ├── in
                             │   ├── Main.java
+                            │   ├── MainJson.java
                             │   ├── ConsoleController.java
                             │   └── CrearPedidoDesdeJson.java
                             └── out
@@ -1360,6 +1362,7 @@ public class ConsoleController {
         System.out.print("Precio: ");
         BigDecimal precio = new BigDecimal(
                 scanner.nextLine()
+                       .replace(',', '.')
         );
 
         System.out.print("Cantidad: ");
@@ -1388,6 +1391,8 @@ public class ConsoleController {
 El controlador de consola conoce el **puerto de entrada** `CrearPedidoUseCase`, pero no conoce el repositorio ni la tecnología de persistencia.
 
 Su responsabilidad es leer datos, convertirlos al formato que necesita la aplicación y mostrar el resultado.
+
+En el precio se aceptan tanto `35.50` como `35,50`, para evitar que el separador decimal habitual en español provoque un error en esta práctica.
 
 #### 8.2 Crear Main
 
@@ -1592,29 +1597,60 @@ crear-pedido.json
 
 #### Probar la entrada JSON
 
-En `Main`, después de crear `CrearPedidoUseCase`, puede ejecutar:
+Para no mezclar las dos entradas en el mismo `Main`, cree un segundo punto de arranque:
 
-~~~java
-CrearPedidoDesdeJson entradaJson =
-        new CrearPedidoDesdeJson(
-                crearPedido
-        );
-
-UUID idDesdeJson =
-        entradaJson.procesar(
-                Path.of("crear-pedido.json")
-        );
-
-System.out.println(
-        "Pedido creado desde JSON: " + idDesdeJson
-);
+~~~text
+MainJson.java
 ~~~
 
-Añada:
-
 ~~~java
+package com.ejemplo.pedidos.adapters.in;
+
+import com.ejemplo.pedidos.application.CrearPedidoService;
+import com.ejemplo.pedidos.application.CrearPedidoUseCase;
+import com.ejemplo.pedidos.adapters.out.PedidoRepositoryMemoria;
+import com.ejemplo.pedidos.ports.PedidoRepository;
+
 import java.nio.file.Path;
+import java.util.UUID;
+
+public class MainJson {
+
+    public static void main(String[] args) {
+
+        PedidoRepository repository =
+                new PedidoRepositoryMemoria();
+
+        CrearPedidoUseCase crearPedido =
+                new CrearPedidoService(
+                        repository
+                );
+
+        CrearPedidoDesdeJson entradaJson =
+                new CrearPedidoDesdeJson(
+                        crearPedido
+                );
+
+        UUID id =
+                entradaJson.procesar(
+                    Path.of("crear-pedido.json")
+                );
+
+        System.out.println(
+                "Pedido creado desde JSON: " + id
+        );
+    }
+}
 ~~~
+
+Ahora existen dos puntos de arranque para probar dos adaptadores de entrada diferentes:
+
+~~~text
+Main       → ConsoleController
+MainJson   → CrearPedidoDesdeJson
+~~~
+
+Ambos terminan llamando al mismo `CrearPedidoUseCase`.
 
 El caso de uso no ha cambiado.
 
@@ -1643,9 +1679,7 @@ Desde el directorio raíz del proyecto ejecute:
 mvn compile
 ~~~
 
-Si la compilación termina correctamente, ejecute Main desde su IDE.
-
-Desde el IDE, ejecute `Main`. Debería aparecer el menú:
+Si la compilación termina correctamente, ejecute `Main` desde su IDE. Debería aparecer el menú:
 
 ~~~text
 1. Crear pedido
@@ -1684,6 +1718,8 @@ CrearPedidoService
                                   ▼
                         PedidoRepositoryMemoria
 ~~~
+
+`Main` y `MainJson` son puntos de arranque o **composición**: crean y conectan objetos. Los adaptadores de entrada son `ConsoleController` y `CrearPedidoDesdeJson`.
 
 En términos de Arquitectura Hexagonal:
 
