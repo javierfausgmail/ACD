@@ -917,7 +917,7 @@ Cree el paquete:
 com.ejemplo.pedidos.domain
 ~~~
 
-### 2.1 Crear LineaPedido
+#### 2.1 Crear LineaPedido
 
 Cree:
 
@@ -1897,7 +1897,7 @@ public class PedidoRepositoryJson
 }
 ~~~
 
-### ¿Qué está haciendo este adaptador?
+#### ¿Qué está haciendo este adaptador?
 
 El puerto sigue siendo:
 
@@ -2139,7 +2139,7 @@ Si la separación es correcta, los cambios deberían concentrarse principalmente
    - c) Porque solo uno de ellos es JSON válido.
    - d) Porque los ficheros JSON solo pueden utilizarse en una dirección.
 
-## Soluciones
+### Soluciones
 
 1. **b** · 2. **a** · 3. **b** · 4. **a** · 5. **b** · 6. **c** · 7. **b** · 8. **a** · 9. **b**
 
