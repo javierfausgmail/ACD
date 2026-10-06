@@ -7,8 +7,6 @@ Este tutorial introduce dos ideas relacionadas pero distintas:
 
 Los ejemplos utilizan Java y avanzan desde un nivel sencillo hasta un nivel medio.
 
-> Importante: el nombre correcto del patrón es **Ports and Adapters** —Puertos y Adaptadores—. Un adaptador puede transformar datos entre formatos, pero “transformer” no es una pieza arquitectónica propia de la Arquitectura Hexagonal.
-
 ---
 
 ## 1. El problema que intentamos resolver
