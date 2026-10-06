@@ -762,6 +762,690 @@ La relación puede resumirse así:
 
 ---
 
+# Práctica guiada: proyecto Maven completo con DDD y Arquitectura Hexagonal
+
+En esta práctica construiremos desde cero una pequeña aplicación de pedidos.
+
+El objetivo no es memorizar una estructura de carpetas, sino entender **qué responsabilidad tiene cada pieza** y comprobar que podemos cambiar la tecnología de persistencia sin modificar el dominio ni el caso de uso.
+
+Al terminar tendremos esta estructura:
+
+~~~text
+pedidos-hexagonal
+├── pom.xml
+└── src
+    └── main
+        └── java
+            └── com
+                └── ejemplo
+                    └── pedidos
+                        ├── domain
+                        │   ├── Pedido.java
+                        │   └── LineaPedido.java
+                        ├── application
+                        │   ├── CrearPedidoUseCase.java
+                        │   └── CrearPedidoService.java
+                        ├── ports
+                        │   └── PedidoRepository.java
+                        └── adapters
+                            ├── in
+                            │   └── Main.java
+                            └── out
+                                └── PedidoRepositoryMemoria.java
+~~~
+
+---
+
+## Paso 1. Crear el proyecto Maven
+
+Cree una carpeta llamada:
+
+~~~text
+pedidos-hexagonal
+~~~
+
+Dentro cree el fichero:
+
+~~~text
+pom.xml
+~~~
+
+con este contenido:
+
+~~~xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.ejemplo</groupId>
+    <artifactId>pedidos-hexagonal</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+</project>
+~~~
+
+Por ahora no necesitamos ninguna dependencia externa.
+
+La aplicación utilizará únicamente clases de la biblioteca estándar de Java.
+
+---
+
+## Paso 2. Crear el dominio
+
+Cree el paquete:
+
+~~~text
+com.ejemplo.pedidos.domain
+~~~
+
+### 2.1 Crear LineaPedido
+
+Cree:
+
+~~~text
+LineaPedido.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.domain;
+
+import java.math.BigDecimal;
+
+public record LineaPedido(
+        String producto,
+        BigDecimal precioUnitario,
+        int cantidad
+) {
+
+    public LineaPedido {
+
+        if (producto == null || producto.isBlank()) {
+            throw new IllegalArgumentException(
+                    "El producto es obligatorio"
+            );
+        }
+
+        if (precioUnitario == null ||
+                precioUnitario.signum() < 0) {
+            throw new IllegalArgumentException(
+                    "El precio no puede ser negativo"
+            );
+        }
+
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException(
+                    "La cantidad debe ser positiva"
+            );
+        }
+    }
+
+    public BigDecimal subtotal() {
+        return precioUnitario.multiply(
+                BigDecimal.valueOf(cantidad)
+        );
+    }
+}
+~~~
+
+### ¿Qué acabamos de hacer?
+
+Hemos creado un **Value Object**.
+
+LineaPedido mantiene algunas reglas sencillas del dominio:
+
+- debe existir un producto;
+- el precio no puede ser negativo;
+- la cantidad debe ser positiva.
+
+También sabe calcular su propio subtotal.
+
+Todavía no existe ninguna base de datos, API REST ni interfaz gráfica.
+
+---
+
+## Paso 3. Crear la entidad Pedido
+
+En el mismo paquete cree:
+
+~~~text
+Pedido.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.domain;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class Pedido {
+
+    private final UUID id;
+    private final List<LineaPedido> lineas =
+            new ArrayList<>();
+
+    public Pedido(UUID id) {
+
+        if (id == null) {
+            throw new IllegalArgumentException(
+                    "El id es obligatorio"
+            );
+        }
+
+        this.id = id;
+    }
+
+    public void agregarLinea(LineaPedido linea) {
+
+        if (linea == null) {
+            throw new IllegalArgumentException(
+                    "La línea no puede ser null"
+            );
+        }
+
+        lineas.add(linea);
+    }
+
+    public BigDecimal total() {
+        return lineas.stream()
+                .map(LineaPedido::subtotal)
+                .reduce(
+                        BigDecimal.ZERO,
+                        BigDecimal::add
+                );
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public List<LineaPedido> getLineas() {
+        return List.copyOf(lineas);
+    }
+}
+~~~
+
+### ¿Qué representa?
+
+Pedido es una **entidad** porque tiene identidad propia mediante su UUID.
+
+También actúa como **Aggregate Root**:
+
+~~~text
+Pedido
+│
+├── LineaPedido
+├── LineaPedido
+└── LineaPedido
+~~~
+
+Desde fuera no modificamos directamente la lista interna.
+
+Utilizamos:
+
+~~~java
+pedido.agregarLinea(linea);
+~~~
+
+---
+
+## Paso 4. Crear el puerto de salida
+
+Ahora necesitamos guardar pedidos.
+
+Pero todavía no queremos decidir si utilizaremos MySQL, un fichero o memoria.
+
+Cree el paquete:
+
+~~~text
+com.ejemplo.pedidos.ports
+~~~
+
+y dentro:
+
+~~~text
+PedidoRepository.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.ports;
+
+import com.ejemplo.pedidos.domain.Pedido;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface PedidoRepository {
+
+    void guardar(Pedido pedido);
+
+    Optional<Pedido> buscarPorId(UUID id);
+}
+~~~
+
+### ¿Por qué una interfaz?
+
+La aplicación expresa:
+
+> Necesito poder guardar y recuperar pedidos.
+
+Pero todavía no dice **cómo**.
+
+Este es un **puerto de salida**.
+
+---
+
+## Paso 5. Crear el puerto de entrada
+
+Cree el paquete:
+
+~~~text
+com.ejemplo.pedidos.application
+~~~
+
+y dentro:
+
+~~~text
+CrearPedidoUseCase.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.application;
+
+import com.ejemplo.pedidos.domain.LineaPedido;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface CrearPedidoUseCase {
+
+    UUID crearPedido(
+            List<LineaPedido> lineas
+    );
+}
+~~~
+
+Este puerto expresa una acción que el exterior puede pedir a nuestra aplicación:
+
+~~~text
+Crear un pedido
+~~~
+
+Es un **puerto de entrada**.
+
+---
+
+## Paso 6. Implementar el caso de uso
+
+En el mismo paquete cree:
+
+~~~text
+CrearPedidoService.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.application;
+
+import com.ejemplo.pedidos.domain.LineaPedido;
+import com.ejemplo.pedidos.domain.Pedido;
+import com.ejemplo.pedidos.ports.PedidoRepository;
+
+import java.util.List;
+import java.util.UUID;
+
+public class CrearPedidoService
+        implements CrearPedidoUseCase {
+
+    private final PedidoRepository repository;
+
+    public CrearPedidoService(
+            PedidoRepository repository
+    ) {
+        this.repository = repository;
+    }
+
+    @Override
+    public UUID crearPedido(
+            List<LineaPedido> lineas
+    ) {
+
+        Pedido pedido =
+                new Pedido(UUID.randomUUID());
+
+        for (LineaPedido linea : lineas) {
+            pedido.agregarLinea(linea);
+        }
+
+        repository.guardar(pedido);
+
+        return pedido.getId();
+    }
+}
+~~~
+
+### Observe la dependencia
+
+CrearPedidoService conoce:
+
+~~~text
+Pedido
+LineaPedido
+PedidoRepository
+~~~
+
+Pero no conoce:
+
+~~~text
+MySQL
+JDBC
+MongoDB
+archivos
+~~~
+
+Depende del **puerto**, no de la tecnología.
+
+---
+
+## Paso 7. Crear el adaptador de salida en memoria
+
+Ahora sí elegimos una primera tecnología de persistencia.
+
+Será muy sencilla: un Map en memoria.
+
+Cree el paquete:
+
+~~~text
+com.ejemplo.pedidos.adapters.out
+~~~
+
+y dentro:
+
+~~~text
+PedidoRepositoryMemoria.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.adapters.out;
+
+import com.ejemplo.pedidos.domain.Pedido;
+import com.ejemplo.pedidos.ports.PedidoRepository;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+public class PedidoRepositoryMemoria
+        implements PedidoRepository {
+
+    private final Map<UUID, Pedido> datos =
+            new HashMap<>();
+
+    @Override
+    public void guardar(Pedido pedido) {
+        datos.put(
+                pedido.getId(),
+                pedido
+        );
+    }
+
+    @Override
+    public Optional<Pedido> buscarPorId(
+            UUID id
+    ) {
+        return Optional.ofNullable(
+                datos.get(id)
+        );
+    }
+}
+~~~
+
+Esta clase es un **adaptador de salida**.
+
+Implementa el contrato PedidoRepository utilizando una tecnología concreta: memoria.
+
+---
+
+## Paso 8. Crear el adaptador de entrada
+
+Utilizaremos una aplicación de consola.
+
+Cree el paquete:
+
+~~~text
+com.ejemplo.pedidos.adapters.in
+~~~
+
+y dentro:
+
+~~~text
+Main.java
+~~~
+
+~~~java
+package com.ejemplo.pedidos.adapters.in;
+
+import com.ejemplo.pedidos.application.CrearPedidoService;
+import com.ejemplo.pedidos.application.CrearPedidoUseCase;
+import com.ejemplo.pedidos.domain.LineaPedido;
+import com.ejemplo.pedidos.domain.Pedido;
+import com.ejemplo.pedidos.ports.PedidoRepository;
+import com.ejemplo.pedidos.adapters.out.PedidoRepositoryMemoria;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        PedidoRepository repository =
+                new PedidoRepositoryMemoria();
+
+        CrearPedidoUseCase crearPedido =
+                new CrearPedidoService(
+                        repository
+                );
+
+        List<LineaPedido> lineas =
+                List.of(
+                    new LineaPedido(
+                        "Monitor",
+                        new BigDecimal("189.90"),
+                        2
+                    ),
+                    new LineaPedido(
+                        "Teclado",
+                        new BigDecimal("35.50"),
+                        1
+                    )
+                );
+
+        UUID id =
+                crearPedido.crearPedido(
+                        lineas
+                );
+
+        Pedido pedido =
+                repository
+                    .buscarPorId(id)
+                    .orElseThrow();
+
+        System.out.println(
+                "Pedido creado: " + id
+        );
+
+        System.out.println(
+                "Total: " + pedido.total()
+        );
+    }
+}
+~~~
+
+La consola es ahora nuestro **adaptador de entrada**.
+
+Es la pieza que inicia la interacción con la aplicación.
+
+---
+
+## Paso 9. Ejecutar la aplicación
+
+Desde el directorio raíz del proyecto ejecute:
+
+~~~bash
+mvn compile
+~~~
+
+Si la compilación termina correctamente, ejecute Main desde su IDE.
+
+Debería aparecer algo parecido a:
+
+~~~text
+Pedido creado: 4c93d193-...
+Total: 415.30
+~~~
+
+El UUID será diferente en cada ejecución.
+
+Compruebe el cálculo:
+
+~~~text
+2 × 189.90 = 379.80
+1 × 35.50  =  35.50
+--------------------
+TOTAL        415.30
+~~~
+
+---
+
+## Paso 10. Identificar la arquitectura que hemos construido
+
+Ahora podemos leer el programa siguiendo el flujo:
+
+~~~text
+Main
+ │
+ ▼
+CrearPedidoUseCase
+ │
+ ▼
+CrearPedidoService
+ │
+ ├───────────────► Pedido
+ │
+ └───────────────► PedidoRepository
+                         │
+                         ▼
+               PedidoRepositoryMemoria
+~~~
+
+En términos de Arquitectura Hexagonal:
+
+~~~text
+CONSOLa
+   │
+   ▼
+Adaptador de entrada
+Main
+   │
+   ▼
+Puerto de entrada
+CrearPedidoUseCase
+   │
+   ▼
+Aplicación
+CrearPedidoService
+   │
+   ▼
+Puerto de salida
+PedidoRepository
+   │
+   ▼
+Adaptador de salida
+PedidoRepositoryMemoria
+~~~
+
+Y dentro del núcleo aparecen los conceptos de DDD:
+
+~~~text
+Pedido             entidad / Aggregate Root
+LineaPedido        Value Object
+PedidoRepository   Repository
+~~~
+
+---
+
+## Paso 11. La prueba importante: cambiar una tecnología
+
+Suponga que mañana ya no queremos almacenar los pedidos en memoria.
+
+Podríamos crear:
+
+~~~text
+PedidoRepositoryJdbc
+~~~
+
+que también implemente:
+
+~~~java
+PedidoRepository
+~~~
+
+La composición de la aplicación pasaría de:
+
+~~~java
+PedidoRepository repository =
+        new PedidoRepositoryMemoria();
+~~~
+
+a:
+
+~~~java
+PedidoRepository repository =
+        new PedidoRepositoryJdbc();
+~~~
+
+La idea importante es que no tendríamos que modificar:
+
+~~~text
+Pedido
+LineaPedido
+CrearPedidoUseCase
+CrearPedidoService
+~~~
+
+Este es precisamente uno de los objetivos de la Arquitectura Hexagonal:
+
+> La tecnología externa puede cambiar sin obligarnos a reescribir el núcleo de la aplicación.
+
+---
+
+## Paso 12. Qué debe haber comprendido
+
+Antes de continuar, compruebe que puede explicar con sus propias palabras:
+
+1. por qué Pedido pertenece al dominio;
+2. por qué LineaPedido contiene sus propias validaciones;
+3. por qué PedidoRepository es una interfaz;
+4. por qué PedidoRepositoryMemoria está fuera del dominio;
+5. qué diferencia existe entre un puerto y un adaptador;
+6. por qué CrearPedidoService no conoce ninguna base de datos;
+7. qué cambiaría si sustituyéramos la consola por una API REST.
+
+Si puede responder a estas preguntas, ya tiene la idea esencial de la combinación entre DDD y Arquitectura Hexagonal.
+
+---
+
 # Ejercicio propuesto
 
 Amplíe el ejemplo incorporando el caso de uso **ConsultarPedido**.
