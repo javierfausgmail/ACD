@@ -234,7 +234,7 @@ for (XWPFTableCell celda : tabla.getRow(0).getTableCells()) {
 }
 ```
 
-Para formatos de tabla muy avanzados puede ser necesario acceder a objetos OOXML de bajo nivel. En un tema introductorio es preferible limitarse a la API XWPF de alto nivel siempre que sea posible.
+Para formatos de tabla muy avanzados puede ser necesario acceder a objetos OOXML de bajo nivel. En un tema introductorio es preferible limitarse a la API XWPF de alto nivel.
 
 ---
 
