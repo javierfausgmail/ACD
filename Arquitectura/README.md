@@ -7,7 +7,19 @@ Este tutorial introduce dos ideas relacionadas pero distintas:
 
 Los ejemplos utilizan Java y avanzan desde un nivel sencillo hasta un nivel medio.
 
+> **DDD y Arquitectura Hexagonal son conceptos independientes.** Se pueden utilizar por separado. En este tutorial primero veremos qué aporta cada uno y, después, tomaremos la decisión de combinarlos en una misma aplicación porque encajan especialmente bien.
+
+Una forma sencilla de diferenciarlos desde el principio es:
+
+| | DDD | Arquitectura Hexagonal |
+|---|---|---|
+| Pregunta principal | ¿Cómo modelo correctamente el negocio y sus reglas? | ¿Cómo separo el núcleo de la aplicación de las tecnologías externas? |
+| Se centra en | Entidades, Value Objects, agregados, lenguaje del dominio... | Puertos, adaptadores y dirección de dependencias |
+| ¿Necesita al otro? | No | No |
+
 ---
+
+
 
 ## 1. El problema que intentamos resolver
 
@@ -277,11 +289,21 @@ Observe que aquí no aparece JDBC, JPA, MySQL ni MongoDB.
 
 La interfaz expresa **qué necesita la aplicación**, no qué tecnología utilizará.
 
+> **Atención:** `Repository` es aquí un concepto que estamos introduciendo desde DDD. Más adelante, al aplicar Arquitectura Hexagonal, utilizaremos esta misma interfaz `PedidoRepository` además como **puerto de salida**. Es una decisión de diseño de nuestro ejemplo: no significa que todos los repositorios pertenezcan a Arquitectura Hexagonal ni que DDD necesite Arquitectura Hexagonal.
+
 ---
 
-## 4. Arquitectura Hexagonal
+
+
+## 4. Arquitectura Hexagonal: un problema diferente
+
+Hasta aquí hemos trabajado principalmente una idea de DDD: **modelar bien el dominio**.
+
+Ahora cambiamos de pregunta. Aunque no utilizáramos DDD, podríamos aplicar Arquitectura Hexagonal igualmente.
 
 La Arquitectura Hexagonal fue propuesta por Alistair Cockburn y también se conoce como **Ports and Adapters**.
+
+Su preocupación principal no es cómo modelar un pedido, sino **cómo evitar que el núcleo de la aplicación quede acoplado a la consola, un fichero JSON, JDBC u otras tecnologías externas**.
 
 La aplicación se sitúa en el centro y se comunica con el exterior mediante puertos y adaptadores.
 
@@ -552,37 +574,23 @@ TECNOLOGÍA EXTERNA
 
 ---
 
-## 10. Relación entre DDD y Arquitectura Hexagonal
+## 10. Ahora sí: relación entre DDD y Arquitectura Hexagonal
 
-No son lo mismo.
+Llegados a este punto podemos combinarlos, pero conviene mantener clara la separación:
 
-### DDD pregunta
+- **DDD** nos ayuda a diseñar el modelo del negocio y sus reglas.
+- **Arquitectura Hexagonal** nos ayuda a proteger ese núcleo frente a detalles externos.
 
-> ¿Cómo representamos correctamente el dominio y sus reglas?
+Ninguno necesita al otro. Podemos encontrar DDD dentro de una arquitectura por capas, y podemos construir una aplicación hexagonal con un dominio muy sencillo sin aplicar DDD de forma completa.
 
-Trabaja con conceptos como:
+En **nuestro ejemplo** decidimos combinarlos porque encajan bien:
 
-- lenguaje ubicuo;
-- entidades;
-- objetos valor;
-- agregados;
-- repositorios;
-- servicios de dominio;
-- bounded contexts.
+- `Pedido` y `LineaPedido` pertenecen al modelo de dominio;
+- `CrearPedidoUseCase` es un puerto de entrada;
+- `PedidoRepository`, que ya tenía sentido como Repository de DDD, actúa además como puerto de salida;
+- `ConsoleController`, `CrearPedidoDesdeJson`, `PedidoRepositoryMemoria` y `PedidoRepositoryJson` son adaptadores.
 
-### Arquitectura Hexagonal pregunta
-
-> ¿Cómo evitamos que el núcleo de la aplicación dependa de tecnologías externas?
-
-Trabaja con:
-
-- puertos;
-- adaptadores;
-- límites;
-- dirección de dependencias;
-- sustitución de tecnologías.
-
-Por eso combinan especialmente bien:
+La idea puede visualizarse así:
 
 ~~~text
 Tecnologías externas
@@ -599,9 +607,9 @@ Tecnologías externas
 └─────────────────────┘
 ~~~
 
-Una aplicación puede utilizar DDD sin Arquitectura Hexagonal y también puede aplicar Hexagonal sin utilizar DDD de forma completa.
+La combinación resulta especialmente útil cuando existe un dominio con cierta complejidad, pero sigue siendo una **combinación de dos decisiones distintas**.
 
-La combinación resulta especialmente útil cuando existe un dominio con cierta complejidad.
+> **DDD intenta que el código se parezca al negocio. Arquitectura Hexagonal intenta que el negocio no dependa de la tecnología.**
 
 ---
 
@@ -814,17 +822,22 @@ El hexágono no representa seis capas obligatorias.
 | Arquitectura Hexagonal | Mantener el núcleo independiente del exterior |
 | Bounded Context | Límite dentro del que un modelo mantiene un significado concreto |
 
-La relación puede resumirse así:
+Antes de continuar, recuerde la distinción principal:
 
-> **DDD intenta que el código se parezca al negocio. Arquitectura Hexagonal intenta que el negocio no dependa de la tecnología.**
+> **DDD y Arquitectura Hexagonal no son dos partes obligatorias de una misma arquitectura. En este tutorial las combinamos porque se complementan bien.**
 
 ---
 
-## Práctica guiada: proyecto Maven completo con DDD y Arquitectura Hexagonal
 
-En esta práctica construiremos desde cero una pequeña aplicación de pedidos.
 
-El objetivo no es memorizar una estructura de carpetas, sino entender **qué responsabilidad tiene cada pieza** y comprobar que podemos cambiar la tecnología de persistencia sin modificar el dominio ni el caso de uso.
+## Práctica guiada: primero modelamos con DDD, después aplicamos Arquitectura Hexagonal
+
+En esta práctica construiremos desde cero una pequeña aplicación de pedidos en **dos etapas conceptuales**:
+
+1. **DDD:** modelaremos `Pedido`, `LineaPedido` y sus reglas sin preocuparnos todavía por consola, JSON o JDBC.
+2. **Arquitectura Hexagonal:** rodearemos ese núcleo con puertos y adaptadores para conectarlo con distintas entradas y formas de persistencia.
+
+El objetivo no es memorizar una estructura de carpetas, sino identificar **qué decisión pertenece al dominio y cuál pertenece a la arquitectura**, y comprobar que podemos cambiar tecnologías externas sin modificar las reglas de negocio.
 
 Al terminar tendremos esta estructura:
 
@@ -1069,7 +1082,9 @@ pedido.agregarLinea(linea);
 
 ---
 
-### Paso 4. Crear el puerto de salida
+### Paso 4. Empezamos a aplicar Arquitectura Hexagonal: crear el puerto de salida
+
+Los pasos anteriores se han centrado principalmente en **modelar el dominio**. A partir de aquí empezamos a organizar cómo se comunica la aplicación con el exterior.
 
 Ahora necesitamos guardar pedidos.
 
@@ -2053,9 +2068,11 @@ Antes de continuar, compruebe que puede explicar con sus propias palabras:
 5. qué diferencia existe entre un puerto y un adaptador;
 6. por qué CrearPedidoService no conoce ninguna base de datos;
 7. qué piezas permanecen iguales al sustituir PedidoRepositoryMemoria por PedidoRepositoryJson;
-8. por qué crear-pedido.json es una entrada y pedidos.json es una salida aunque ambos sean JSON.
+8. por qué crear-pedido.json es una entrada y pedidos.json es una salida aunque ambos sean JSON;
+9. qué partes del ejemplo pertenecen a DDD y cuáles a Arquitectura Hexagonal;
+10. por qué podríamos utilizar DDD sin Hexagonal o Hexagonal sin DDD.
 
-Si puede responder a estas preguntas, ya tiene la idea esencial de la combinación entre DDD y Arquitectura Hexagonal.
+Si puede responder a estas preguntas, ya tiene la idea esencial de **cada enfoque por separado y de cómo los hemos combinado** en este ejemplo.
 
 ---
 
@@ -2232,9 +2249,21 @@ Si la separación es correcta, los cambios deberían concentrarse principalmente
    - c) Porque solo uno de ellos es JSON válido.
    - d) Porque los ficheros JSON solo pueden utilizarse en una dirección.
 
+10. **¿Es obligatorio utilizar DDD y Arquitectura Hexagonal juntos?**
+   - a) Sí, uno forma parte del otro.
+   - b) Sí, siempre que exista persistencia.
+   - c) No; son enfoques independientes que pueden combinarse.
+   - d) Solo si la aplicación utiliza JSON.
+
+11. **En este ejemplo, ¿por qué `PedidoRepository` aparece relacionado con ambos enfoques?**
+   - a) Porque todo Repository es obligatoriamente un puerto hexagonal.
+   - b) Porque es un Repository del modelo y hemos decidido utilizar su interfaz también como puerto de salida.
+   - c) Porque DDD y Hexagonal son lo mismo.
+   - d) Porque los adaptadores deben estar dentro del dominio.
+
 ### Soluciones
 
-1. **b** · 2. **a** · 3. **b** · 4. **a** · 5. **b** · 6. **c** · 7. **b** · 8. **a** · 9. **b**
+1. **b** · 2. **a** · 3. **b** · 4. **a** · 5. **b** · 6. **c** · 7. **b** · 8. **a** · 9. **b** · 10. **c** · 11. **b**
 
 ---
 
