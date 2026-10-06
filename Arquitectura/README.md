@@ -2063,19 +2063,23 @@ Si puede responder a estas preguntas, ya tiene la idea esencial de la combinaci�
 
 ## Ejercicio propuesto
 
-Amplíe el ejemplo incorporando el caso de uso **ConsultarPedido** y una pequeña interfaz de consola.
+El ejercicio se divide en dos partes de dificultad incremental.
+
+### Parte 1. Consultar un pedido — nivel fácil
+
+Amplíe el ejemplo incorporando el caso de uso **ConsultarPedido**.
 
 Debe crear:
 
 1. un puerto de entrada `ConsultarPedidoUseCase`;
 2. una implementación `ConsultarPedidoService`;
 3. reutilizar `PedidoRepository` como puerto de salida;
-4. utilizar `PedidoRepositoryMemoria`;
-5. ampliar el `ConsoleController` existente para añadir la nueva opción;
+4. utilizar inicialmente `PedidoRepositoryMemoria`;
+5. ampliar el `ConsoleController` existente para añadir la opción de consultar;
 6. permitir al usuario introducir por teclado el identificador de un pedido;
 7. mostrar en consola los datos del pedido encontrado o un mensaje si no existe.
 
-Un menú posible sería:
+El menú puede quedar así:
 
 ~~~text
 1. Crear pedido
@@ -2083,9 +2087,7 @@ Un menú posible sería:
 0. Salir
 ~~~
 
-No es necesario utilizar HTTP, APIs REST ni interfaces gráficas.
-
-El objetivo es practicar el flujo:
+Esta primera parte sirve para comprobar que comprende el flujo:
 
 ~~~text
 Consola
@@ -2101,11 +2103,68 @@ Puerto de salida
 Adaptador de persistencia
 ~~~
 
+---
+
+### Parte 2. Cancelar un pedido — nivel medio
+
+Añada ahora comportamiento de dominio.
+
+Un pedido tendrá un estado:
+
+~~~text
+CREADO
+CANCELADO
+~~~
+
+Debe modificar `Pedido` para que tenga ese estado y añadir una operación:
+
+~~~java
+pedido.cancelar();
+~~~
+
+La cancelación debe respetar al menos esta regla de negocio:
+
+> Un pedido ya cancelado no puede volver a cancelarse.
+
+Después implemente:
+
+1. el puerto de entrada `CancelarPedidoUseCase`;
+2. la implementación `CancelarPedidoService`;
+3. la recuperación del pedido mediante `PedidoRepository`;
+4. la llamada a `pedido.cancelar()`;
+5. el guardado del pedido actualizado;
+6. una nueva opción en `ConsoleController`.
+
+El menú debería quedar:
+
+~~~text
+1. Crear pedido
+2. Consultar pedido
+3. Cancelar pedido
+0. Salir
+~~~
+
+El objetivo de esta segunda parte es comprobar que distingue entre:
+
+~~~text
+Regla de negocio
+        ↓
+      Pedido
+       DDD
+
+Coordinación del proceso
+        ↓
+CancelarPedidoService
+Arquitectura Hexagonal
+~~~
+
+La regla sobre si un pedido puede cancelarse pertenece al dominio. El caso de uso coordina la operación, pero no debería contener esa regla.
+
 ### Ampliación
 
-Sustituya `PedidoRepositoryMemoria` por `PedidoRepositoryJson` y compruebe que el ejercicio sigue funcionando sin modificar el dominio ni los casos de uso.
+Sustituya `PedidoRepositoryMemoria` por `PedidoRepositoryJson` y compruebe que crear, consultar y cancelar pedidos siguen funcionando sin modificar el dominio ni los casos de uso.
 
-Como ampliación de nivel medio, cree un tercer adaptador:
+Como ampliación adicional de nivel medio, cree un tercer adaptador:
 
 ~~~text
 PedidoRepositoryJdbc
@@ -2115,7 +2174,7 @@ El dominio, los puertos y los casos de uso **no deben modificarse**.
 
 Al terminar, compruebe qué clases han cambiado al sustituir la persistencia.
 
-Si la separación es correcta, los cambios deberían concentrarse principalmente en el adaptador y en la composición de la aplicación.
+Si la separación es correcta, los cambios deberían concentrarse principalmente en el adaptador y en el punto de composición de la aplicación.
 
 ---
 
