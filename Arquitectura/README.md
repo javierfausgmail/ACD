@@ -335,6 +335,8 @@ En Java suele representarse mediante una interfaz.
 
 Representa algo que el exterior puede pedirle a la aplicación.
 
+En nuestro ejemplo, el **puerto de entrada** está representado por la interfaz del caso de uso:
+
 ~~~java
 import java.util.List;
 import java.util.UUID;
@@ -346,6 +348,11 @@ public interface CrearPedidoUseCase {
 ~~~
 
 Una consola o un fichero JSON pueden utilizar este mismo puerto mediante adaptadores de entrada diferentes.
+
+> **Importante: caso de uso y puerto de entrada no son dos cosas incompatibles.**  
+> El *caso de uso* expresa una capacidad de la aplicación: «crear un pedido». La interfaz `CrearPedidoUseCase` define el contrato mediante el que el exterior puede solicitar esa capacidad, por eso en Arquitectura Hexagonal **esa interfaz actúa como puerto de entrada**.
+>
+> En este tutorial la colocamos dentro de `application` para mantener sencilla la estructura de paquetes. Podríamos colocar exactamente la misma interfaz en `ports/in` y seguiría cumpliendo el mismo papel. **La arquitectura la determinan las responsabilidades y la dirección de las dependencias, no el nombre de las carpetas.**
 
 ### 5.2 Puerto de salida
 
@@ -407,9 +414,9 @@ Todos implementarían el mismo puerto.
 
 ---
 
-## 7. Caso de uso de aplicación
+## 7. Implementación del caso de uso
 
-Implementamos ahora el puerto de entrada:
+Ya tenemos definido el puerto de entrada `CrearPedidoUseCase`. Ahora creamos el servicio de aplicación que **lo implementa**:
 
 ~~~java
 import java.util.List;
@@ -869,6 +876,28 @@ pedidos-hexagonal
                                 ├── PedidoRepositoryMemoria.java
                                 └── PedidoRepositoryJson.java
 ~~~
+
+> **¿Por qué `CrearPedidoUseCase` está en `application` y `PedidoRepository` en `ports`?**  
+> Es una **simplificación didáctica** de este tutorial. `CrearPedidoUseCase` sigue siendo nuestro puerto de entrada aunque esté físicamente dentro de `application`.
+>
+> En un proyecto donde queramos hacer los puertos visibles también en la estructura de paquetes, podríamos organizarlo así:
+>
+> ~~~text
+> application
+> └── CrearPedidoService.java
+> ports
+> ├── in
+> │   └── CrearPedidoUseCase.java
+> └── out
+>     └── PedidoRepository.java
+> adapters
+> ├── in
+> │   └── ...
+> └── out
+>     └── ...
+> ~~~
+>
+> Las dos organizaciones son válidas. Para esta primera práctica mantenemos la estructura más sencilla y nos centramos en identificar correctamente **qué pieza es puerto, cuál es adaptador y hacia dónde apuntan las dependencias**.
 
 ---
 
