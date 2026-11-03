@@ -1,4 +1,4 @@
-# Aprender Flyway construyendo una biblioteca de aula
+# Aprender Flyway construyendo una biblioteca del instituto
 
 **Acceso a Datos · Tema 3 — JPA**  
 **Tres sesiones de 55 minutos · Metodología PRIMM**  
@@ -6,7 +6,7 @@ Punto de partida: Java, Maven, SQL y JPA. No necesitas conocer Flyway.
 
 ## Antes de empezar: un problema que puedes reconocer
 
-La biblioteca de tu aula necesita un programa pequeño. Hoy basta con guardar títulos. La semana que viene querrá conocer los autores. Más adelante necesitará indicar qué libros están prestados.
+La biblioteca de tu instituto necesita un programa pequeño. Hoy basta con guardar solo los títulos. La semana que viene querrás conocer los autores. Más adelante necesitará indicar qué libros están prestados.
 
 Ya sabes escribir una entidad `Libro`. También sabes escribir `CREATE TABLE` y guardar un objeto con `EntityManager`. La nueva dificultad es otra: **¿cómo cambiamos el programa y su tabla sin perder los libros que ya hemos registrado?**
 
