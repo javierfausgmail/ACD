@@ -1,5 +1,5 @@
 # Tema 3 — JPA
 
-- [Java Persistence API: apuntes del tema](Java%20Persistance%20API.md).
-- [Tutorial de Flyway: evolución de bases de datos con Java, JPA y MySQL](Tutorial%20Flyway.md). Incluye el caso PlantillaACD, explicación de los problemas que resuelve, migraciones progresivas, integración con JPA y Spring Boot, diagnóstico y actividades.
-- [Proyecto ejecutable PlantillaACD](ejemplo-flyway/): Java 17, Maven, Hibernate, MySQL, Docker Compose y pruebas automáticas.
+- [Java Persistence API: apuntes](Java%20Persistance%20API.md).
+- [Aprender Flyway construyendo una biblioteca de aula](Tutorial%20Flyway.md): tres sesiones de 55 minutos con PRIMM, predicciones, experimentos, cambios pequeños y funciones propias.
+- [Código de la biblioteca por etapas](biblioteca-flyway/): cada punto de comprobación contiene únicamente lo que se ha construido hasta ese momento. Java, Maven, JPA y una base H2 local sin configuración de servicios.

@@ -1,0 +1,56 @@
+package es.acd.biblioteca;
+
+import jakarta.persistence.*;
+import java.util.Scanner;
+
+public class App {
+    public static void main(String[] args) {
+        String accion = args.length == 0 ? "listar" : args[0];
+        if (accion.equals("historial")) {
+            for (var paso : BaseDatos.migrador(BaseDatos.URL).info().all()) {
+                System.out.println(paso.getVersion() + " | " + paso.getDescription()
+                        + " | " + paso.getState());
+            }
+            return;
+        }
+        EntityManagerFactory fabrica = BaseDatos.abrir(BaseDatos.URL);
+        try {
+            EntityManager em = fabrica.createEntityManager();
+            try {
+                Scanner entrada = new Scanner(System.in);
+                em.getTransaction().begin();
+                switch (accion) {
+                    case "listar" -> listar(em);
+                    case "alta" -> alta(em, entrada);
+                    default -> throw new IllegalArgumentException("Acciones: listar, alta, historial");
+                }
+                em.getTransaction().commit();
+            } catch (RuntimeException error) {
+                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+                throw error;
+            } finally {
+                em.close();
+            }
+        } finally {
+            fabrica.close();
+        }
+    }
+
+    private static void listar(EntityManager em) {
+        var libros = em.createQuery("select l from Libro l order by l.id", Libro.class)
+                .getResultList();
+        if (libros.isEmpty()) System.out.println("Todavía no hay libros");
+        for (Libro libro : libros) {
+            System.out.println(libro.getId() + " | " + libro.getTitulo());
+        }
+    }
+
+    private static void alta(EntityManager em, Scanner entrada) {
+        System.out.print("Título: ");
+        String titulo = entrada.nextLine();
+        Libro libro = new Libro(titulo);
+        em.persist(libro);
+        System.out.println("Libro registrado");
+    }
+
+}
