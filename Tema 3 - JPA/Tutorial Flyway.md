@@ -2,7 +2,7 @@
 
 **Acceso a Datos · Tema 3 — JPA**  
 **Tres sesiones de 55 minutos · Metodología PRIMM**  
-Punto de partida: ya sabes Java, Maven, SQL y JPA. No necesitas conocer Flyway.
+Punto de partida: Java, Maven, SQL y JPA. No necesitas conocer Flyway.
 
 ## Antes de empezar: un problema que puedes reconocer
 
